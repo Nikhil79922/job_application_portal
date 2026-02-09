@@ -10,5 +10,5 @@ export interface ResgisterCheck {
     role: UserRole,
     bio?: string,
     resume ?:string,
-    resumePublicId?: number,
+    resumePublicId?: string,
 }
