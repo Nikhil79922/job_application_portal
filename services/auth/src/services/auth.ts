@@ -1,4 +1,4 @@
-import { UsersOperations } from "../repositories/auth.js";
+import { UsersFinder,UsersInsertions } from "../repositories/users/usersTable.js";
 import AppError from "../utlis/AppError.js";
 import bcrypt from 'bcrypt'
 import { ResgisterCheck } from '../dtos/auth.js'
@@ -10,7 +10,7 @@ export class Auth {
     static async resgister(data: { body: ResgisterCheck; file?: any }) {
         this.requiredFields(data.body);
         const { name, email, password, phoneNumber } = data.body;
-        const existingUser = await UsersOperations.existingUser(email);
+        const existingUser = await UsersFinder.existingUser(email);
         if (existingUser.length > 0) {
             throw new AppError(`User with this email Already exists`, 409);
         }
@@ -42,7 +42,7 @@ export class Auth {
 
     static async createUser(payload: any) {
         if (payload.bodyData.role === "recruiter") {
-            const [recruiterUser] = await UsersOperations.insertRecruiter(payload.bodyData) as Array<any>;
+            const [recruiterUser] = await UsersInsertions.insertRecruiter(payload.bodyData) as Array<any>;
             return recruiterUser;
         }
         else if (payload.bodyData.role === "jobseeker") {
@@ -62,7 +62,7 @@ export class Auth {
                 resume:data.url,
                 resumePublicId:data.public_id
                }
-        const [jobseekerUser] = await UsersOperations.insertJobSeeker(insertData) as Array<any>;
+        const [jobseekerUser] = await UsersInsertions.insertJobSeeker(insertData) as Array<any>;
         return jobseekerUser
         }
     }
