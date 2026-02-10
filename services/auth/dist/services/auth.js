@@ -5,7 +5,7 @@ import getBuffer from "../utlis/buffer.js";
 import { upload } from "./uploadFile.js";
 export class Auth {
     static async resgister(data) {
-        this.requiredFields(data.body);
+        // this.requiredFields(data.body);
         const { name, email, password, phoneNumber } = data.body;
         const existingUser = await UsersFinder.existingUser(email);
         if (existingUser.length > 0) {
@@ -22,22 +22,25 @@ export class Auth {
         };
         return await this.createUser(payload);
     }
-    static requiredFields(checkData) {
-        const { name, email, password, phoneNumber, role } = checkData;
-        const requiredFields = {
-            name,
-            email,
-            password,
-            phoneNumber,
-            role,
-        };
-        const missingFields = Object.entries(requiredFields)
-            .filter(([_, value]) => value === undefined || value === null || value === "")
-            .map(([key]) => key);
-        if (missingFields.length > 0) {
-            throw new AppError(`Missing required fields: ${missingFields.join(", ")}`, 400);
-        }
-    }
+    // static requiredFields(checkData: RegisterDTO) {
+    //     const { name, email, password, phoneNumber, role } = checkData;
+    //     const requiredFields = {
+    //         name,
+    //         email,
+    //         password,
+    //         phoneNumber,
+    //         role,
+    //     };
+    //     const missingFields = Object.entries(requiredFields)
+    //         .filter(([_, value]) =>
+    //             value === undefined || value === null || value === ""
+    //         )
+    //         .map(([key]) => key)
+    //     if (missingFields.length > 0) {
+    //         throw new AppError(
+    //             `Missing required fields: ${missingFields.join(", ")}`, 400);
+    //     }
+    // }
     static async createUser(payload) {
         if (payload.bodyData.role === "recruiter") {
             const [recruiterUser] = await UsersInsertions.insertRecruiter(payload.bodyData);

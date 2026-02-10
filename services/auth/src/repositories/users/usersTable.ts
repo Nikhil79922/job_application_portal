@@ -1,5 +1,5 @@
 import { sql } from "../../utlis/db.js";
-import { ResgisterCheck } from '../../dtos/auth.js'
+import type  { RegisterDTO } from '../../dtos/auth.schema.js';
 
 export class UsersFinder {
     static async existingUser(email: string) {
@@ -8,10 +8,10 @@ export class UsersFinder {
 }
 
 export class UsersInsertions {
-    static async insertRecruiter(data: ResgisterCheck) {
+    static async insertRecruiter(data: RegisterDTO) {
         return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.resume} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
     }
-    static async insertJobSeeker(data: ResgisterCheck) {
+    static async insertJobSeeker(data: RegisterDTO) {
         return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.resume} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
     }
 }
