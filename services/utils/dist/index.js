@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import routes from './routes.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { sendMailConsumer } from './consumer.js';
 dotenv.config();
 // Configuration
 cloudinary.config({
@@ -11,6 +12,8 @@ cloudinary.config({
     api_secret: process.env.Api_secret,
 });
 const app = express();
+//Kafka consumer
+sendMailConsumer();
 let port = process.env.PORT;
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
