@@ -2,10 +2,21 @@ import { Request, Response } from "express";
 import TryCatch from "../utlis/TryCatch.js";
 import sendResponse from "../utlis/success.js";
 import { Auth } from "../services/auth.js";
-import { registerSchema } from "../dtos/auth.schema.js";
+import { loginSchema } from "../dtos/authLogin.schema.js";
+import {registerSchema} from "../dtos/authResgister.schema.js"
 
 export const registerUser = TryCatch(async (req: Request, res: Response) => {
-    const dto = registerSchema.parse(req.body);
+    const dto = registerSchema.parse({
+        ...req.body,
+        file: req.file  
+      });
  const registeredUser=await Auth.resgister({body:dto,file:req.file})
     sendResponse(res, 200, "Resgistered Successfull", registeredUser)
+})
+
+
+export const LoginUser = TryCatch(async (req: Request, res: Response) => {
+    const dto = loginSchema.parse(req.body);
+ const LogedInUser=await Auth.logIn(dto)
+    sendResponse(res, 200, "Login Successfull",LogedInUser)
 })

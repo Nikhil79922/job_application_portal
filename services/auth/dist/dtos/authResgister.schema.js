@@ -7,7 +7,7 @@ export const registerSchema = z
     phoneNumber: z.any(),
     role: z.any(),
     bio: z.any().optional(),
-    resume: z.any().optional(),
+    file: z.any().optional(),
     resumePublicId: z.any().optional(),
 })
     .strict() // THIS IS THE UPDATE
@@ -109,17 +109,10 @@ export const registerSchema = z
                 code: z.ZodIssueCode.custom,
             });
         }
-        if (!data.resume) {
+        if (!data.file) {
             ctx.addIssue({
-                path: ["resume"],
-                message: "Missing field: resume is required for jobseeker",
-                code: z.ZodIssueCode.custom,
-            });
-        }
-        if (!data.resumePublicId) {
-            ctx.addIssue({
-                path: ["resumePublicId"],
-                message: "Missing field: resumePublicId is required for jobseeker",
+                path: ["file"],
+                message: "Missing field: file is required for jobseeker",
                 code: z.ZodIssueCode.custom,
             });
         }

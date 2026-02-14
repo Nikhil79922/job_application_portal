@@ -1,9 +1,11 @@
-import { UsersFinder,UsersInsertions } from "../repositories/users/usersTable.js";
+import { UsersFinder, UsersInsertions } from "../repositories/users/usersTable.js";
 import AppError from "../utlis/AppError.js";
 import bcrypt from 'bcrypt'
-import {registerSchema,RegisterDTO} from  '../dtos/auth.schema.js'
+import { registerSchema, RegisterDTO } from '../dtos/authResgister.schema.js'
+import { loginSchema, LoginDTO } from '../dtos/authLogin.schema.js'
 import getBuffer from "../utlis/buffer.js";
 import { upload } from "./uploadFile.js";
+import jwtToken from "./jwtToken.js";
 
 export class Auth {
     static async resgister(data: { body: RegisterDTO; file?: Express.Multer.File }) {
@@ -23,31 +25,37 @@ export class Auth {
             bodyData,
             fileData: data.file
         }
-        return await this.createUser(payload as any);
+        const registedUser = await CreateUser.createUser(payload as any);
+
+        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.userId }, process.env.SECRET_KEY as string, '1d')
+        return {
+            registedUser,
+            accessToken
+        }
     }
 
-    // static requiredFields(checkData: RegisterDTO) {
-    //     const { name, email, password, phoneNumber, role } = checkData;
-    //     const requiredFields = {
-    //         name,
-    //         email,
-    //         password,
-    //         phoneNumber,
-    //         role,
-    //     };
-    //     const missingFields = Object.entries(requiredFields)
-    //         .filter(([_, value]) =>
-    //             value === undefined || value === null || value === ""
-    //         )
-    //         .map(([key]) => key)
+    static async logIn(data: LoginDTO) {
+        const user = await UsersFinder.users_skills(data.email)
+        if (user.length === 0) {
+            throw new AppError('Invalid Credentials, Email Not Found', 400)
+        }
+        const usersObject = user[0];
+        const matchPassword = await bcrypt.compare(data.password, usersObject.password)
+        if (!matchPassword) {
+            throw new AppError(`Invalid Credentials, Password didn't matched for the Email`, 400)
+        }
+        usersObject.skills = usersObject.skills || [];
+        delete usersObject.password;
+        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.userId }, process.env.SECRET_KEY as string, '1d')
+        return {
+            usersObject,
+            accessToken
+        }
+    }
+}
 
-    //     if (missingFields.length > 0) {
-    //         throw new AppError(
-    //             `Missing required fields: ${missingFields.join(", ")}`, 400);
-    //     }
-    // }
-
-    static async createUser(payload: {bodyData:RegisterDTO ,fileData:Express.Multer.File} ) {
+export class CreateUser {
+    static async createUser(payload: { bodyData: RegisterDTO, fileData: Express.Multer.File }) {
         if (payload.bodyData.role === "recruiter") {
             const [recruiterUser] = await UsersInsertions.insertRecruiter(payload.bodyData as RegisterDTO);
             return recruiterUser;
@@ -63,14 +71,14 @@ export class Auth {
                 throw new AppError(`Failed to generate file buffer`, 500);
             }
 
-               const {data}= await upload.uploadFile(fileBuffer.content);
-               const insertData={
+            const { data } = await upload.uploadFile(fileBuffer);
+            const insertData = {
                 ...payload.bodyData,
-                resume:data.url,
-                resumePublicId:data.public_id
-               }
-        const [jobseekerUser] = await UsersInsertions.insertJobSeeker(insertData  as RegisterDTO);
-        return jobseekerUser
+                file: data.url,
+                resumePublicId: data.public_id
+            }
+            const [jobseekerUser] = await UsersInsertions.insertJobSeeker(insertData as RegisterDTO);
+            return jobseekerUser
         }
     }
 }

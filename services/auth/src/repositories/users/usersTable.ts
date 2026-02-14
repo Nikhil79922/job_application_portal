@@ -1,25 +1,30 @@
 import { sql } from "../../utlis/db.js";
-import type  { RegisterDTO } from '../../dtos/auth.schema.js';
+import type { RegisterDTO } from '../../dtos/authResgister.schema.js';
 
 export class UsersFinder {
     static async existingUser(email: string) {
         return await sql`SELECT user_id FROM users WHERE email = ${email}`
     }
+
+    static async users_skills(email: string) {
+        return await sql`SELECT u.user_id,u.name,u.email,u.password,u.phone_number,u.role,u.bio,u.resume,u.resume_public_id,u.subscription , ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as User_Skills  FROM users as u LEFT JOIN user_skills as us ON u.user_id = us.user_id 
+  LEFT JOIN skills as s ON s.skill_id = us.skill_id WHERE email = ${email} GROUP BY u.user_id`
+    }
 }
 
 export class UsersInsertions {
     static async insertRecruiter(data: RegisterDTO) {
-        return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.resume} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
+        return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.file} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
     }
     static async insertJobSeeker(data: RegisterDTO) {
-        return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.resume} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
+        return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.file} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
     }
 }
 
 
 export class UserTable {
     static async createTable() {
-         await sql`
+        await sql`
           CREATE TABLE IF NOT EXISTS users(
              user_id SERIAL PRIMARY KEY,
              name VARCHAR(255) NOT NULL,
@@ -39,7 +44,7 @@ export class UserTable {
     }
 
     static async createRoleEnum() {
-         await sql`
+        await sql`
         DO $$
         Begin 
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN 
