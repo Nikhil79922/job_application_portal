@@ -10,6 +10,8 @@ import { forgotDTO } from "../dtos/authForgot.schema copy.js";
 import { emailTemp } from "../utlis/emailTemplate.js";
 import {  publishToTopic } from "../library/kafka/producer.js";
 import { redisClient } from "../library/redis/index.js";
+import { ResetDTO } from "../dtos/authReset.schema copy.js";
+import { jwt } from "zod";
 
 export class Auth {
     static async resgister(data: { body: RegisterDTO; file?: Express.Multer.File }) {
@@ -66,7 +68,7 @@ export class Auth {
 
         const resetLink= `${process.env.Frontend_Url}/reset/${resetToken}`
 
-        await redisClient.set(`forgot:${data.email}`,resetLink,{
+        await redisClient.set(`forgot:${data.email}`,resetToken,{
             EX:900
         })
         const message={
@@ -78,6 +80,33 @@ export class Auth {
             console.error("Failed to send Message",err)
         });
         return {message: 'If this email exists , we have sent a reset link'};
+    }
+
+    static async ResetPassword(data: ResetDTO) {
+        console.log(data)
+      const decodedToken=await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY as string)
+console.log(decodedToken)
+      if(decodedToken?.type !=='reset'){
+        throw new AppError('Invalid token type',400);
+      }
+
+      const email=decodedToken?.email;
+      const storedToken= await redisClient.get(`forgot:${email}`);
+      if(!storedToken || storedToken !== data.token ){
+        throw new AppError('Token has been expired',400);
+      }
+
+      const users= await UsersFinder.existingUser(email);
+      if (users.length === 0) {
+        throw new AppError('User Not Found',404);
+    }
+    const user=users[0];
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    await UsersFinder.updateUser({email,password:hashedPassword})
+    await redisClient.del(`forgot:${email}`)
+    return {
+        message:'Your password has been updated.'
+    }
     }
 }
 

@@ -3,6 +3,9 @@ export class UsersFinder {
     static async existingUser(email) {
         return await sql `SELECT user_id FROM users WHERE email = ${email}`;
     }
+    static async updateUser(data) {
+        return await sql `UPDATE users SET password=${data.password}  WHERE email = ${data.email}`;
+    }
     static async users_skills(email) {
         return await sql `SELECT u.user_id,u.name,u.email,u.password,u.phone_number,u.role,u.bio,u.resume,u.resume_public_id,u.subscription , ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as User_Skills  FROM users as u LEFT JOIN user_skills as us ON u.user_id = us.user_id 
   LEFT JOIN skills as s ON s.skill_id = us.skill_id WHERE email = ${email} GROUP BY u.user_id`;

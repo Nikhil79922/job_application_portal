@@ -56,7 +56,7 @@ export class Auth {
         }
         const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY, '15min');
         const resetLink = `${process.env.Frontend_Url}/reset/${resetToken}`;
-        await redisClient.set(`forgot:${data.email}`, resetLink, {
+        await redisClient.set(`forgot:${data.email}`, resetToken, {
             EX: 900
         });
         const message = {
@@ -68,6 +68,30 @@ export class Auth {
             console.error("Failed to send Message", err);
         });
         return { message: 'If this email exists , we have sent a reset link' };
+    }
+    static async ResetPassword(data) {
+        console.log(data);
+        const decodedToken = await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY);
+        console.log(decodedToken);
+        if (decodedToken?.type !== 'reset') {
+            throw new AppError('Invalid token type', 400);
+        }
+        const email = decodedToken?.email;
+        const storedToken = await redisClient.get(`forgot:${email}`);
+        if (!storedToken || storedToken !== data.token) {
+            throw new AppError('Token has been expired', 400);
+        }
+        const users = await UsersFinder.existingUser(email);
+        if (users.length === 0) {
+            throw new AppError('User Not Found', 404);
+        }
+        const user = users[0];
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+        await UsersFinder.updateUser({ email, password: hashedPassword });
+        await redisClient.del(`forgot:${email}`);
+        return {
+            message: 'Your password has been updated.'
+        };
     }
 }
 export class CreateUser {
