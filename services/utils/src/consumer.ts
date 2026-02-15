@@ -15,7 +15,7 @@ try {
       await consumer.subscribe({ topic: topicName, fromBeginning: false })
 
       console.log("✅ Mail service Kafka consumer is started , For Emails.")
-
+      
       await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
         try {

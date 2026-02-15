@@ -4,6 +4,7 @@ import sendResponse from "../utlis/success.js";
 import { Auth } from "../services/auth.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import {registerSchema} from "../dtos/authResgister.schema.js"
+import { forgotSchema } from "../dtos/authForgot.schema copy.js";
 
 export const registerUser = TryCatch(async (req: Request, res: Response) => {
     const dto = registerSchema.parse({
@@ -22,7 +23,7 @@ export const LoginUser = TryCatch(async (req: Request, res: Response) => {
 })
 
 export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
-    const dto = loginSchema.parse(req.body);
- const LogedInUser=await Auth.logIn(dto)
-    sendResponse(res, 200, "Login Successfull",LogedInUser)
+    const dto = forgotSchema.parse(req.body);
+ const forgotUser=await Auth.forgotPassword(dto)
+    sendResponse(res, 200, "ForgotPassword Successfull",forgotUser)
 })

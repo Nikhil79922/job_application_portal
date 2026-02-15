@@ -4,6 +4,7 @@ import errorMiddleware from './middleware/errorMiddleware.js';
 import logger from './middleware/logger.js';
 import { connectAdmin } from './library/kafka/admin.js';
 import { kafkaProducer } from './library/kafka/producer.js';
+import { redisClient } from './library/redis/index.js';
 const app = express();
 //global Route Logs logger.
 app.use(logger);
@@ -11,6 +12,12 @@ app.use(express.json());
 //Kafka Admin and Prodcuer
 connectAdmin();
 kafkaProducer();
+//Redis connection
+redisClient.connect().then(() => {
+    console.log("✅ connected the Redis server");
+}).catch((err) => {
+    console.log('❌ failed to connect to redis', err);
+});
 app.use('/api/auth', authRouter);
 app.use(errorMiddleware); //global Error.
 export default app;

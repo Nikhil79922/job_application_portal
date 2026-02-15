@@ -3,6 +3,7 @@ import sendResponse from "../utlis/success.js";
 import { Auth } from "../services/auth.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js";
+import { forgotSchema } from "../dtos/authForgot.schema copy.js";
 export const registerUser = TryCatch(async (req, res) => {
     const dto = registerSchema.parse({
         ...req.body,
@@ -15,4 +16,9 @@ export const LoginUser = TryCatch(async (req, res) => {
     const dto = loginSchema.parse(req.body);
     const LogedInUser = await Auth.logIn(dto);
     sendResponse(res, 200, "Login Successfull", LogedInUser);
+});
+export const forgotPassword = TryCatch(async (req, res) => {
+    const dto = forgotSchema.parse(req.body);
+    const forgotUser = await Auth.forgotPassword(dto);
+    sendResponse(res, 200, "ForgotPassword Successfull", forgotUser);
 });

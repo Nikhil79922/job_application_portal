@@ -4,6 +4,9 @@ import bcrypt from 'bcrypt';
 import getBuffer from "../utlis/buffer.js";
 import { upload } from "./uploadFile.js";
 import jwtToken from "./jwtToken.js";
+import { emailTemp } from "../utlis/emailTemplate.js";
+import { publishToTopic } from "../library/kafka/producer.js";
+import { redisClient } from "../library/redis/index.js";
 export class Auth {
     static async resgister(data) {
         // this.requiredFields(data.body);
@@ -45,6 +48,26 @@ export class Auth {
             usersObject,
             accessToken
         };
+    }
+    static async forgotPassword(data) {
+        const existingUser = await UsersFinder.existingUser(data.email);
+        if (existingUser.length === 0) {
+            return { message: 'If this email exists ,We have sent a reset link' };
+        }
+        const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY, '15min');
+        const resetLink = `${process.env.Frontend_Url}/reset/${resetToken}`;
+        await redisClient.set(`forgot:${data.email}`, resetLink, {
+            EX: 900
+        });
+        const message = {
+            to: data.email,
+            subject: "RESET YOUR PASSWORD - HireHeaven",
+            html: emailTemp(resetLink)
+        };
+        publishToTopic('send-mail', message).catch((err) => {
+            console.error("Failed to send Message", err);
+        });
+        return { message: 'If this email exists , we have sent a reset link' };
     }
 }
 export class CreateUser {

@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-export const loginSchema = z
+export const forgotSchema = z
   .object({
     email: z.any(),
-    password: z.any(),
   })
   .strict() // THIS IS THE UPDATE
   .superRefine((data, ctx) => {
@@ -21,27 +20,6 @@ export const loginSchema = z
         code: z.ZodIssueCode.custom,
       });
     }
-
-    // 🔴 PASSWORD
-    if (data.password === undefined) {
-      ctx.addIssue({
-        path: ["password"],
-        message: "Missing field: password is required",
-        code: z.ZodIssueCode.custom,
-      });
-    } else if (typeof data.password !== "string") {
-      ctx.addIssue({
-        path: ["password"],
-        message: "Invalid data type: password must be a string",
-        code: z.ZodIssueCode.custom,
-      });
-    } else if (data.password.length < 8) {
-      ctx.addIssue({
-        path: ["password"],
-        message: "Invalid value: password must be at least 8 characters",
-        code: z.ZodIssueCode.custom,
-      });
-    }
   });
 
 //Interface
@@ -49,4 +27,4 @@ export const loginSchema = z
   userId: string,
  } 
 // DTO
-export type LoginDTO = z.infer<typeof loginSchema>;
+export type forgotDTO = z.infer<typeof forgotSchema>;
