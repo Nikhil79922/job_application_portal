@@ -83,13 +83,10 @@ export class Auth {
     }
 
     static async ResetPassword(data: ResetDTO) {
-        console.log(data)
       const decodedToken=await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY as string)
-console.log(decodedToken)
       if(decodedToken?.type !=='reset'){
         throw new AppError('Invalid token type',400);
       }
-
       const email=decodedToken?.email;
       const storedToken= await redisClient.get(`forgot:${email}`);
       if(!storedToken || storedToken !== data.token ){

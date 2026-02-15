@@ -1,20 +1,25 @@
 import axios from "axios";
 import { jwtPayload, } from '../dtos/authLogin.schema.js'
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions,JwtPayload } from "jsonwebtoken";
+import AppError from "../utlis/AppError.js";
 
+interface ResetTokenPayload extends JwtPayload {
+    email: string;
+    type: string;
+  }
+  
 export default class jwtToken {
     static async JWTtoken(payload: jwtPayload, secret: string, expires: SignOptions["expiresIn"]) {
         const token = jwt.sign(payload, secret, { expiresIn: expires, })
         return token
     }
 
-    static async JWTtokenVerify(token:string, secret:string) {
+    static JWTtokenVerify(token: string, secret: string): ResetTokenPayload {
         try {
-            const decodedToken = jwt.verify(token, secret)
-            console.log("token=======>",decodedToken)
-            return decodedToken 
+          return jwt.verify(token, secret) as ResetTokenPayload;
         } catch (error) {
-           console.log("JWT====>",error)
+          throw new AppError("Invalid or expired token", 400);
         }
-    }
+      }
+      
 } 

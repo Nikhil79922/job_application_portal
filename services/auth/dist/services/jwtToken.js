@@ -1,17 +1,16 @@
 import jwt from "jsonwebtoken";
+import AppError from "../utlis/AppError.js";
 export default class jwtToken {
     static async JWTtoken(payload, secret, expires) {
         const token = jwt.sign(payload, secret, { expiresIn: expires, });
         return token;
     }
-    static async JWTtokenVerify(token, secret) {
+    static JWTtokenVerify(token, secret) {
         try {
-            const decodedToken = jwt.verify(token, secret);
-            console.log("token=======>", decodedToken);
-            return decodedToken;
+            return jwt.verify(token, secret);
         }
         catch (error) {
-            console.log("JWT====>", error);
+            throw new AppError("Invalid or expired token", 400);
         }
     }
 }

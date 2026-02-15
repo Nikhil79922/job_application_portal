@@ -70,9 +70,7 @@ export class Auth {
         return { message: 'If this email exists , we have sent a reset link' };
     }
     static async ResetPassword(data) {
-        console.log(data);
         const decodedToken = await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY);
-        console.log(decodedToken);
         if (decodedToken?.type !== 'reset') {
             throw new AppError('Invalid token type', 400);
         }
