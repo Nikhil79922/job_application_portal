@@ -20,3 +20,9 @@ export const LoginUser = TryCatch(async (req: Request, res: Response) => {
  const LogedInUser=await Auth.logIn(dto)
     sendResponse(res, 200, "Login Successfull",LogedInUser)
 })
+
+export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
+    const dto = loginSchema.parse(req.body);
+ const LogedInUser=await Auth.logIn(dto)
+    sendResponse(res, 200, "Login Successfull",LogedInUser)
+})
