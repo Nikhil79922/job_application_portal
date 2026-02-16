@@ -30,11 +30,5 @@ export const ResetSchema = z
     }
   });
 
-//Interface
- export interface jwtPayload{
-  userId?: string,
-  email?:string,
-  type?:string
- } 
 // DTO
 export type ResetDTO = z.infer<typeof ResetSchema>;

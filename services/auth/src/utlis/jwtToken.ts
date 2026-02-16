@@ -1,7 +1,6 @@
-import axios from "axios";
-import { jwtPayload, } from '../dtos/authLogin.schema.js'
+import { jwtPayload, } from '../types/jwtType.js'
 import jwt, { SignOptions,JwtPayload } from "jsonwebtoken";
-import AppError from "../utlis/AppError.js";
+import AppError from "./AppError.js";
 
 interface ResetTokenPayload extends JwtPayload {
     email: string;

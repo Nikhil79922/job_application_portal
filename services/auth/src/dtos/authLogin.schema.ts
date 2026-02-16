@@ -44,11 +44,6 @@ export const loginSchema = z
     }
   });
 
-//Interface
- export interface jwtPayload{
-  userId?: string,
-  email?:string,
-  type?:string
- } 
+
 // DTO
 export type LoginDTO = z.infer<typeof loginSchema>;

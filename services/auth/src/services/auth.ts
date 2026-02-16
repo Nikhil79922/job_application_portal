@@ -5,13 +5,12 @@ import { registerSchema, RegisterDTO } from '../dtos/authResgister.schema.js'
 import { loginSchema, LoginDTO } from '../dtos/authLogin.schema.js'
 import getBuffer from "../utlis/buffer.js";
 import { upload } from "./uploadFile.js";
-import jwtToken from "./jwtToken.js";
+import jwtToken from "../utlis/jwtToken.js";
 import { forgotDTO } from "../dtos/authForgot.schema copy.js";
 import { emailTemp } from "../utlis/emailTemplate.js";
 import {  KafkaProducer } from "../library/kafka/producer.js";
 import { redisClient } from "../library/redis/index.js";
 import { ResetDTO } from "../dtos/authReset.schema copy.js";
-import { jwt } from "zod";
 
 export class Auth {
     static async resgister(data: { body: RegisterDTO; file?: Express.Multer.File }) {

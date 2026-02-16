@@ -22,9 +22,5 @@ export const forgotSchema = z
     }
   });
 
-//Interface
- export interface jwtPayload{
-  userId: string,
- } 
 // DTO
 export type forgotDTO = z.infer<typeof forgotSchema>;

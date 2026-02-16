@@ -120,9 +120,5 @@ export const registerSchema = z
     }
   });
 
-//Interface
- export interface jwtPayload{
-  userId: string,
- } 
 // DTO
 export type RegisterDTO = z.infer<typeof registerSchema>;
