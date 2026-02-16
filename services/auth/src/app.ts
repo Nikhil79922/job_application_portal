@@ -3,7 +3,7 @@ import authRouter from './routes/auth.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
 import logger from './middleware/logger.js';
 import { connectAdmin } from './library/kafka/admin.js';
-import { kafkaProducer } from './library/kafka/producer.js';
+import { KafkaProducer } from './library/kafka/producer.js';
 import { redisClient } from './library/redis/index.js';
  const app =express();
 
@@ -15,7 +15,7 @@ app.use(express.json());
 
 //Kafka Admin and Prodcuer
 connectAdmin()
-kafkaProducer()
+KafkaProducer.connect();
 
 //Redis connection
 redisClient.connect().then(()=>{

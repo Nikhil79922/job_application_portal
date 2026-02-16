@@ -8,7 +8,7 @@ import { upload } from "./uploadFile.js";
 import jwtToken from "./jwtToken.js";
 import { forgotDTO } from "../dtos/authForgot.schema copy.js";
 import { emailTemp } from "../utlis/emailTemplate.js";
-import {  publishToTopic } from "../library/kafka/producer.js";
+import {  KafkaProducer } from "../library/kafka/producer.js";
 import { redisClient } from "../library/redis/index.js";
 import { ResetDTO } from "../dtos/authReset.schema copy.js";
 import { jwt } from "zod";
@@ -76,7 +76,7 @@ export class Auth {
             subject:"RESET YOUR PASSWORD - HireHeaven",
             html:emailTemp(resetLink)
         }
-        publishToTopic('send-mail',message).catch((err)=>{
+        KafkaProducer.publish('send-mail',message).catch((err)=>{
             console.error("Failed to send Message",err)
         });
         return {message: 'If this email exists , we have sent a reset link'};

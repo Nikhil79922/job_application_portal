@@ -1,4 +1,4 @@
-import { sql } from "../../utlis/db.js";
+import { sql } from "../../library/neonDB/db.js";
 
 export class SkillsTable {
     static async createTable() {

@@ -1,38 +1,57 @@
-import { kafka } from './client.js'
-import { Producer } from 'kafkajs'
-let producer: Producer
-export const kafkaProducer = async () => {
+import { Producer } from "kafkajs"
+import { kafka } from "./kafkaClient" // adjust import
+
+export class KafkaProducer {
+  private static producer: Producer | null = null
+
+  /** Initialize producer (call once on app startup) */
+  static async connect(): Promise<void> {
+    if (this.producer) {
+      console.log("⚠️ Kafka producer already connected")
+      return
+    }
+
     try {
-        producer = kafka.producer()
-        await producer.connect()
-        console.log("✅ Kafka producer connected...")
+      this.producer = kafka.producer()
+      await this.producer.connect()
+      console.log("✅ Kafka producer connected")
     } catch (error) {
-        console.log("❌ Kafka producer failed", error)
+      console.error("❌ Kafka producer connection failed", error)
+      throw error
+    }
+  }
+
+  /** Publish message to topic */
+  static async publish<T>(topic: string, message: T): Promise<void> {
+    if (!this.producer) {
+      throw new Error("Kafka Producer is not initialized. Call connect() first.")
     }
 
-}
-
-
-export const publishToTopic = async (topic: string, message: any) => {
-    if (!producer) {
-        console.error("Kafka Producer is not initialized")
-    }
     try {
-        await producer.send({
-            topic,
-            messages: [
-                {
-                    value: JSON.stringify(message)
-                }
-            ]
-        })
+      await this.producer.send({
+        topic,
+        messages: [
+          {
+            value: JSON.stringify(message),
+          },
+        ],
+      })
     } catch (error) {
-        console.log("❌ Failed to publish message to Kafka", error)
+      console.error(`❌ Failed to publish message to topic: ${topic}`, error)
+      throw error
     }
-}
+  }
 
-export const disconnectProducer = async () => {
-    if (producer) {
-        await producer.disconnect();
+  /** Gracefully disconnect */
+  static async disconnect(): Promise<void> {
+    if (!this.producer) return
+
+    try {
+      await this.producer.disconnect()
+      this.producer = null
+      console.log("🛑 Kafka producer disconnected")
+    } catch (error) {
+      console.error("❌ Kafka producer disconnect failed", error)
     }
+  }
 }

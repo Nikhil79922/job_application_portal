@@ -1,4 +1,4 @@
-import { sql } from "../../utlis/db.js";
+import { sql } from "../../library/neonDB/db.js";
 import type { RegisterDTO } from '../../dtos/authResgister.schema.js';
 
 export class UsersFinder {

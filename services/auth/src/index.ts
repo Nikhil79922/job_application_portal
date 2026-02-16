@@ -1,6 +1,6 @@
 import app from './app.js'
 import dotenv from 'dotenv'
-import { sql } from './utlis/db.js';
+import { sql } from './library/neonDB/db.js';
 import { UserTable } from './repositories/users/usersTable.js';
 import { SkillsTable } from './repositories/skills/skillsTable.js';
 import { UserSkillsTable } from './repositories/user_skills/user_skillsTable.js';
