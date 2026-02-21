@@ -1,22 +1,24 @@
 import { UsersFinder, UsersInsertions } from "../repositories/users/usersTable.js";
+import crypto from "crypto";
 import AppError from "../utlis/AppError.js";
 import bcrypt from 'bcrypt'
-import { registerSchema, RegisterDTO } from '../dtos/authResgister.schema.js'
-import { loginSchema, LoginDTO } from '../dtos/authLogin.schema.js'
+import { RegisterDTO } from '../dtos/authResgister.schema.js'
+import { LoginDTO } from '../dtos/authLogin.schema.js'
 import getBuffer from "../utlis/buffer.js";
 import { upload } from "./uploadFile.js";
 import jwtToken from "../utlis/jwtToken.js";
 import { forgotDTO } from "../dtos/authForgot.schema copy.js";
 import { emailTemp } from "../utlis/emailTemplate.js";
-import {  KafkaProducer } from "../library/kafka/producer.js";
+import { KafkaProducer } from "../library/kafka/producer.js";
 import { redisClient } from "../library/redis/index.js";
 import { ResetDTO } from "../dtos/authReset.schema copy.js";
+import { RefreshTokenTable } from "../repositories/refresh_token/refresh_tokenTable.js";
 
 export class Auth {
-    static async resgister(data: { body: RegisterDTO; file?: Express.Multer.File }) {
+    static async resgister(data: { body: RegisterDTO; file?: Express.Multer.File; ua: any, userAgent: string }) {
         // this.requiredFields(data.body);
         const { name, email, password, phoneNumber } = data.body;
-        const existingUser = await UsersFinder.existingUser(email);
+        const existingUser = await UsersFinder.find({ email });
         if (existingUser.length > 0) {
             throw new AppError(`User with this email Already exists`, 409);
         }
@@ -31,8 +33,45 @@ export class Auth {
             fileData: data.file
         }
         const registedUser = await CreateUser.createUser(payload as any);
+        console.log("registerUser=====>", registedUser);
+        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.user_id }, process.env.SECRET_KEY as string, '6h')
 
-        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.userId }, process.env.SECRET_KEY as string, '1d')
+        const refreshToken = crypto.randomBytes(64).toString("hex");
+
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        const browser = data.ua.browser.name || "Unknown Browser";
+        const os = data.ua.os.name || "Unknown OS";
+        const deviceType = data.ua.device.type || "desktop";
+
+        const device = data.userAgent.includes("Postman")
+            ? "Postman Client"
+            : `${deviceType} - ${browser} on ${os}`;
+
+        const platform = data.ua.os.name?.toLowerCase();
+
+        let device_type;
+
+        if (platform?.includes("ios")) device_type = "ios";
+        else if (platform?.includes("android")) device_type = "android";
+        else if (data.userAgent.includes("Postman")) device_type = "postman";
+        else device_type = "web";
+
+        const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+        console.log(registedUser?.user_id, tokenHash, device, data.userAgent, expiryDate)
+        let [insertedToken] = await RefreshTokenTable.insertToken({
+            user_id: registedUser?.user_id,
+            token_hash: tokenHash,
+            device,
+            device_type,
+            user_agent: data.userAgent,
+            expires_at: expiryDate
+        });
+
+        console.log(insertedToken)
         return {
             registedUser,
             accessToken
@@ -51,7 +90,7 @@ export class Auth {
         }
         usersObject.skills = usersObject.skills || [];
         delete usersObject.password;
-        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.userId }, process.env.SECRET_KEY as string, '1d')
+        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.user_id }, process.env.SECRET_KEY as string, '1d')
         return {
             usersObject,
             accessToken
@@ -59,50 +98,50 @@ export class Auth {
     }
 
     static async forgotPassword(data: forgotDTO) {
-        const existingUser = await UsersFinder.existingUser(data.email);
+        const existingUser = await UsersFinder.find({ email: data.email });
         if (existingUser.length === 0) {
-            return {message: 'If this email exists ,We have sent a reset link'};
+            return { message: 'If this email exists ,We have sent a reset link' };
         }
-        const resetToken= await jwtToken.JWTtoken({ email: data.email ,type: 'reset'  }, process.env.SECRET_KEY as string, '15min')
+        const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY as string, '15min')
 
-        const resetLink= `${process.env.Frontend_Url}/reset/${resetToken}`
+        const resetLink = `${process.env.Frontend_Url}/reset/${resetToken}`
 
-        await redisClient.set(`forgot:${data.email}`,resetToken,{
-            EX:900
+        await redisClient.set(`forgot:${data.email}`, resetToken, {
+            EX: 900
         })
-        const message={
-            to:data.email,
-            subject:"RESET YOUR PASSWORD - HireHeaven",
-            html:emailTemp(resetLink)
+        const message = {
+            to: data.email,
+            subject: "RESET YOUR PASSWORD - HireHeaven",
+            html: emailTemp(resetLink)
         }
-        KafkaProducer.publish('send-mail',message).catch((err)=>{
-            console.error("Failed to send Message",err)
+        KafkaProducer.publish('send-mail', message).catch((err) => {
+            console.error("Failed to send Message", err)
         });
-        return {message: 'If this email exists , we have sent a reset link'};
+        return { message: 'If this email exists , we have sent a reset link' };
     }
 
     static async ResetPassword(data: ResetDTO) {
-      const decodedToken=await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY as string)
-      if(decodedToken?.type !=='reset'){
-        throw new AppError('Invalid token type',400);
-      }
-      const email=decodedToken?.email;
-      const storedToken= await redisClient.get(`forgot:${email}`);
-      if(!storedToken || storedToken !== data.token ){
-        throw new AppError('Token has been expired',400);
-      }
+        const decodedToken = await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY as string)
+        if (decodedToken?.type !== 'reset') {
+            throw new AppError('Invalid token type', 400);
+        }
+        const email = decodedToken?.email;
+        const storedToken = await redisClient.get(`forgot:${email}`);
+        if (!storedToken || storedToken !== data.token) {
+            throw new AppError('Token has been expired', 400);
+        }
 
-      const users= await UsersFinder.existingUser(email);
-      if (users.length === 0) {
-        throw new AppError('User Not Found',404);
-    }
-    const user=users[0];
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    await UsersFinder.updateUser({email,password:hashedPassword})
-    await redisClient.del(`forgot:${email}`)
-    return {
-        message:'Your password has been updated.'
-    }
+        const users = await UsersFinder.find({ email });
+        if (users.length === 0) {
+            throw new AppError('User Not Found', 404);
+        }
+        const user = users[0];
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+        await UsersFinder.update({ password: hashedPassword }, { email })
+        await redisClient.del(`forgot:${email}`)
+        return {
+            message: 'Your password has been updated.'
+        }
     }
 }
 

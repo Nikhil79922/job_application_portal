@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { UAParser } from "ua-parser-js";
 import TryCatch from "../utlis/TryCatch.js";
 import sendResponse from "../utlis/success.js";
 import { Auth } from "../services/auth.js";
@@ -12,8 +13,11 @@ export const registerUser = TryCatch(async (req: Request, res: Response) => {
         ...req.body,
         file: req.file
     });
-    const registeredUser = await Auth.resgister({ body: dto, file: req.file })
-    sendResponse(res, 200, "Resgistered Successfull", registeredUser)
+    const userAgentString = req.headers["user-agent"] || "unknown";
+    const parser = new UAParser(userAgentString);
+    const ua = parser.getResult();
+    const registeredUser = await Auth.resgister({ body: dto, file: req.file , ua ,  userAgent: userAgentString,});
+    sendResponse(res, 200, "Resgistered Successfull", registeredUser);
 })
 
 
@@ -30,7 +34,7 @@ export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
 })
 
 export const resetPassword = TryCatch(async (req: Request, res: Response) => {
-    const dto = ResetSchema.parse({...req.body, token:req.params.token});
+    const dto = ResetSchema.parse({ ...req.body, token: req.params.token });
     const ResetPassword = await Auth.ResetPassword(dto)
     sendResponse(res, 200, "Reset Password Successfull", ResetPassword)
 })

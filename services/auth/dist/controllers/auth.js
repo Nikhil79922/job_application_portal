@@ -1,3 +1,4 @@
+import { UAParser } from "ua-parser-js";
 import TryCatch from "../utlis/TryCatch.js";
 import sendResponse from "../utlis/success.js";
 import { Auth } from "../services/auth.js";
@@ -10,7 +11,10 @@ export const registerUser = TryCatch(async (req, res) => {
         ...req.body,
         file: req.file
     });
-    const registeredUser = await Auth.resgister({ body: dto, file: req.file });
+    const userAgentString = req.headers["user-agent"] || "unknown";
+    const parser = new UAParser(userAgentString);
+    const ua = parser.getResult();
+    const registeredUser = await Auth.resgister({ body: dto, file: req.file, ua, userAgent: userAgentString, });
     sendResponse(res, 200, "Resgistered Successfull", registeredUser);
 });
 export const loginUser = TryCatch(async (req, res) => {

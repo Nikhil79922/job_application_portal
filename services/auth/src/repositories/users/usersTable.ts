@@ -1,13 +1,84 @@
 import { sql } from "../../library/neonDB/db.js";
 import type { RegisterDTO } from '../../dtos/authResgister.schema.js';
+import AppError from "../../utlis/AppError.js";
 
 export class UsersFinder {
-    static async existingUser(email: string) {
-        return await sql`SELECT user_id FROM users WHERE email = ${email}`
+    static tableName = 'users';
+    static allowedColumns = [
+      "user_id",
+      "name",
+      "email",
+      "password",
+      "phone_number",
+      "role",
+      "bio",
+      "resume",
+      "created_at"
+    ];
+    static async find(
+      conditions: Record<string, any>,
+      selectFields: string[] = ["user_id"]
+    ) {
+      const keys = Object.keys(conditions);
+    
+      if (!keys.length) {
+        throw new Error("Conditions required");
+      }
+
+      selectFields.forEach(field => {
+        if (!this.allowedColumns.includes(field)) {
+          throw new AppError(`Invalid select column: ${field}`,500);
+        }
+      });
+
+      keys.forEach(key => {
+        if (!this.allowedColumns.includes(key)) {
+          throw new AppError(`Invalid condition column: ${key}`,500);
+        }
+      });
+    
+      const clauses = keys.map(
+        (key, index) => `${key} = $${index + 1}`
+      );
+      const values = Object.values(conditions);
+      const query = `
+        SELECT ${selectFields.join(", ")}
+        FROM ${this.tableName}
+        WHERE ${clauses.join(" AND ")}
+      `;
+    
+      return await sql.query(query, values);
     }
 
-    static async updateUser(data:any) {
-        return await sql`UPDATE users SET password=${data.password}  WHERE email = ${data.email}`
+    static async update(
+        data: Record<string, any>,
+        conditions: Record<string, any>
+    ) {
+        const dataKeys = Object.keys(data);
+        const conditionKeys = Object.keys(conditions);
+        if (!dataKeys.length || !conditionKeys.length) {
+            throw new AppError("Data and conditions required", 500);
+        }
+        const setClause = dataKeys
+            .map((key, index) => `${key} = $${index + 1}`)
+            .join(", ");
+        const whereClause = conditionKeys
+            .map(
+                (key, index) =>
+                    `${key} = $${index + 1 + dataKeys.length}`
+            )
+            .join(" AND ");
+
+        const values = [
+            ...Object.values(data),
+            ...Object.values(conditions),
+        ];
+        const query = `
+    UPDATE ${this.tableName}
+    SET ${setClause}
+    WHERE ${whereClause}
+  `;
+        return await sql.query(query as any, values);
     }
 
     static async users_skills(email: string) {
@@ -24,37 +95,3 @@ export class UsersInsertions {
         return await sql`Insert INTO users (name , email , password , phone_number, role, bio, resume, resume_public_id ) VALUES (${data.name}, ${data.email}, ${data.password} ,${data.phoneNumber}, ${data.role}, ${data.bio} ,${data.file} , ${data.resumePublicId}) RETURNING user_id , name , email , phone_number, role , bio , resume, created_at`
     }
 }
-
-
-// export class UserTable {
-//     static async createTable() {
-//         await sql`
-//           CREATE TABLE IF NOT EXISTS users(
-//              user_id SERIAL PRIMARY KEY,
-//              name VARCHAR(255) NOT NULL,
-//              email VARCHAR(255) NOT NULL UNIQUE,
-//              password VARCHAR(255) NOT NULL,
-//              phone_number VARCHAR(20) NOT NULL,
-//              role user_role NOT NUll,
-//              bio TEXT,
-//              resume VARCHAR(255),
-//              resume_public_id VARCHAR(255),
-//              profile_pic VARCHAR(255),
-//              profile_pic_public_id VARCHAR(255),
-//              created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//              subscription TIMESTAMPTZ
-//           )
-//        `;
-//     }
-
-//     static async createRoleEnum() {
-//         await sql`
-//         DO $$
-//         Begin 
-//             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN 
-//                 CREATE TYPE user_role AS ENUM ('jobseeker','recruiter');
-//             END IF;
-//         END $$   
-//        `;
-//     }
-// }

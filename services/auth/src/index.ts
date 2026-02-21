@@ -4,6 +4,7 @@ import { sql } from './library/neonDB/db.js';
 import { UserModel } from './models/users/usersTable.js';
 import { SkillsModel } from './models/skills/skillsTable.js';
 import { UserSkillsModel } from './models/user_skills/user_skillsTable.js';
+import { RefreshTokenModel } from './models/refresh_token/refresh_tokenTable.js';
 dotenv.config();
 
 let port = process.env.PORT
@@ -18,6 +19,9 @@ async function initDB() {
        await SkillsModel.createTable();
 
        await UserSkillsModel.createTable();
+
+       await RefreshTokenModel.createTable();
+       
         console.log("✅ DataBase initialization successfully done",);
     } catch (e) {
         console.log("❌ Error in DataBase initialization", e);
