@@ -1,17 +1,17 @@
 import app from './app.js';
 import dotenv from 'dotenv';
-import { UserTable } from './repositories/users/usersTable.js';
-import { SkillsTable } from './repositories/skills/skillsTable.js';
-import { UserSkillsTable } from './repositories/user_skills/user_skillsTable.js';
+import { UserModel } from './models/users/usersTable.js';
+import { SkillsModel } from './models/skills/skillsTable.js';
+import { UserSkillsModel } from './models/user_skills/user_skillsTable.js';
 dotenv.config();
 let port = process.env.PORT;
 //DB
 async function initDB() {
     try {
-        await UserTable.createRoleEnum();
-        await UserTable.createTable();
-        await SkillsTable.createTable();
-        await UserSkillsTable.createTable();
+        await UserModel.createRoleEnum();
+        await UserModel.createTable();
+        await SkillsModel.createTable();
+        await UserSkillsModel.createTable();
         console.log("✅ DataBase initialization successfully done");
     }
     catch (e) {

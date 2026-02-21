@@ -1,5 +1,5 @@
 import { Producer } from "kafkajs"
-import { kafka } from "./kafkaClient" // adjust import
+import { kafka } from "./client.js" // adjust import
 
 export class KafkaProducer {
   private static producer: Producer | null = null
