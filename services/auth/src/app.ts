@@ -5,6 +5,7 @@ import logger from './middleware/logger.js';
 import { connectAdmin } from './library/kafka/admin.js';
 import { KafkaProducer } from './library/kafka/producer.js';
 import { redisClient } from './library/redis/index.js';
+import cookieParser from "cookie-parser";
  const app =express();
 
  //global Route Logs logger.
@@ -12,6 +13,7 @@ app.use(logger);
 
 
 app.use(express.json());
+app.use(cookieParser());
 
 //Kafka Admin and Prodcuer
 connectAdmin()

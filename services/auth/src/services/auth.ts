@@ -33,8 +33,7 @@ export class Auth {
             fileData: data.file
         }
         const registedUser = await CreateUser.createUser(payload as any);
-        console.log("registerUser=====>", registedUser);
-        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.user_id }, process.env.SECRET_KEY as string, '6h')
+        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.user_id }, process.env.SECRET_KEY as string, '15m')
 
         const refreshToken = crypto.randomBytes(64).toString("hex");
 
@@ -61,8 +60,7 @@ export class Auth {
         else device_type = "web";
 
         const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        console.log(registedUser?.user_id, tokenHash, device, data.userAgent, expiryDate)
-        let [insertedToken] = await RefreshTokenTable.insertToken({
+        await RefreshTokenTable.insertToken({
             user_id: registedUser?.user_id,
             token_hash: tokenHash,
             device,
@@ -71,29 +69,84 @@ export class Auth {
             expires_at: expiryDate
         });
 
-        console.log(insertedToken)
         return {
             registedUser,
-            accessToken
+            accessToken,
+            refreshToken
         }
     }
 
-    static async logIn(data: LoginDTO) {
-        const user = await UsersFinder.users_skills(data.email)
+    static async logIn(data: { dto: LoginDTO; ua: any, userAgent: string }) {
+        const user = await UsersFinder.users_skills(data.dto.email)
         if (user.length === 0) {
             throw new AppError('Invalid Credentials, Email Not Found', 400)
         }
         const usersObject = user[0];
-        const matchPassword = await bcrypt.compare(data.password, usersObject.password)
+        const matchPassword = await bcrypt.compare(data.dto.password, usersObject.password)
         if (!matchPassword) {
             throw new AppError(`Invalid Credentials, Password didn't matched for the Email`, 400)
         }
         usersObject.skills = usersObject.skills || [];
         delete usersObject.password;
-        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.user_id }, process.env.SECRET_KEY as string, '1d')
+        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.user_id }, process.env.SECRET_KEY as string, '15m')
+        const refreshToken = crypto.randomBytes(64).toString("hex");
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        const browser = data.ua.browser.name || "Unknown Browser";
+        const os = data.ua.os.name || "Unknown OS";
+        const deviceType = data.ua.device.type || "desktop";
+
+        const device = data.userAgent.includes("Postman")
+            ? "Postman Client"
+            : `${deviceType} - ${browser} on ${os}`;
+
+        const platform = data.ua.os.name?.toLowerCase();
+
+        let device_type;
+
+        if (platform?.includes("ios")) device_type = "ios";
+        else if (platform?.includes("android")) device_type = "android";
+        else if (data.userAgent.includes("Postman")) device_type = "postman";
+        else device_type = "web";
+
+        const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+
+        const [tokenRow] = await RefreshTokenTable.find({
+            user_id: usersObject?.user_id,
+            device_type,
+            user_agent: data.userAgent
+        });
+        if (tokenRow) {
+            await RefreshTokenTable.update(
+                {
+                    token_hash: tokenHash,
+                    expires_at: expiryDate,
+                    revoked: false
+                },
+                {
+                    user_id: usersObject?.user_id,
+                    device_type,
+                    user_agent: data.userAgent
+                }
+            );
+        } else {
+            await RefreshTokenTable.insertToken({
+                user_id: usersObject?.user_id,
+                token_hash: tokenHash,
+                device,
+                device_type,
+                user_agent: data.userAgent,
+                expires_at: expiryDate,
+                revoked: false
+            });
+        }
         return {
             usersObject,
-            accessToken
+            accessToken,
+            refreshToken
         }
     }
 
@@ -102,7 +155,7 @@ export class Auth {
         if (existingUser.length === 0) {
             return { message: 'If this email exists ,We have sent a reset link' };
         }
-        const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY as string, '15min')
+        const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY as string, '15m')
 
         const resetLink = `${process.env.Frontend_Url}/reset/${resetToken}`
 
@@ -142,6 +195,88 @@ export class Auth {
         return {
             message: 'Your password has been updated.'
         }
+    }
+
+    static async refreshToken(data: {
+        refreshToken: string;
+        ua: any;
+        userAgent: string;
+    }) {
+        const { refreshToken, ua, userAgent } = data;
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        const platform = ua.os.name?.toLowerCase();
+        let device_type;
+
+        if (platform?.includes("ios")) device_type = "ios";
+        else if (platform?.includes("android")) device_type = "android";
+        else if (userAgent.includes("Postman")) device_type = "postman";
+        else device_type = "web";
+
+        const [tokenRow] = await RefreshTokenTable.find({
+            token_hash: tokenHash,
+            device_type,
+            user_agent: userAgent
+        });
+        if (!tokenRow) {
+            throw new AppError("Invalid refresh token or device mismatch", 401);
+        }
+        if (tokenRow.revoked) {
+            throw new AppError("Token revoked", 401);
+        }
+        if (new Date() > tokenRow.expires_at) {
+            throw new AppError("Refresh token expired", 401);
+        }
+        // Generate new access token
+        const accessToken = jwtToken.JWTtoken(
+            { userId: tokenRow.user_id },
+            process.env.SECRET_KEY!,
+            "15m"
+        );
+
+        // Rotate refresh token
+        const newRefreshToken = crypto.randomBytes(64).toString("hex");
+        const newTokenHash = crypto
+            .createHash("sha256")
+            .update(newRefreshToken)
+            .digest("hex");
+
+        const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+        await RefreshTokenTable.update(
+            {
+                token_hash: newTokenHash,
+                expires_at: newExpiry
+            },
+            {
+                token_hash: tokenHash,
+                device_type,
+                user_agent: userAgent
+            }
+        );
+        return {
+            accessToken,
+            refreshToken: newRefreshToken
+        };
+    }
+
+    static async logout(refreshToken: string) {
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+        const [tokenRow] = await RefreshTokenTable.find({
+            token_hash: tokenHash
+        });
+        if (!tokenRow) {
+            return; // silent logout (recommended)
+        }
+        await RefreshTokenTable.update(
+            { revoked: true },
+            { token_hash: tokenHash }
+        );
     }
 }
 
