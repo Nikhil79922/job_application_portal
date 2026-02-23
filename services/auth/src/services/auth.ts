@@ -188,7 +188,6 @@ export class Auth {
         if (users.length === 0) {
             throw new AppError('User Not Found', 404);
         }
-        const user = users[0];
         const hashedPassword = await bcrypt.hash(data.password, 10);
         await UsersFinder.update({ password: hashedPassword }, { email })
         await redisClient.del(`forgot:${email}`)
