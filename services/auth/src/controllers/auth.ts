@@ -74,7 +74,7 @@ export const refreshToken = TryCatch(async (req: Request, res: Response) => {
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 15 * 24 * 60 * 60 * 1000,
-        });
+        }); 
     sendResponse(res, 200, "Refresh Token Re-Invoked",result.accessToken)
 })
 
