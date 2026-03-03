@@ -1,38 +1,33 @@
 import { sql } from "../../../config/database.config.js";
-import type { RegisterDTO } from "../../../api/dtos/authResgister.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
-import { IUserRepository } from "../../../domain/interfaces/user.repository.interface.js";
-
-export class PostgresUserRepository implements IUserRepository {
-
-    private allowedColumns = [
-        "user_id",
-        "name",
-        "email",
-        "password",
-        "phone_number",
-        "role",
-        "bio",
-        "resume",
-        "created_at"
-    ];
-
-    async findByEmail(email: string) {
-        const result = await sql`
+export class PostgresUserRepository {
+    constructor() {
+        this.allowedColumns = [
+            "user_id",
+            "name",
+            "email",
+            "password",
+            "phone_number",
+            "role",
+            "bio",
+            "resume",
+            "created_at"
+        ];
+    }
+    async findByEmail(email) {
+        const result = await sql `
             SELECT * FROM users WHERE email = ${email} LIMIT 1
         `;
         return result[0] ?? null;
     }
-
-    async findById(userId: string) {
-        const result = await sql`
+    async findById(userId) {
+        const result = await sql `
             SELECT * FROM users WHERE user_id = ${userId} LIMIT 1
         `;
         return result[0] ?? null;
     }
-
-    async create(data: RegisterDTO & { role: string }) {
-        const result = await sql`
+    async create(data) {
+        const result = await sql `
             INSERT INTO users (
                 name,
                 email,
@@ -55,40 +50,31 @@ export class PostgresUserRepository implements IUserRepository {
             )
             RETURNING user_id, name, email, phone_number, role, bio, resume, created_at
         `;
-
         return result[0];
     }
-
-    async update(userId: string, data: Partial<any>) {
+    async update(userId, data) {
         const keys = Object.keys(data);
-
         if (!keys.length) {
             throw new AppError("Update data required", 400);
         }
-
         keys.forEach(key => {
             if (!this.allowedColumns.includes(key)) {
                 throw new AppError(`Invalid update column: ${key}`, 400);
             }
         });
-
         const setClause = keys
             .map((key, index) => `${key} = $${index + 1}`)
             .join(", ");
-
         const values = [...Object.values(data), userId];
-
         const query = `
             UPDATE users
             SET ${setClause}
             WHERE user_id = $${keys.length + 1}
         `;
-
         await sql.query(query, values);
     }
-
-    async getUserWithSkills(email: string) {
-        const result = await sql`
+    async getUserWithSkills(email) {
+        const result = await sql `
             SELECT 
                 u.user_id,
                 u.name,
@@ -107,7 +93,6 @@ export class PostgresUserRepository implements IUserRepository {
             WHERE u.email = ${email}
             GROUP BY u.user_id
         `;
-
         return result[0] ?? null;
     }
 }

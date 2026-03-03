@@ -8,12 +8,12 @@ interface ResetTokenPayload extends JwtPayload {
   }
   
 export default class jwtToken {
-     async JWTtoken(payload: jwtPayload, secret: string, expires: SignOptions["expiresIn"]) {
+     static async JWTtoken(payload: jwtPayload, secret: string, expires: SignOptions["expiresIn"]) {
         const token = jwt.sign(payload, secret, { expiresIn: expires, })
         return token
     }
 
-     JWTtokenVerify(token: string, secret: string): ResetTokenPayload {
+    static JWTtokenVerify(token: string, secret: string): ResetTokenPayload {
         try {
           return jwt.verify(token, secret) as ResetTokenPayload;
         } catch (error) {

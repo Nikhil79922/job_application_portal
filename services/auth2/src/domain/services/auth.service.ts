@@ -1,333 +1,287 @@
-import { UsersFinder, UsersInsertions } from "../repositories/users/usersTable.js";
-import crypto from "crypto";
-import AppError from "../utlis/AppError.js";
-import bcrypt from 'bcrypt'
-import { RegisterDTO } from '../../api/dtos/authResgister.schema.js'
-import { LoginDTO } from '../dtos/authLogin.schema.js'
-import getBuffer from "../utlis/buffer.js";
-import { upload } from "./uploadFile.js";
-import jwtToken from "../utlis/jwtToken.js";
-import { forgotDTO } from "../dtos/authForgot.schema copy.js";
-import { emailTemp } from "../utlis/emailTemplate.js";
-import { KafkaProducer } from "../library/kafka/producer.js";
-import { redisClient } from "../library/redis/index.js";
-import { ResetDTO } from "../dtos/authReset.schema copy.js";
-import { RefreshTokenTable } from "../repositories/refresh_token/refresh_tokenTable.js";
-
+import AppError from "../../shared/errors/AppError.js";
+import {IUserRepository} from "../../domain/interfaces/user.repository.interface.js";
+import {IRefreshTokenRepository} from "../../domain/interfaces/refreshToken.repository.interface.js";
+import {IPasswordService} from "../../domain/interfaces/password.service.interface.js";
+import {ITokenService} from "../../domain/interfaces/token.service.interface.js";
+import {ICacheService} from "../../domain/interfaces/cache.interface.js";
+import {IMessageBroker} from "../../domain/interfaces/message-broker.interface.js";
+import { RegisterDTO } from "../../api/dtos/authResgister.schema.js";
+import { IDeviceService } from "../../domain/interfaces/deviceInfo.interface.js";
+import { LoginDTO } from "../../api/dtos/authLogin.schema.js";
+import { forgotDTO } from "../../api/dtos/authForgot.schema copy.js";
+import { env } from "../../config/env.js";
+import { emailTemp } from '../../shared/utils/emailTemplate.js';
+import { ResetDTO } from "../../api/dtos/authReset.schema copy.js";
+import { DeviceInfo } from "./device.service.js";
+  
 export class Auth {
-     async resgister(data: { body: RegisterDTO; file?: Express.Multer.File; ua: any, userAgent: string }) {
-        // this.requiredFields(data.body);
-        const { name, email, password, phoneNumber } = data.body;
-        const existingUser = await UsersFinder.find({ email });
-        if (existingUser.length > 0) {
-            throw new AppError(`User with this email Already exists`, 409);
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const bodyData: RegisterDTO = {
-            ...data.body,
-            password: hashedPassword
-        }
-        const payload = {
-            bodyData,
-            fileData: data.file
-        }
-        const registedUser = await CreateUser.createUser(payload as any);
-        const accessToken = await jwtToken.JWTtoken({ userId: registedUser?.user_id }, process.env.SECRET_KEY as string, '15m')
-
-        const refreshToken = crypto.randomBytes(64).toString("hex");
-
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex");
-
-        const browser = data.ua.browser.name || "Unknown Browser";
-        const os = data.ua.os.name || "Unknown OS";
-        const deviceType = data.ua.device.type || "desktop";
-
-        const device = data.userAgent.includes("Postman")
-            ? "Postman Client"
-            : `${deviceType} - ${browser} on ${os}`;
-
-        const platform = data.ua.os.name?.toLowerCase();
-
-        let device_type;
-
-        if (platform?.includes("ios")) device_type = "ios";
-        else if (platform?.includes("android")) device_type = "android";
-        else if (data.userAgent.includes("Postman")) device_type = "postman";
-        else device_type = "web";
-
-        const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        await RefreshTokenTable.insertToken({
-            user_id: registedUser?.user_id,
-            token_hash: tokenHash,
-            device,
-            device_type,
-            user_agent: data.userAgent,
-            expires_at: expiryDate
-        });
-
-        return {
-            registedUser,
-            accessToken,
-            refreshToken
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static async logIn(data: { dto: LoginDTO; ua: any, userAgent: string }) {
-        const user = await UsersFinder.users_skills(data.dto.email)
-        if (user.length === 0) {
-            throw new AppError('Invalid Credentials, Email Not Found', 400)
-        }
-        const usersObject = user[0];
-        const matchPassword = await bcrypt.compare(data.dto.password, usersObject.password)
-        if (!matchPassword) {
-            throw new AppError(`Invalid Credentials, Password didn't matched for the Email`, 400)
-        }
-        usersObject.skills = usersObject.skills || [];
-        delete usersObject.password;
-        const accessToken = await jwtToken.JWTtoken({ userId: usersObject?.user_id }, process.env.SECRET_KEY as string, '15m')
-        const refreshToken = crypto.randomBytes(64).toString("hex");
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex");
-
-        const browser = data.ua.browser.name || "Unknown Browser";
-        const os = data.ua.os.name || "Unknown OS";
-        const deviceType = data.ua.device.type || "desktop";
-
-        const device = data.userAgent.includes("Postman")
-            ? "Postman Client"
-            : `${deviceType} - ${browser} on ${os}`;
-
-        const platform = data.ua.os.name?.toLowerCase();
-
-        let device_type;
-
-        if (platform?.includes("ios")) device_type = "ios";
-        else if (platform?.includes("android")) device_type = "android";
-        else if (data.userAgent.includes("Postman")) device_type = "postman";
-        else device_type = "web";
-
-        const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-
-        const [tokenRow] = await RefreshTokenTable.find({
-            user_id: usersObject?.user_id,
-            device_type,
-            user_agent: data.userAgent
-        });
-        if (tokenRow) {
-            await RefreshTokenTable.update(
-                {
-                    token_hash: tokenHash,
-                    expires_at: expiryDate,
-                    revoked: false
-                },
-                {
-                    user_id: usersObject?.user_id,
-                    device_type,
-                    user_agent: data.userAgent
-                }
-            );
-        } else {
-            await RefreshTokenTable.insertToken({
-                user_id: usersObject?.user_id,
-                token_hash: tokenHash,
-                device,
-                device_type,
-                user_agent: data.userAgent,
-                expires_at: expiryDate,
-                revoked: false
-            });
-        }
-        return {
-            usersObject,
-            accessToken,
-            refreshToken
-        }
-    }
-
-    static async forgotPassword(data: forgotDTO) {
-        const existingUser = await UsersFinder.find({ email: data.email });
-        if (existingUser.length === 0) {
-            return { message: 'If this email exists ,We have sent a reset link' };
-        }
-        const resetToken = await jwtToken.JWTtoken({ email: data.email, type: 'reset' }, process.env.SECRET_KEY as string, '15m')
-
-        const resetLink = `${process.env.Frontend_Url}/reset/${resetToken}`
-
-        await redisClient.set(`forgot:${data.email}`, resetToken, {
-            EX: 900
-        })
-        const message = {
-            to: data.email,
-            subject: "RESET YOUR PASSWORD - HireHeaven",
-            html: emailTemp(resetLink)
-        }
-        KafkaProducer.publish('send-mail', message).catch((err) => {
-            console.error("Failed to send Message", err)
-        });
-        return { message: 'If this email exists , we have sent a reset link' };
-    }
-
-    static async ResetPassword(data: ResetDTO) {
-        const decodedToken = await jwtToken.JWTtokenVerify(data.token, process.env.SECRET_KEY as string)
-        if (decodedToken?.type !== 'reset') {
-            throw new AppError('Invalid token type', 400);
-        }
-        const email = decodedToken?.email;
-        const storedToken = await redisClient.get(`forgot:${email}`);
-        if (!storedToken || storedToken !== data.token) {
-            throw new AppError('Token has been expired', 400);
-        }
-
-        const users = await UsersFinder.find({ email });
-        if (users.length === 0) {
-            throw new AppError('User Not Found', 404);
-        }
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-        await UsersFinder.update({ password: hashedPassword }, { email })
-        await redisClient.del(`forgot:${email}`)
-        return {
-            message: 'Your password has been updated.'
-        }
-    }
-
-    static async refreshToken(data: {
-        refreshToken: string;
-        ua: any;
+    constructor(
+        private userRepo: IUserRepository,
+        private refreshRepo: IRefreshTokenRepository,
+        private passwordService: IPasswordService,
+        private tokenService: ITokenService,
+        private cacheService: ICacheService,
+        private messageBroker: IMessageBroker,
+        private deviceInfo: IDeviceService
+      ) {}
+      async register(data: {
+        body: RegisterDTO;
+        file?: Express.Multer.File;
+        deviceInfo: DeviceInfo;
         userAgent: string;
-    }) {
-        const { refreshToken, ua, userAgent } = data;
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex");
+      }) {
+        const { body, deviceInfo, userAgent } = data;
+      
+        const existingUser = await this.userRepo.findByEmail(body.email);
+      
+        if (existingUser) {
+          throw new AppError("User with this email already exists", 409);
+        }
+      
+        const hashedPassword = await this.passwordService.hash(body.password);
+      
+        const bodyData: RegisterDTO = {
+          ...body,
+          password: hashedPassword,
+        };
 
-        const platform = ua.os.name?.toLowerCase();
-        let device_type;
+        const registeredUser = await this.userRepo.create(bodyData);
 
-        if (platform?.includes("ios")) device_type = "ios";
-        else if (platform?.includes("android")) device_type = "android";
-        else if (userAgent.includes("Postman")) device_type = "postman";
-        else device_type = "web";
-
-        const [tokenRow] = await RefreshTokenTable.find({
-            token_hash: tokenHash,
-            device_type,
-            user_agent: userAgent
+        const accessToken = await this.tokenService.generateAccessToken({
+          userId: registeredUser.user_id,
         });
-        if (!tokenRow) {
-            throw new AppError("Invalid refresh token or device mismatch", 401);
+      
+        const rawRefreshToken = this.tokenService.generateRefreshToken();
+        const tokenHash = this.tokenService.hashToken(rawRefreshToken);
+
+        await this.refreshRepo.create({
+          user_id: registeredUser.user_id,
+          token_hash: tokenHash,
+          device: deviceInfo.device,
+          device_type: deviceInfo.deviceType,
+          user_agent: userAgent,
+          expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        });
+      
+        return {
+          registeredUser,
+          accessToken,
+          refreshToken: rawRefreshToken,
+        };
+      }
+
+      async login(data: {
+        dto: LoginDTO;
+        deviceInfo: DeviceInfo;
+        userAgent: string;
+      }) {
+        const { dto, deviceInfo, userAgent } = data;
+        const { email, password } = dto;
+ 
+        const user = await this.userRepo.findByEmail(email);
+      
+        if (!user) {
+          throw new AppError("Invalid credentials", 400);
         }
-        if (tokenRow.revoked) {
-            throw new AppError("Token revoked", 401);
-        }
-        if (new Date() > tokenRow.expires_at) {
-            throw new AppError("Refresh token expired", 401);
-        }
-        // Generate new access token
-        const accessToken = jwtToken.JWTtoken(
-            { userId: tokenRow.user_id },
-            process.env.SECRET_KEY!,
-            "15m"
+
+        const isMatch = await this.passwordService.compare(
+          password,
+          user.password
         );
-
-        // Rotate refresh token
-        const newRefreshToken = crypto.randomBytes(64).toString("hex");
-        const newTokenHash = crypto
-            .createHash("sha256")
-            .update(newRefreshToken)
-            .digest("hex");
-
-        const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        await RefreshTokenTable.update(
+      
+        if (!isMatch) {
+          throw new AppError("Invalid credentials", 400);
+        }
+      
+        const accessToken = await this.tokenService.generateAccessToken({
+          userId: user.user_id,
+        });
+      
+        const rawRefreshToken = this.tokenService.generateRefreshToken();
+        const tokenHash = this.tokenService.hashToken(rawRefreshToken);
+      
+        const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      
+        const existingToken = await this.refreshRepo.find({
+          user_id: user.user_id,
+          device_type: deviceInfo.deviceType,
+          user_agent: userAgent,
+        });
+      
+        if (existingToken) {
+          await this.refreshRepo.update(
             {
-                token_hash: newTokenHash,
-                expires_at: newExpiry
+              user_id: user.user_id,
+              device_type: deviceInfo.deviceType,
+              user_agent: userAgent,
             },
             {
-                token_hash: tokenHash,
-                device_type,
-                user_agent: userAgent
+              token_hash: tokenHash,
+              expires_at: expiryDate,
+              revoked: false,
             }
-        );
+          );
+        } else {
+          await this.refreshRepo.create({
+            user_id: user.user_id,
+            token_hash: tokenHash,
+            device: deviceInfo.device,
+            device_type: deviceInfo.deviceType,
+            user_agent: userAgent,
+            expires_at: expiryDate,
+          });
+        }
+      
+        const { password: _, ...safeUser } = user;
+      
         return {
-            accessToken,
-            refreshToken: newRefreshToken
+          user: safeUser,
+          accessToken,
+          refreshToken: rawRefreshToken,
         };
-    }
+      }
 
-    static async logout(refreshToken: string) {
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex");
-        const [tokenRow] = await RefreshTokenTable.find({
-            token_hash: tokenHash
+      async forgotPassword(data: forgotDTO) {
+        const { email } = data;
+      
+        const user = await this.userRepo.findByEmail(email);
+
+        if (!user) {
+          return { message: "If this email exists, we have sent a reset link" };
+        }
+
+        const resetToken = await this.tokenService.generateAccessToken({
+          email,
+          type: "reset",
         });
-        if (!tokenRow) {
-            return; // silent logout (recommended)
-        }
-        await RefreshTokenTable.update(
-            { revoked: true },
-            { token_hash: tokenHash }
+
+        await this.cacheService.set(
+          `forgot:${email}`,
+          resetToken,
+          900
         );
-    }
+
+        const resetLink = `${env.Frontend_Url}/reset/${resetToken}`;
+      
+        // 5️⃣ Publish email event
+        await this.messageBroker.publish("send-mail", {
+          to: email,
+          subject: "RESET YOUR PASSWORD - HireHeaven",
+          html: emailTemp(resetLink),
+        });
+      
+        return {
+          message: "If this email exists, we have sent a reset link",
+        };
+      }
+
+      async resetPassword(data: ResetDTO) {
+        const { token, password } = data;
+      
+        // 1️⃣ Verify token
+        const decoded = await this.tokenService.verify(token);
+      
+        if (!decoded || decoded.type !== "reset") {
+          throw new AppError("Invalid or expired token", 400);
+        }
+        const email = decoded.email;
+        const storedToken = await this.cacheService.get(`forgot:${email}`);
+        if (!storedToken || storedToken !== token) {
+          throw new AppError("Invalid or expired token", 400);
+        }
+        const user = await this.userRepo.findByEmail(email);
+        if (!user) {
+          throw new AppError("User not found", 404);
+        }
+        const hashedPassword = await this.passwordService.hash(password);
+  
+        await this.userRepo.update(
+          user.user_id,
+          { password: hashedPassword }
+        );
+      
+        await this.cacheService.delete(`forgot:${email}`);
+      
+        return {
+          message: "Your password has been updated.",
+        };
+      }
+
+      async refreshToken(data: {
+        refreshToken: string;
+        deviceInfo: DeviceInfo;
+        userAgent: string;
+      }) {
+        const { refreshToken, deviceInfo, userAgent } = data;
+      
+        // 1️⃣ Hash incoming refresh token
+        const tokenHash = this.tokenService.hashToken(refreshToken);
+      
+        // 2️⃣ Find stored token for this device
+        const tokenRow = await this.refreshRepo.find({
+          token_hash: tokenHash,
+          device_type: deviceInfo.deviceType,
+          user_agent: userAgent,
+        });
+      
+        if (!tokenRow) {
+          throw new AppError("Invalid refresh token", 401);
+        }
+      
+        if (tokenRow.revoked) {
+          throw new AppError("Invalid refresh token", 401);
+        }
+      
+        if (new Date() > tokenRow.expires_at) {
+          throw new AppError("Invalid refresh token", 401);
+        }
+      
+        // 3️⃣ Generate new access token
+        const accessToken = await this.tokenService.generateAccessToken({
+          userId: tokenRow.user_id,
+        });
+      
+        // 4️⃣ Rotate refresh token
+        const newRefreshToken = this.tokenService.generateRefreshToken();
+        const newTokenHash = this.tokenService.hashToken(newRefreshToken);
+      
+        const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      
+        await this.refreshRepo.update(
+          {
+            token_hash: tokenHash,
+            device_type: deviceInfo.deviceType,
+            user_agent: userAgent,
+          },
+          {
+            token_hash: newTokenHash,
+            expires_at: newExpiry,
+            revoked: false,
+          }
+        );
+      
+        return {
+          accessToken,
+          refreshToken: newRefreshToken,
+        };
+      }
+
+      async logout(refreshToken: string) {
+        const tokenHash = this.tokenService.hashToken(refreshToken);
+      
+        const tokenRow = await this.refreshRepo.find({
+          token_hash: tokenHash,
+        });
+      
+        if (!tokenRow) {
+          return; // silent logout
+        }
+      
+        await this.refreshRepo.update(
+          { token_hash: tokenHash },
+          { revoked: true }
+        );
+      }
 }
 
-export class CreateUser {
-    static async createUser(payload: { bodyData: RegisterDTO, fileData: Express.Multer.File }) {
-        if (payload.bodyData.role === "recruiter") {
-            const [recruiterUser] = await UsersInsertions.insertRecruiter(payload.bodyData as RegisterDTO);
-            return recruiterUser;
-        }
-        else if (payload.bodyData.role === "jobseeker") {
-            const file = payload.fileData;
-            if (!file) {
-                throw new AppError(`Resume file is required for Job Seekers`, 400);
-            }
-            //getBuffer data of file
-            let fileBuffer = getBuffer(file);
-            if (!fileBuffer || !fileBuffer.content) {
-                throw new AppError(`Failed to generate file buffer`, 500);
-            }
-
-            const { data } = await upload.uploadFile(fileBuffer);
-            const insertData = {
-                ...payload.bodyData,
-                file: data.url,
-                resumePublicId: data.public_id
-            }
-            const [jobseekerUser] = await UsersInsertions.insertJobSeeker(insertData as RegisterDTO);
-            return jobseekerUser
-        }
-    }
-}

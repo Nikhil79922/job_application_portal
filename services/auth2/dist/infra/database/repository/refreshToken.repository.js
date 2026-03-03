@@ -1,21 +1,21 @@
 import { sql } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
-import { IRefreshTokenRepository, CreateRefreshTokenDTO } from "../../../domain/interfaces/refreshToken.repository.interface.js";
-
-export class RefreshTokenTable implements IRefreshTokenRepository {
-    private allowedColumns = [
-        "token_id",
-        "user_id",
-        "token_hash",
-        "device",
-        "device_type",
-        "revoked",
-        "user_agent",
-        "expires_at",
-        "created_at"
-    ];
-    async create(data: CreateRefreshTokenDTO) {
-        return await sql`
+export class RefreshTokenTable {
+    constructor() {
+        this.allowedColumns = [
+            "token_id",
+            "user_id",
+            "token_hash",
+            "device",
+            "device_type",
+            "revoked",
+            "user_agent",
+            "expires_at",
+            "created_at"
+        ];
+    }
+    async create(data) {
+        return await sql `
         INSERT INTO refresh_tokens (
           user_id,
           token_hash,
@@ -35,46 +35,31 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
         RETURNING user_id , token_hash , device , device_type , user_agent, revoked , expires_at, created_at
       `;
     }
-
-    async find(
-        conditions: Record<string, any>,
-        selectFields: string[] = ["user_id"]
-    ) {
+    async find(conditions, selectFields = ["user_id"]) {
         const keys = Object.keys(conditions);
-
         if (!keys.length) {
             throw new AppError(`Conditions required`, 400);
         }
-
         selectFields.forEach(field => {
             if (!this.allowedColumns.includes(field)) {
                 throw new AppError(`Invalid select column: ${field}`, 500);
             }
         });
-
         keys.forEach(key => {
             if (!this.allowedColumns.includes(key)) {
                 throw new AppError(`Invalid condition column: ${key}`, 500);
             }
         });
-
-        const clauses = keys.map(
-            (key, index) => `${key} = $${index + 1}`
-        );
+        const clauses = keys.map((key, index) => `${key} = $${index + 1}`);
         const values = Object.values(conditions);
         const query = `
           SELECT ${selectFields.join(", ")}
           FROM refresh_tokens
           WHERE ${clauses.join(" AND ")}
         `;
-
         return await sql.query(query, values);
     }
-
-    async update(
-        conditions: Record<string, any>,
-        data: Record<string, any>
-    ) {
+    async update(conditions, data) {
         const dataKeys = Object.keys(data);
         const conditionKeys = Object.keys(conditions);
         if (!dataKeys.length || !conditionKeys.length) {
@@ -85,23 +70,17 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
                 throw new AppError(`Invalid update column: ${key}`, 500);
             }
         });
-
         conditionKeys.forEach(key => {
             if (!this.allowedColumns.includes(key)) {
                 throw new AppError(`Invalid condition column: ${key}`, 500);
             }
         });
-
         const setClause = dataKeys
             .map((key, index) => `${key} = $${index + 1}`)
             .join(", ");
         const whereClause = conditionKeys
-            .map(
-                (key, index) =>
-                    `${key} = $${index + 1 + dataKeys.length}`
-            )
+            .map((key, index) => `${key} = $${index + 1 + dataKeys.length}`)
             .join(" AND ");
-
         const values = [
             ...Object.values(data),
             ...Object.values(conditions),
@@ -111,6 +90,6 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
     SET ${setClause}
     WHERE ${whereClause}
   `;
-        return await sql.query(query as any, values);
+        return await sql.query(query, values);
     }
 }
