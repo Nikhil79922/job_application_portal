@@ -1,7 +1,7 @@
 import express from 'express'
 import authRouter from './routes/auth.js';
-import errorMiddleware from './middleware/errorMiddleware.js';
-import logger from './middleware/logger.js';
+import errorMiddleware from './shared/middleware/error.middleware.js';
+import logger from './shared/middleware/logger.middleware.js';
 import { connectAdmin } from './library/kafka/admin.js';
 import { KafkaProducer } from './library/kafka/producer.js';
 import { redisClient } from './library/redis/index.js';
@@ -22,7 +22,7 @@ KafkaProducer.connect();
 //Redis connection
 redisClient.connect().then(()=>{
     console.log("✅ connected the Redis server")
-}).catch((err)=>{
+}).catch((err : any)=>{
     console.log('❌ failed to connect to redis',err)
 })
 

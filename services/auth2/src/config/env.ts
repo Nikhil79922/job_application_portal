@@ -4,8 +4,12 @@ dotenv.config();
 
 export const env = {
   PORT: process.env.PORT || 3000,
-  DATABASE_URL: process.env.DATABASE_URL!,
-  REDIS_URL: process.env.REDIS_URL!,
-  JWT_SECRET: process.env.JWT_SECRET!,
+  DATABASE_URL: process.env.DB_URL!,
+  REDIS_URL: process.env.Redis_url!,
+  JWT_SECRET: process.env.SECRET_KEY!,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
+  NODE_ENV: process.env.NODE_ENV,
+  Utils_service: process.env.Utils_service,
+  Kakfa_Broker: process.env.Kakfa_Broker,
+  Frontend_Url: process.env.Frontend_Url,
 };
