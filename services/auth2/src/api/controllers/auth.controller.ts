@@ -60,18 +60,35 @@ export const loginUser = TryCatch(async (req: Request, res: Response) => {
 });
 
 export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
+
   const dto = forgotSchema.parse(req.body);
 
-  const result = await authService.forgotPassword(dto);
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.ip;
 
-  sendResponse(res, 200, "Request processed", result);
+  // rate limit protection
+  await rateLimit.checkForgotPasswordLimit(ip as string, dto.email);
+
+  await authService.forgotPassword(dto);
+
+  // always generic response
+  sendResponse(res, 200, "If the account exists, a reset link has been sent");
 });
 
 export const resetPassword = TryCatch(async (req: Request, res: Response) => {
+
   const dto = ResetSchema.parse({
     ...req.body,
     token: req.params.token,
   });
+
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.ip;
+
+  // Rate limit protection
+  await rateLimit.checkResetPasswordLimit(ip as string);
 
   const result = await authService.resetPassword(dto);
 
@@ -79,11 +96,19 @@ export const resetPassword = TryCatch(async (req: Request, res: Response) => {
 });
 
 export const refreshToken = TryCatch(async (req: Request, res: Response) => {
+
   const oldRefreshToken = req.cookies.refreshToken;
 
   if (!oldRefreshToken) {
     throw new AppError("Refresh token missing", 401);
   }
+
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.ip;
+
+  // Rate limit refresh attempts
+  await rateLimit.checkRefreshLimit(ip as string);
 
   const result = await authService.refreshToken({
     refreshToken: oldRefreshToken,
@@ -99,13 +124,12 @@ export const refreshToken = TryCatch(async (req: Request, res: Response) => {
 });
 
 export const logout = TryCatch(async (req: Request, res: Response) => {
+
   const refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) {
-    throw new AppError("Refresh token missing", 401);
+  if (refreshToken) {
+    await authService.logout(refreshToken);
   }
-
-  await authService.logout(refreshToken);
 
   clearRefreshCookie(res);
 

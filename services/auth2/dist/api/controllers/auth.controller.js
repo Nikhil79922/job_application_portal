@@ -42,14 +42,23 @@ export const loginUser = TryCatch(async (req, res) => {
 });
 export const forgotPassword = TryCatch(async (req, res) => {
     const dto = forgotSchema.parse(req.body);
-    const result = await authService.forgotPassword(dto);
-    sendResponse(res, 200, "Request processed", result);
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.ip;
+    // rate limit protection
+    await rateLimit.checkForgotPasswordLimit(ip, dto.email);
+    await authService.forgotPassword(dto);
+    // always generic response
+    sendResponse(res, 200, "If the account exists, a reset link has been sent");
 });
 export const resetPassword = TryCatch(async (req, res) => {
     const dto = ResetSchema.parse({
         ...req.body,
         token: req.params.token,
     });
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.ip;
+    // Rate limit protection
+    await rateLimit.checkResetPasswordLimit(ip);
     const result = await authService.resetPassword(dto);
     sendResponse(res, 200, "Password reset successful", result);
 });
@@ -58,6 +67,10 @@ export const refreshToken = TryCatch(async (req, res) => {
     if (!oldRefreshToken) {
         throw new AppError("Refresh token missing", 401);
     }
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.ip;
+    // Rate limit refresh attempts
+    await rateLimit.checkRefreshLimit(ip);
     const result = await authService.refreshToken({
         refreshToken: oldRefreshToken,
         deviceInfo: req.deviceInfo,
@@ -70,10 +83,9 @@ export const refreshToken = TryCatch(async (req, res) => {
 });
 export const logout = TryCatch(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        throw new AppError("Refresh token missing", 401);
+    if (refreshToken) {
+        await authService.logout(refreshToken);
     }
-    await authService.logout(refreshToken);
     clearRefreshCookie(res);
     sendResponse(res, 200, "Logged out successfully");
 });

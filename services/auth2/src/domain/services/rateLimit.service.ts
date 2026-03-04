@@ -47,4 +47,67 @@ export class RateLimitService {
       );
     }
   }
+
+  async checkForgotPasswordLimit(ip: string, email: string) {
+
+    const ipAttempts = await this.cache.increment(
+      `forgot:ip:${ip}`,
+      300 // 5 minutes
+    );
+  
+    if (ipAttempts > 10) {
+      throw new AppError("Too many requests", 429);
+    }
+  
+    const cooldown = await this.cache.increment(
+        `forgot:cooldown:${email}`,
+        60
+      );
+      
+      if (cooldown > 1) {
+        throw new AppError("Please wait before requesting again", 429);
+      }
+
+    const emailAttempts = await this.cache.increment(
+      `forgot:email:${email}`,
+      900 // 15 minutes
+    );
+  
+    if (emailAttempts > 3) {
+      throw new AppError(
+        "Password reset already requested recently",
+        429
+      );
+    }
+  }
+
+  async checkResetPasswordLimit(ip: string) {
+
+    const attempts = await this.cache.increment(
+      `reset:ip:${ip}`,
+      300 // 5 minutes
+    );
+  
+    if (attempts > 5) {
+      throw new AppError(
+        "Too many reset attempts. Please try again later.",
+        429
+      );
+    }
+  }
+
+  async checkRefreshLimit(ip: string) {
+
+    const attempts = await this.cache.increment(
+      `refresh:ip:${ip}`,
+      60 // 1 minute
+    );
+  
+    if (attempts > 20) {
+      throw new AppError(
+        "Too many token refresh attempts. Try again later.",
+        429
+      );
+    }
+  }
 }
