@@ -5,14 +5,17 @@ import {IPasswordService} from "../../domain/interfaces/password.service.interfa
 import {ITokenService} from "../../domain/interfaces/token.service.interface.js";
 import {ICacheService} from "../../domain/interfaces/cache.interface.js";
 import {IMessageBroker} from "../../domain/interfaces/message-broker.interface.js";
+import { IUploadFile } from "../interfaces/uploadFile.interface.js";
 import { RegisterDTO } from "../../api/dtos/authResgister.schema.js";
-import { IDeviceService } from "../../domain/interfaces/deviceInfo.interface.js";
+// import { IDeviceService } from "../../domain/interfaces/deviceInfo.interface.js";
 import { LoginDTO } from "../../api/dtos/authLogin.schema.js";
 import { forgotDTO } from "../../api/dtos/authForgot.schema copy.js";
 import { env } from "../../config/env.js";
 import { emailTemp } from '../../shared/utils/emailTemplate.js';
 import { ResetDTO } from "../../api/dtos/authReset.schema copy.js";
 import { DeviceInfo } from "./device.service.js";
+import getBuffer from "../../shared/utils/buffer.js";
+import uploadFile from "../../config/multer.config.js";
   
 export class Auth {
 
@@ -23,7 +26,8 @@ export class Auth {
         private tokenService: ITokenService,
         private cacheService: ICacheService,
         private messageBroker: IMessageBroker,
-        private deviceInfo: IDeviceService
+        private fileUpload: IUploadFile
+        // private deviceInfo: IDeviceService
       ) {}
       async register(data: {
         body: RegisterDTO;
@@ -31,7 +35,7 @@ export class Auth {
         deviceInfo: DeviceInfo;
         userAgent: string;
       }) {
-        const { body, deviceInfo, userAgent } = data;
+        const { body, file, deviceInfo, userAgent } = data;
       
         const existingUser = await this.userRepo.findByEmail(body.email);
       
@@ -41,20 +45,42 @@ export class Auth {
       
         const hashedPassword = await this.passwordService.hash(body.password);
       
-        const bodyData: RegisterDTO = {
+        let bodyData: RegisterDTO = {
           ...body,
           password: hashedPassword,
         };
-
+      
+        // Upload resume only for jobseekers
+        if (body.role === "jobseeker") {
+          if (!file) {
+            throw new AppError("Resume file is required for job seekers", 400);
+          }
+      
+          const fileBuffer = getBuffer(file);
+      
+          if (!fileBuffer || !fileBuffer.content) {
+            throw new AppError("Failed to generate file buffer", 500);
+          }
+      
+          const uploadResult = await this.fileUpload.uploadFile(fileBuffer);
+      
+          if (!uploadResult?.data?.url || !uploadResult?.data?.public_id) {
+            throw new AppError("File upload failed", 500);
+          }
+      
+          bodyData.file = uploadResult.data.url;
+          bodyData.resumePublicId = uploadResult.data.public_id;
+        }
+      
         const registeredUser = await this.userRepo.create(bodyData);
-
+      
         const accessToken = await this.tokenService.generateAccessToken({
           userId: registeredUser.user_id,
         });
       
         const rawRefreshToken = this.tokenService.generateRefreshToken();
         const tokenHash = this.tokenService.hashToken(rawRefreshToken);
-
+      
         await this.refreshRepo.create({
           user_id: registeredUser.user_id,
           token_hash: tokenHash,
@@ -164,7 +190,6 @@ export class Auth {
 
         const resetLink = `${env.Frontend_Url}/reset/${resetToken}`;
       
-        // 5️⃣ Publish email event
         await this.messageBroker.publish("send-mail", {
           to: email,
           subject: "RESET YOUR PASSWORD - HireHeaven",
@@ -178,8 +203,7 @@ export class Auth {
 
       async resetPassword(data: ResetDTO) {
         const { token, password } = data;
-      
-        // 1️⃣ Verify token
+
         const decoded = await this.tokenService.verify(token);
       
         if (!decoded || decoded.type !== "reset") {
@@ -214,11 +238,8 @@ export class Auth {
         userAgent: string;
       }) {
         const { refreshToken, deviceInfo, userAgent } = data;
-      
-        // 1️⃣ Hash incoming refresh token
         const tokenHash = this.tokenService.hashToken(refreshToken);
       
-        // 2️⃣ Find stored token for this device
         const tokenRow = await this.refreshRepo.find({
           token_hash: tokenHash,
           device_type: deviceInfo.deviceType,
@@ -236,13 +257,11 @@ export class Auth {
         if (new Date() > tokenRow.expires_at) {
           throw new AppError("Invalid refresh token", 401);
         }
-      
-        // 3️⃣ Generate new access token
+
         const accessToken = await this.tokenService.generateAccessToken({
           userId: tokenRow.user_id,
         });
-      
-        // 4️⃣ Rotate refresh token
+
         const newRefreshToken = this.tokenService.generateRefreshToken();
         const newTokenHash = this.tokenService.hashToken(newRefreshToken);
       

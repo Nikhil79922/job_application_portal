@@ -1,27 +1,46 @@
 import AppError from "../../shared/errors/AppError.js";
 import { env } from "../../config/env.js";
 import { emailTemp } from '../../shared/utils/emailTemplate.js';
+import getBuffer from "../../shared/utils/buffer.js";
 export class Auth {
-    constructor(userRepo, refreshRepo, passwordService, tokenService, cacheService, messageBroker, deviceInfo) {
+    constructor(userRepo, refreshRepo, passwordService, tokenService, cacheService, messageBroker, fileUpload
+    // private deviceInfo: IDeviceService
+    ) {
         this.userRepo = userRepo;
         this.refreshRepo = refreshRepo;
         this.passwordService = passwordService;
         this.tokenService = tokenService;
         this.cacheService = cacheService;
         this.messageBroker = messageBroker;
-        this.deviceInfo = deviceInfo;
+        this.fileUpload = fileUpload;
     }
     async register(data) {
-        const { body, deviceInfo, userAgent } = data;
+        const { body, file, deviceInfo, userAgent } = data;
         const existingUser = await this.userRepo.findByEmail(body.email);
         if (existingUser) {
             throw new AppError("User with this email already exists", 409);
         }
         const hashedPassword = await this.passwordService.hash(body.password);
-        const bodyData = {
+        let bodyData = {
             ...body,
             password: hashedPassword,
         };
+        // Upload resume only for jobseekers
+        if (body.role === "jobseeker") {
+            if (!file) {
+                throw new AppError("Resume file is required for job seekers", 400);
+            }
+            const fileBuffer = getBuffer(file);
+            if (!fileBuffer || !fileBuffer.content) {
+                throw new AppError("Failed to generate file buffer", 500);
+            }
+            const uploadResult = await this.fileUpload.uploadFile(fileBuffer);
+            if (!uploadResult?.data?.url || !uploadResult?.data?.public_id) {
+                throw new AppError("File upload failed", 500);
+            }
+            bodyData.file = uploadResult.data.url;
+            bodyData.resumePublicId = uploadResult.data.public_id;
+        }
         const registeredUser = await this.userRepo.create(bodyData);
         const accessToken = await this.tokenService.generateAccessToken({
             userId: registeredUser.user_id,
@@ -104,7 +123,6 @@ export class Auth {
         });
         await this.cacheService.set(`forgot:${email}`, resetToken, 900);
         const resetLink = `${env.Frontend_Url}/reset/${resetToken}`;
-        // 5️⃣ Publish email event
         await this.messageBroker.publish("send-mail", {
             to: email,
             subject: "RESET YOUR PASSWORD - HireHeaven",
@@ -116,7 +134,6 @@ export class Auth {
     }
     async resetPassword(data) {
         const { token, password } = data;
-        // 1️⃣ Verify token
         const decoded = await this.tokenService.verify(token);
         if (!decoded || decoded.type !== "reset") {
             throw new AppError("Invalid or expired token", 400);
@@ -139,9 +156,7 @@ export class Auth {
     }
     async refreshToken(data) {
         const { refreshToken, deviceInfo, userAgent } = data;
-        // 1️⃣ Hash incoming refresh token
         const tokenHash = this.tokenService.hashToken(refreshToken);
-        // 2️⃣ Find stored token for this device
         const tokenRow = await this.refreshRepo.find({
             token_hash: tokenHash,
             device_type: deviceInfo.deviceType,
@@ -156,11 +171,9 @@ export class Auth {
         if (new Date() > tokenRow.expires_at) {
             throw new AppError("Invalid refresh token", 401);
         }
-        // 3️⃣ Generate new access token
         const accessToken = await this.tokenService.generateAccessToken({
             userId: tokenRow.user_id,
         });
-        // 4️⃣ Rotate refresh token
         const newRefreshToken = this.tokenService.generateRefreshToken();
         const newTokenHash = this.tokenService.hashToken(newRefreshToken);
         const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
