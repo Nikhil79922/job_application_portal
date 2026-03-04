@@ -1,6 +1,11 @@
 import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
-import { authService } from "../../containers/authService.container.js";
+import { authRefreshService } from "../../containers/auth/refreshToken.container.js";
+import { authLoginService } from "../../containers/auth/login.container.js";
+import { authRegisterService } from "../../containers/auth/register.container.js";
+import { authResetService } from "../../containers/auth/reset.container.js";
+import { authLogoutService } from "../../containers/auth/logout.container.js";
+import { authForgotPasswordService } from "../../containers/auth/forgotPassword.container.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js";
 import { forgotSchema } from "../dtos/authForgot.schema copy.js";
@@ -16,7 +21,7 @@ export const registerUser = TryCatch(async (req, res) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
         req.ip;
     await rateLimit.checkRegisterLimit(ip, dto.email);
-    const result = await authService.register({
+    const result = await authRegisterService.register({
         body: dto,
         file: req.file,
         deviceInfo: req.deviceInfo,
@@ -31,7 +36,7 @@ export const loginUser = TryCatch(async (req, res) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
         req.ip;
     await rateLimit.checkLoginLimit(ip, dto.email);
-    const result = await authService.login({
+    const result = await authLoginService.login({
         dto,
         deviceInfo: req.deviceInfo,
         userAgent: req.userAgentString,
@@ -46,7 +51,7 @@ export const forgotPassword = TryCatch(async (req, res) => {
         req.ip;
     // rate limit protection
     await rateLimit.checkForgotPasswordLimit(ip, dto.email);
-    await authService.forgotPassword(dto);
+    await authForgotPasswordService.forgotPassword(dto);
     // always generic response
     sendResponse(res, 200, "If the account exists, a reset link has been sent");
 });
@@ -59,7 +64,7 @@ export const resetPassword = TryCatch(async (req, res) => {
         req.ip;
     // Rate limit protection
     await rateLimit.checkResetPasswordLimit(ip);
-    const result = await authService.resetPassword(dto);
+    const result = await authResetService.resetPassword(dto);
     sendResponse(res, 200, "Password reset successful", result);
 });
 export const refreshToken = TryCatch(async (req, res) => {
@@ -71,7 +76,7 @@ export const refreshToken = TryCatch(async (req, res) => {
         req.ip;
     // Rate limit refresh attempts
     await rateLimit.checkRefreshLimit(ip);
-    const result = await authService.refreshToken({
+    const result = await authRefreshService.refreshToken({
         refreshToken: oldRefreshToken,
         deviceInfo: req.deviceInfo,
         userAgent: req.userAgentString,
@@ -84,7 +89,7 @@ export const refreshToken = TryCatch(async (req, res) => {
 export const logout = TryCatch(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
-        await authService.logout(refreshToken);
+        await authLogoutService.logout(refreshToken);
     }
     clearRefreshCookie(res);
     sendResponse(res, 200, "Logged out successfully");

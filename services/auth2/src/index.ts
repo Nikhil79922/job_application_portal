@@ -4,6 +4,7 @@ import { SkillsModel } from './infra/database/models/skill.model.js';
 import { UserSkillsModel } from './infra/database/models/userSkills.model.js';
 import { RefreshTokenModel } from './infra/database/models/refreshToken.model.js';
 import { env } from './config/env.js';
+import { startRefreshTokenCleanup } from './shared/job/refreshTokenCleanUp.cronJob.js';
 
 let port = env.PORT
 
@@ -34,5 +35,8 @@ async function initDB() {
 initDB().then(() => {
     app.listen(port, () => {
         console.log(`Auth Server is Listening at Port ${port}`)
+
+//Cron Clean Up 
+startRefreshTokenCleanup()
     })
 })

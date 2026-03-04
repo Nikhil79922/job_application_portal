@@ -92,4 +92,16 @@ export class RefreshTokenTable {
   `;
         return await sql.query(query, values);
     }
+    async count(conditions) {
+        const keys = Object.keys(conditions);
+        const clauses = keys.map((key, index) => `${key} = $${index + 1}`);
+        const values = Object.values(conditions);
+        const query = `
+          SELECT COUNT(*) as count
+          FROM refresh_tokens
+          WHERE ${clauses.join(" AND ")}
+        `;
+        const result = await sql.query(query, values);
+        return Number(result.rows[0].count);
+    }
 }

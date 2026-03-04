@@ -11,4 +11,5 @@ export interface IRefreshTokenRepository {
     create(data:CreateRefreshTokenDTO): Promise<any>,
     find(conditions: Record<string, any>, selectFields?: string[]):Promise<any | null>;
     update(conditions: Record<string, any>, data: Record<string, any>):Promise<any>;
+    count(conditions: Record<string, any>):Promise<any>;
 }

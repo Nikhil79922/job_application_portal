@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
-import { authService } from "../../containers/authService.container.js";
+import { authRefreshService } from "../../containers/auth/refreshToken.container.js";
+import { authLoginService } from "../../containers/auth/login.container.js";
+import { authRegisterService } from "../../containers/auth/register.container.js";
+import { authResetService } from "../../containers/auth/reset.container.js";
+import { authLogoutService } from "../../containers/auth/logout.container.js";
+import { authForgotPasswordService } from "../../containers/auth/forgotPassword.container.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js"
 import { forgotSchema } from "../dtos/authForgot.schema copy.js";
@@ -22,7 +27,7 @@ export const registerUser = TryCatch(async (req: Request, res: Response) => {
 
   await rateLimit.checkRegisterLimit(ip as string, dto.email);
 
-  const result = await authService.register({
+  const result = await authRegisterService.register({
     body: dto,
     file: req.file,
     deviceInfo: req.deviceInfo!,
@@ -46,7 +51,7 @@ export const loginUser = TryCatch(async (req: Request, res: Response) => {
 
   await rateLimit.checkLoginLimit(ip as string, dto.email);
 
-  const result = await authService.login({
+  const result = await authLoginService.login({
     dto,
     deviceInfo: req.deviceInfo!,
     userAgent: req.userAgentString!,
@@ -70,7 +75,7 @@ export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
   // rate limit protection
   await rateLimit.checkForgotPasswordLimit(ip as string, dto.email);
 
-  await authService.forgotPassword(dto);
+  await authForgotPasswordService.forgotPassword(dto);
 
   // always generic response
   sendResponse(res, 200, "If the account exists, a reset link has been sent");
@@ -90,7 +95,7 @@ export const resetPassword = TryCatch(async (req: Request, res: Response) => {
   // Rate limit protection
   await rateLimit.checkResetPasswordLimit(ip as string);
 
-  const result = await authService.resetPassword(dto);
+  const result = await authResetService.resetPassword(dto);
 
   sendResponse(res, 200, "Password reset successful", result);
 });
@@ -110,7 +115,7 @@ export const refreshToken = TryCatch(async (req: Request, res: Response) => {
   // Rate limit refresh attempts
   await rateLimit.checkRefreshLimit(ip as string);
 
-  const result = await authService.refreshToken({
+  const result = await authRefreshService.refreshToken({
     refreshToken: oldRefreshToken,
     deviceInfo: req.deviceInfo!,
     userAgent: req.userAgentString!,
@@ -128,7 +133,7 @@ export const logout = TryCatch(async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (refreshToken) {
-    await authService.logout(refreshToken);
+    await authLogoutService.logout(refreshToken);
   }
 
   clearRefreshCookie(res);

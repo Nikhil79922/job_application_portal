@@ -66,11 +66,19 @@ export class Auth {
         const { email, password } = dto;
         const user = await this.userRepo.findByEmail(email);
         if (!user) {
-            throw new AppError("Invalid credentials", 400);
+            throw new AppError("Invalid credentials", 401);
         }
         const isMatch = await this.passwordService.compare(password, user.password);
         if (!isMatch) {
-            throw new AppError("Invalid credentials", 400);
+            throw new AppError("Invalid credentials", 401);
+        }
+        // 🔐 Limit active sessions
+        const sessions = await this.refreshRepo.count({
+            user_id: user.user_id,
+            revoked: false
+        });
+        if (sessions > 10) {
+            throw new AppError("Too many active sessions", 403);
         }
         const accessToken = await this.tokenService.generateAccessToken({
             userId: user.user_id,
@@ -78,32 +86,14 @@ export class Auth {
         const rawRefreshToken = this.tokenService.generateRefreshToken();
         const tokenHash = this.tokenService.hashToken(rawRefreshToken);
         const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        const existingToken = await this.refreshRepo.find({
+        await this.refreshRepo.create({
             user_id: user.user_id,
+            token_hash: tokenHash,
+            device: deviceInfo.device,
             device_type: deviceInfo.deviceType,
             user_agent: userAgent,
+            expires_at: expiryDate,
         });
-        if (existingToken) {
-            await this.refreshRepo.update({
-                user_id: user.user_id,
-                device_type: deviceInfo.deviceType,
-                user_agent: userAgent,
-            }, {
-                token_hash: tokenHash,
-                expires_at: expiryDate,
-                revoked: false,
-            });
-        }
-        else {
-            await this.refreshRepo.create({
-                user_id: user.user_id,
-                token_hash: tokenHash,
-                device: deviceInfo.device,
-                device_type: deviceInfo.deviceType,
-                user_agent: userAgent,
-                expires_at: expiryDate,
-            });
-        }
         const { password: _, ...safeUser } = user;
         return {
             user: safeUser,
@@ -159,8 +149,6 @@ export class Auth {
         const tokenHash = this.tokenService.hashToken(refreshToken);
         const tokenRow = await this.refreshRepo.find({
             token_hash: tokenHash,
-            device_type: deviceInfo.deviceType,
-            user_agent: userAgent,
         });
         if (!tokenRow) {
             throw new AppError("Invalid refresh token", 401);
@@ -171,16 +159,18 @@ export class Auth {
         if (new Date() > tokenRow.expires_at) {
             throw new AppError("Invalid refresh token", 401);
         }
+        const user = await this.userRepo.findById(tokenRow.user_id);
+        if (!user) {
+            throw new AppError("Invalid refresh token", 401);
+        }
         const accessToken = await this.tokenService.generateAccessToken({
-            userId: tokenRow.user_id,
+            userId: user.user_id,
         });
         const newRefreshToken = this.tokenService.generateRefreshToken();
         const newTokenHash = this.tokenService.hashToken(newRefreshToken);
         const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
         await this.refreshRepo.update({
             token_hash: tokenHash,
-            device_type: deviceInfo.deviceType,
-            user_agent: userAgent,
         }, {
             token_hash: newTokenHash,
             expires_at: newExpiry,
