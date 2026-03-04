@@ -2,25 +2,14 @@ import { z } from "zod";
 
 export const forgotSchema = z
   .object({
-    email: z.any(),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(1, "Email is required")
+      .email("Invalid email format")
+      .max(254, "Email is too long"),
   })
-  .strict() // THIS IS THE UPDATE
-  .superRefine((data, ctx) => {
-    // 🔴 EMAIL
-    if (data.email === undefined) {
-      ctx.addIssue({
-        path: ["email"],
-        message: "Missing field: email is required",
-        code: z.ZodIssueCode.custom,
-      });
-    } else if (typeof data.email !== "string") {
-      ctx.addIssue({
-        path: ["email"],
-        message: "Invalid data type: email must be a string",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-  });
+  .strict();
 
-// DTO
 export type forgotDTO = z.infer<typeof forgotSchema>;

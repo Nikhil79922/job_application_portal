@@ -1,17 +1,21 @@
 import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
-import { authService } from "../../container.js";
+import { authService } from "../../containers/authService.container.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js";
 import { forgotSchema } from "../dtos/authForgot.schema copy.js";
 import { ResetSchema } from "../dtos/authReset.schema copy.js";
 import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
+import { rateLimit } from "../../containers/rateLimiting.container.js";
 export const registerUser = TryCatch(async (req, res) => {
     const dto = registerSchema.parse({
         ...req.body,
         file: req.file,
     });
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.ip;
+    await rateLimit.checkRegisterLimit(ip, dto.email);
     const result = await authService.register({
         body: dto,
         file: req.file,
@@ -24,6 +28,9 @@ export const registerUser = TryCatch(async (req, res) => {
 });
 export const loginUser = TryCatch(async (req, res) => {
     const dto = loginSchema.parse(req.body);
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.ip;
+    await rateLimit.checkLoginLimit(ip, dto.email);
     const result = await authService.login({
         dto,
         deviceInfo: req.deviceInfo,

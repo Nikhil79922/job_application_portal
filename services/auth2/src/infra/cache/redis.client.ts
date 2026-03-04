@@ -39,4 +39,18 @@ export class RedisCacheService implements ICacheService {
       throw new AppError("Redis DEL failed", 503);
     }
   }
+
+  async increment(key: string, ttlSeconds: number): Promise<number> {
+    try {
+      const value = await redisClient.incr(key);
+  
+      if (value === 1) {
+        await redisClient.expire(key, ttlSeconds);
+      }
+  
+      return value;
+    } catch {
+      throw new AppError("Redis INCR failed", 503);
+    }
+  }
 }

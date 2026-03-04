@@ -1,46 +1,22 @@
 import { z } from "zod";
 export const loginSchema = z
     .object({
-    email: z.any(),
-    password: z.any(),
+    email: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .min(1, "Email is required")
+        .email("Invalid email format")
+        .max(254, "Email is too long"),
+    password: z
+        .string()
+        .trim()
+        .min(1, "Password is required")
+        .min(8, "Password must be at least 8 characters")
+        .max(72, "Password must not exceed 72 characters")
+        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+        .regex(/[0-9]/, "Password must contain at least one number")
+        .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
 })
-    .strict() // THIS IS THE UPDATE
-    .superRefine((data, ctx) => {
-    // 🔴 EMAIL
-    if (data.email === undefined) {
-        ctx.addIssue({
-            path: ["email"],
-            message: "Missing field: email is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.email !== "string") {
-        ctx.addIssue({
-            path: ["email"],
-            message: "Invalid data type: email must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔴 PASSWORD
-    if (data.password === undefined) {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Missing field: password is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.password !== "string") {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Invalid data type: password must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (data.password.length < 8) {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Invalid value: password must be at least 8 characters",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-});
+    .strict();

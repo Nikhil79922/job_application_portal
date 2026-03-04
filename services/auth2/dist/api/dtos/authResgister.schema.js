@@ -1,119 +1,58 @@
 import { z } from "zod";
 export const registerSchema = z
     .object({
-    name: z.any(),
-    email: z.any(),
-    password: z.any(),
-    phoneNumber: z.any(),
-    role: z.any(),
-    bio: z.any().optional(),
+    name: z
+        .string()
+        .trim()
+        .min(1, "Name is required")
+        .min(2, "Name must be at least 2 characters")
+        .max(100, "Name is too long"),
+    email: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .min(1, "Email is required")
+        .email("Invalid email format")
+        .max(254, "Email is too long"),
+    password: z
+        .string()
+        .trim()
+        .min(1, "Password is required")
+        .min(8, "Password must be at least 8 characters")
+        .max(72, "Password must not exceed 72 characters")
+        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+        .regex(/[0-9]/, "Password must contain at least one number")
+        .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    phoneNumber: z
+        .string()
+        .trim()
+        .min(1, "Phone number is required")
+        .regex(/^[0-9]{10,15}$/, "Invalid phone number"),
+    role: z.enum(["jobseeker", "recruiter"]),
+    bio: z
+        .string()
+        .trim()
+        .max(500, "Bio must be less than 500 characters")
+        .optional(),
     file: z.any().optional(),
-    resumePublicId: z.any().optional(),
+    resumePublicId: z.string().optional(),
 })
-    .strict() // THIS IS THE UPDATE
+    .strict()
     .superRefine((data, ctx) => {
-    if (data.name === undefined) {
-        ctx.addIssue({
-            path: ["name"],
-            message: "Missing field: name is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.name !== "string") {
-        ctx.addIssue({
-            path: ["name"],
-            message: "Invalid data type: name must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔴 EMAIL
-    if (data.email === undefined) {
-        ctx.addIssue({
-            path: ["email"],
-            message: "Missing field: email is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.email !== "string") {
-        ctx.addIssue({
-            path: ["email"],
-            message: "Invalid data type: email must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔴 PASSWORD
-    if (data.password === undefined) {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Missing field: password is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.password !== "string") {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Invalid data type: password must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (data.password.length < 8) {
-        ctx.addIssue({
-            path: ["password"],
-            message: "Invalid value: password must be at least 8 characters",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔴 PHONE NUMBER
-    if (data.phoneNumber === undefined) {
-        ctx.addIssue({
-            path: ["phoneNumber"],
-            message: "Missing field: phoneNumber is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.phoneNumber !== "string") {
-        ctx.addIssue({
-            path: ["phoneNumber"],
-            message: "Invalid data type: phoneNumber must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔴 ROLE
-    if (data.role === undefined) {
-        ctx.addIssue({
-            path: ["role"],
-            message: "Missing field: role is required",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (typeof data.role !== "string") {
-        ctx.addIssue({
-            path: ["role"],
-            message: "Invalid data type: role must be a string",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    else if (!["jobseeker", "recruiter"].includes(data.role)) {
-        ctx.addIssue({
-            path: ["role"],
-            message: "Invalid value: role must be jobseeker or recruiter",
-            code: z.ZodIssueCode.custom,
-        });
-    }
-    // 🔥 JOBSEEKER-SPECIFIC RULES
     if (data.role === "jobseeker") {
         if (!data.bio) {
             ctx.addIssue({
                 path: ["bio"],
-                message: "Missing field: bio is required for jobseeker",
                 code: z.ZodIssueCode.custom,
+                message: "Bio is required for jobseekers",
             });
         }
         if (!data.file) {
             ctx.addIssue({
                 path: ["file"],
-                message: "Missing field: file is required for jobseeker",
                 code: z.ZodIssueCode.custom,
+                message: "Resume file is required for jobseekers",
             });
         }
     }

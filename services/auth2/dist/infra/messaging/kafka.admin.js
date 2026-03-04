@@ -15,6 +15,7 @@ export class KafkaAdmin {
             try {
                 const admin = kafka.admin();
                 await admin.connect();
+                console.log("✅ Kafka Admin connected");
                 const topics = await admin.listTopics();
                 if (!topics.includes(this.SEND_MAIL_TOPIC)) {
                     await admin.createTopics({

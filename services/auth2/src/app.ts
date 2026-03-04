@@ -6,7 +6,8 @@ import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
 
 // IMPORTANT: this ensures container initializes
-import "./container.js";
+import "./containers/authService.container.js";
+import './containers/rateLimiting.container.js'
 
 const app = express();
 
