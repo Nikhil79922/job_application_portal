@@ -1,25 +1,22 @@
-import express from 'express';
-import authRouter from './routes/auth.js';
-import errorMiddleware from './middleware/errorMiddleware.js';
-import logger from './middleware/logger.js';
-import { connectAdmin } from './library/kafka/admin.js';
-import { KafkaProducer } from './library/kafka/producer.js';
-import { redisClient } from './library/redis/index.js';
+import express from "express";
 import cookieParser from "cookie-parser";
+import authRouter from "./api/routes/auth.routes.js";
+import errorMiddleware from "./shared/middleware/error.middleware.js";
+import logger from "./shared/middleware/logger.middleware.js";
+// IMPORTANT: this ensures container initializes
+import "./containers/InfraConnect.container.js";
+import './containers/rateLimiting.container.js';
+import './containers/auth/login.container.js';
+import './containers/auth/logout.container.js';
+import './containers/auth/refreshToken.container.js';
+import './containers/auth/register.container.js';
+import './containers/auth/reset.container.js';
 const app = express();
-//global Route Logs logger.
 app.use(logger);
 app.use(express.json());
 app.use(cookieParser());
-//Kafka Admin and Prodcuer
-connectAdmin();
-KafkaProducer.connect();
-//Redis connection
-redisClient.connect().then(() => {
-    console.log("✅ connected the Redis server");
-}).catch((err) => {
-    console.log('❌ failed to connect to redis', err);
-});
-app.use('/api/auth', authRouter);
-app.use(errorMiddleware); //global Error.
+// Routes
+app.use("/api/auth", authRouter);
+// Global error handler
+app.use(errorMiddleware);
 export default app;

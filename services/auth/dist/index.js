@@ -1,19 +1,23 @@
 import app from './app.js';
-import dotenv from 'dotenv';
-import { UserModel } from './models/users/usersTable.js';
-import { SkillsModel } from './models/skills/skillsTable.js';
-import { UserSkillsModel } from './models/user_skills/user_skillsTable.js';
-import { RefreshTokenModel } from './models/refresh_token/refresh_tokenTable.js';
-dotenv.config();
-let port = process.env.PORT;
+import { UserModel } from './infra/database/models/user.model.js';
+import { SkillsModel } from './infra/database/models/skill.model.js';
+import { UserSkillsModel } from './infra/database/models/userSkills.model.js';
+import { RefreshTokenModel } from './infra/database/models/refreshToken.model.js';
+import { env } from './config/env.js';
+import { startRefreshTokenCleanup } from './shared/job/refreshTokenCleanUp.cronJob.js';
+let port = env.PORT;
+const users = new UserModel();
+const skills = new SkillsModel();
+const userSkills = new UserSkillsModel();
+const refreshToken = new RefreshTokenModel();
 //DB
 async function initDB() {
     try {
-        await UserModel.createRoleEnum();
-        await UserModel.createTable();
-        await SkillsModel.createTable();
-        await UserSkillsModel.createTable();
-        await RefreshTokenModel.createTable();
+        await users.createRoleEnum();
+        await users.createTable();
+        await skills.createTable();
+        await userSkills.createTable();
+        await refreshToken.createTable();
         console.log("✅ DataBase initialization successfully done");
     }
     catch (e) {
@@ -24,5 +28,7 @@ async function initDB() {
 initDB().then(() => {
     app.listen(port, () => {
         console.log(`Auth Server is Listening at Port ${port}`);
+        //Cron Clean Up 
+        startRefreshTokenCleanup();
     });
 });

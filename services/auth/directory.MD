@@ -1,7 +1,13 @@
 src/
  ├── app.ts
  ├── server.ts
- ├── config/
+ ├──config/
+         ├── env.ts
+         ├── app.config.ts
+         ├── database.config.ts
+         ├── redis.config.ts
+         ├── kafka.config.ts
+         └── jwt.config.ts
 
  ├── api/
  │   ├── controllers/
