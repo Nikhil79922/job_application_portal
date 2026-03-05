@@ -27,6 +27,10 @@ export class authRefreshToken{
           throw new AppError("Invalid refresh token", 401);
         }
     
+        if (tokenRow.device !== deviceInfo.device) {
+          throw new AppError("Device mismatch", 401);
+        }
+
         if (tokenRow.revoked) {
           throw new AppError("Invalid refresh token", 401);
         }

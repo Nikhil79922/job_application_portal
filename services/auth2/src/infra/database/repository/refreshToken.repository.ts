@@ -133,4 +133,18 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
       
         return Number(result.rows[0].count);
       }
+      async revokeAll(userId: string) {
+
+        if (!userId) {
+          throw new AppError("User ID required", 400);
+        }
+      
+        const query = `
+          UPDATE refresh_tokens
+          SET revoked = true
+          WHERE user_id = $1 AND revoked = false
+        `;
+      
+        return await sql.query(query, [userId]);
+      }
 }

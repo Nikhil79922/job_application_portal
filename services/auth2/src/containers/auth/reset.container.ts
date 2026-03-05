@@ -3,7 +3,6 @@
 import { RedisCacheService } from "../../infra/cache/redis.client.js";
 
 // Services
-import { authRegister } from "../../domain/services/auth/register.service.js";
 import { BcryptPasswordService } from "../../infra/security/password.service.js";
 import { JwtTokenService } from "../../infra/security/token.service.js";
 
@@ -28,4 +27,5 @@ export const authResetService = new authResetPassword(
   tokenService,
   cacheService,
   passwordService,
+  refreshRepo
 );

@@ -213,7 +213,8 @@ export class Auth {
       user.user_id,
       { password: hashedPassword }
     );
-
+    // revoke all sessions
+    await this.refreshRepo.revokeAll(user.user_id);
     await this.cacheService.delete(`forgot:${email}`);
 
     return {
@@ -232,6 +233,9 @@ export class Auth {
     const tokenRow = await this.refreshRepo.find({
       token_hash: tokenHash,
     });
+    if (tokenRow.device !== deviceInfo.device) {
+      throw new AppError("Device mismatch", 401);
+    }
 
     if (!tokenRow) {
       throw new AppError("Invalid refresh token", 401);
