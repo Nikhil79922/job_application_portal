@@ -40,28 +40,37 @@ export class authRegister{
     
         // Upload resume only for jobseekers
         if (body.role === "jobseeker") {
+
           if (!file) {
-            throw new AppError("Resume file is required for job seekers", 400);
+            throw new AppError("Resume file is required", 400);
           }
-    
+          const allowedTypes = ["application/pdf"];
+          if (!allowedTypes.includes(file.mimetype)) {
+            throw new AppError("Only PDF files allowed", 400);
+          }
           const fileBuffer = getBuffer(file);
-    
-          if (!fileBuffer || !fileBuffer.content) {
-            throw new AppError("Failed to generate file buffer", 500);
+        
+          if (!fileBuffer?.content) {
+            throw new AppError("Failed to process file", 500);
           }
-    
+        
           const uploadResult = await this.fileUpload.uploadFile(fileBuffer);
-    
-          if (!uploadResult?.data?.url || !uploadResult?.data?.public_id) {
-            throw new AppError("File upload failed", 500);
+        
+          if (!uploadResult?.data?.url) {
+            throw new AppError("Upload failed", 500);
           }
-    
+        
           bodyData.file = uploadResult.data.url;
           bodyData.resumePublicId = uploadResult.data.public_id;
         }
-    
-        const registeredUser = await this.userRepo.create(bodyData);
-    
+        try {
+          var registeredUser = await this.userRepo.create(bodyData);
+        } catch (error:any) {
+          if (error.code === "23505") {
+            throw new AppError("Email already registered", 409);
+          }
+          throw error;
+        }
         const accessToken = await this.tokenService.generateAccessToken({
           userId: registeredUser.user_id,
         });
