@@ -1,0 +1,14 @@
+import express from "express";
+import {registerUser,loginUser,forgotPassword,resetPassword,refreshToken,logout} from "../controllers/auth.controller.js";
+import uploadFile from "../../config/multer.config.js";
+import { deviceMiddleware } from "../../shared/middleware/device.middleware.js";
+const router = express.Router();
+
+router.post("/register",deviceMiddleware,uploadFile,registerUser);
+router.post("/login",deviceMiddleware,loginUser);
+router.post("/forgotPassword", forgotPassword);
+router.post("/resetPassword/:token", resetPassword);
+router.post("/refreshToken",deviceMiddleware,refreshToken);
+router.post("/logout", logout);
+
+export default router;
