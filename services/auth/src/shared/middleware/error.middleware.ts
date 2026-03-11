@@ -10,14 +10,14 @@ const errorMiddleware = (
 
     // 🔥 ZOD VALIDATION ERRORS
     if (err?.name === "ZodError") {
-      console.log(err)
+      console.log(err.message)
       return res.status(400).json({
         success: false,
         message: err.issues.map((e: { message: any; }) => e.message).join(", "),
       });
     }
   const statusCode = err.statusCode || err.status || 500;
-console.log(err)
+console.log(err.message)
   res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error",

@@ -1,4 +1,4 @@
-import { UserAgentParser } from "../../shared/utils/reqUserAgent.entity.js";
+import { UserAgentParser } from "../utils/reqUserAgent.entity.js";
 import { DeviceService } from "../../domain/services/device.service.js";
 const deviceService = new DeviceService();
 export const deviceMiddleware = (req, _res, next) => {

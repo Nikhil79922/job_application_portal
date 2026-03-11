@@ -1,7 +1,7 @@
 import { LoginDTO } from "../../../api/dtos/authLogin.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { IPasswordService } from "../../interfaces/password.service.interface.js";
-import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository } from "../../interfaces/refreshToken.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
 import { DeviceInfo } from "../device.service.js";

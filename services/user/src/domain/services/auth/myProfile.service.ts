@@ -2,7 +2,7 @@ import { RegisterDTO } from "../../../api/dtos/authResgister.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
 import getBuffer from "../../../shared/utils/buffer.js";
 import { IPasswordService } from "../../interfaces/password.service.interface.js";
-import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository } from "../../interfaces/refreshToken.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUploadFile } from "../../interfaces/uploadFile.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";

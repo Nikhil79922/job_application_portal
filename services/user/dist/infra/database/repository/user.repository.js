@@ -73,7 +73,7 @@ export class PostgresUserRepository {
         `;
         await sql.query(query, values);
     }
-    async getUserWithSkills(email) {
+    async getUserWithSkills(userId) {
         const result = await sql `
             SELECT 
                 u.user_id,
@@ -90,7 +90,7 @@ export class PostgresUserRepository {
             FROM users u
             LEFT JOIN user_skills us ON u.user_id = us.user_id
             LEFT JOIN skills s ON s.skill_id = us.skill_id
-            WHERE u.email = ${email}
+            WHERE u.user_id = ${userId}
             GROUP BY u.user_id
         `;
         return result[0] ?? null;

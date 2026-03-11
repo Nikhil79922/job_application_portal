@@ -2,7 +2,7 @@ import { ResetDTO } from "../../../api/dtos/authReset.schema copy.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { ICacheService } from "../../interfaces/cache.interface.js";
 import { IPasswordService } from "../../interfaces/password.service.interface.js";
-import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository } from "../../interfaces/refreshToken.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
 

@@ -34,7 +34,7 @@ async function initDB() {
 }
 initDB().then(() => {
     app.listen(port, () => {
-        console.log(`Auth Server is Listening at Port ${port}`)
+        console.log(`User    Server is Listening at Port ${port}`)
 
 //Cron Clean Up 
 startRefreshTokenCleanup()

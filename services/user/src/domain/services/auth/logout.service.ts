@@ -1,4 +1,4 @@
-import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository } from "../../interfaces/refreshToken.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 
 export class authLogout{

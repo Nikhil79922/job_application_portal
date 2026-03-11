@@ -1,16 +1,16 @@
 // Infra
-import { RedisCacheService } from "../../infra/cache/redis.client.js";
+import { upload } from "../../infra/storage/fileUpload.js";
 // Services
+import { authRegister } from "../../domain/services/auth/register.service.js";
 import { BcryptPasswordService } from "../../infra/security/password.service.js";
 import { JwtTokenService } from "../../infra/security/token.service.js";
 // Repositories
 import { PostgresUserRepository } from "../../infra/database/repository/user.repository.js";
 import { RefreshTokenTable } from "../../infra/database/repository/refreshToken.repository.js";
-import { authResetPassword } from "../../domain/services/auth/resetPassword.service.js";
-const cacheService = new RedisCacheService();
+const fileUpload = new upload();
 const userRepo = new PostgresUserRepository();
 const refreshRepo = new RefreshTokenTable();
 const passwordService = new BcryptPasswordService();
 const tokenService = new JwtTokenService();
 // const deviceService = new DeviceService();
-export const authResetService = new authResetPassword(userRepo, tokenService, cacheService, passwordService, refreshRepo);
+export const authRegisterService = new authRegister(userRepo, refreshRepo, passwordService, tokenService, fileUpload);

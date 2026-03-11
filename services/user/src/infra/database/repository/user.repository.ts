@@ -2,6 +2,7 @@ import { sql } from "../../../config/database.config.js";
 import type { RegisterDTO } from "../../../api/dtos/authResgister.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { IUserRepository } from "../../../domain/interfaces/user.repository.interface.js";
+import { Users } from "../../../shared/types/user.type.js";
 
 export class PostgresUserRepository implements IUserRepository {
 
@@ -87,7 +88,7 @@ export class PostgresUserRepository implements IUserRepository {
         await sql.query(query, values);
     }
 
-    async getUserWithSkills(email: string) {
+    async getUserWithSkills(userId: string) {
         const result = await sql`
             SELECT 
                 u.user_id,
@@ -104,7 +105,7 @@ export class PostgresUserRepository implements IUserRepository {
             FROM users u
             LEFT JOIN user_skills us ON u.user_id = us.user_id
             LEFT JOIN skills s ON s.skill_id = us.skill_id
-            WHERE u.email = ${email}
+            WHERE u.user_id = ${userId}
             GROUP BY u.user_id
         `;
 

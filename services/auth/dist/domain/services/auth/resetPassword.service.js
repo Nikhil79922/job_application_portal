@@ -1,10 +1,11 @@
 import AppError from "../../../shared/errors/AppError.js";
 export class authResetPassword {
-    constructor(userRepo, tokenService, cacheService, passwordService) {
+    constructor(userRepo, tokenService, cacheService, passwordService, refreshRepo) {
         this.userRepo = userRepo;
         this.tokenService = tokenService;
         this.cacheService = cacheService;
         this.passwordService = passwordService;
+        this.refreshRepo = refreshRepo;
     }
     async resetPassword(data) {
         const { token, password } = data;
@@ -23,6 +24,8 @@ export class authResetPassword {
         }
         const hashedPassword = await this.passwordService.hash(password);
         await this.userRepo.update(user.user_id, { password: hashedPassword });
+        // revoke all sessions
+        await this.refreshRepo.revokeAll(user.user_id);
         await this.cacheService.delete(`forgot:${email}`);
         return {
             message: "Your password has been updated.",

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 export const env = {
-    PORT: process.env.PORT || 5002,
+    PORT: process.env.PORT || 3000,
     DATABASE_URL: process.env.DB_URL,
     REDIS_URL: process.env.Redis_url,
     JWT_SECRET: process.env.SECRET_KEY,

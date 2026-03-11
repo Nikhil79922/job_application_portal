@@ -23,7 +23,7 @@ export class authLogin{
         const { dto, deviceInfo, userAgent } = data;
         const { email, password } = dto;
     
-        const user = await this.userRepo.findByEmail(email);
+        const user = await this.userRepo.getUserWithSkills(email);
     
         if (!user) {
           throw new AppError("Invalid credentials", 401);
@@ -57,6 +57,17 @@ export class authLogin{
     
         const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
     
+// revoke previous token for same device
+await this.refreshRepo.update(
+  {
+    user_id: user.user_id,
+    device: deviceInfo.device,
+    revoked: false
+  },
+  {
+    revoked: true
+  }
+);
         await this.refreshRepo.create({
           user_id: user.user_id,
           token_hash: tokenHash,

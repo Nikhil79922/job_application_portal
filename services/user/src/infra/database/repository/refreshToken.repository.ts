@@ -1,6 +1,6 @@
 import { sql } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
-import { IRefreshTokenRepository, CreateRefreshTokenDTO } from "../../../domain/interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository, CreateRefreshTokenDTO } from "../../../domain/interfaces/refreshToken.interface.js";
 
 export class RefreshTokenTable implements IRefreshTokenRepository {
     private allowedColumns = [

@@ -15,26 +15,37 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
         "created_at"
     ];
     async create(data: CreateRefreshTokenDTO) {
-        return await sql`
-        INSERT INTO refresh_tokens (
-          user_id,
-          token_hash,
-          device,
-          device_type,
-          user_agent,
-          expires_at
-        )
-        VALUES (
-          ${data.user_id},
-          ${data.token_hash},
-          ${data.device},
-          ${data.device_type},
-          ${data.user_agent},
-          ${data.expires_at}
-        )
-        RETURNING user_id , token_hash , device , device_type , user_agent, revoked , expires_at, created_at
-      `;
-    }
+        const result = await sql`
+          INSERT INTO refresh_tokens (
+            user_id,
+            token_hash,
+            device,
+            device_type,
+            user_agent,
+            expires_at
+          )
+          VALUES (
+            ${data.user_id},
+            ${data.token_hash},
+            ${data.device},
+            ${data.device_type},
+            ${data.user_agent},
+            ${data.expires_at}
+          )
+      
+          ON CONFLICT (user_id, device_type, user_agent)
+          DO UPDATE SET
+            token_hash = EXCLUDED.token_hash,
+            device = EXCLUDED.device,
+            revoked = false,
+            expires_at = EXCLUDED.expires_at,
+            created_at = NOW()
+      
+          RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
+        `;
+      
+        return result[0];
+      }
 
     async find(
         conditions: Record<string, any>,
@@ -131,8 +142,9 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
       
         const result = await sql.query(query, values);
       
-        return Number(result.rows[0].count);
+        return Number(result[0].count);
       }
+
       async revokeAll(userId: string) {
 
         if (!userId) {

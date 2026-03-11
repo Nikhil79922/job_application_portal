@@ -1,5 +1,5 @@
 import AppError from "../../../shared/errors/AppError.js";
-import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
+import { IRefreshTokenRepository } from "../../interfaces/refreshToken.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
 import { DeviceInfo } from "../device.service.js";
