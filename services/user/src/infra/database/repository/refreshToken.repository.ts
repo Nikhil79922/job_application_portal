@@ -17,7 +17,7 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
 
     
     async create(data: CreateRefreshTokenDTO) {
-        const result = await sql`          INSERT INTO refresh_tokens (
+        const result = await sql`INSERT INTO refresh_tokens (
             user_id,
             token_hash,
             device,
