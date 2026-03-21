@@ -1,5 +1,4 @@
 import { sql } from "../../../config/database.config.js";
-import type { RegisterDTO } from "../../../api/dtos/authResgister.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { IUserRepository } from "../../../domain/interfaces/user.repository.interface.js";
 import { Users } from "../../../shared/types/user.type.js";
@@ -15,6 +14,8 @@ export class PostgresUserRepository implements IUserRepository {
         "role",
         "bio",
         "resume",
+        "profile_pic",
+        "profile_pic_public_id",
         "created_at"
     ];
 
@@ -30,34 +31,6 @@ export class PostgresUserRepository implements IUserRepository {
             SELECT * FROM users WHERE user_id = ${userId} LIMIT 1
         `;
         return result[0] ?? null;
-    }
-
-    async create(data: RegisterDTO & { role: string }) {
-        const result = await sql`
-            INSERT INTO users (
-                name,
-                email,
-                password,
-                phone_number,
-                role,
-                bio,
-                resume,
-                resume_public_id
-            )
-            VALUES (
-                ${data.name},
-                ${data.email},
-                ${data.password},
-                ${data.phoneNumber},
-                ${data.role},
-                ${data.bio},
-                ${data.file},
-                ${data.resumePublicId}
-            )
-            RETURNING user_id, name, email, phone_number, role, bio, resume, created_at
-        `;
-
-        return result[0];
     }
 
     async update(userId: string, data: Partial<any>) {
@@ -80,13 +53,18 @@ export class PostgresUserRepository implements IUserRepository {
         const values = [...Object.values(data), userId];
 
         const query = `
-            UPDATE users
-            SET ${setClause}
-            WHERE user_id = $${keys.length + 1}
-        `;
+        UPDATE users
+        SET ${setClause}
+        WHERE user_id = $${keys.length + 1}
+        RETURNING *
+    `;
 
-        await sql.query(query, values);
+    const result:any = await sql.query(query, values);
+    if (result.rowCount === 0) {
+        throw new AppError("User not found", 404);
     }
+    return result[0];
+}
 
     async getUserWithSkills(userId: number) {
         const result = await sql`
@@ -100,6 +78,8 @@ export class PostgresUserRepository implements IUserRepository {
                 u.bio,
                 u.resume,
                 u.resume_public_id,
+                u.profile_pic,
+                u.profile_pic_public_id,
                 u.subscription,
                 ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
             FROM users u

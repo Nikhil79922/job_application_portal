@@ -11,6 +11,8 @@ export class PostgresUserRepository {
             "role",
             "bio",
             "resume",
+            "profile_pic",
+            "profile_pic_public_id",
             "created_at"
         ];
     }
@@ -25,32 +27,6 @@ export class PostgresUserRepository {
             SELECT * FROM users WHERE user_id = ${userId} LIMIT 1
         `;
         return result[0] ?? null;
-    }
-    async create(data) {
-        const result = await sql `
-            INSERT INTO users (
-                name,
-                email,
-                password,
-                phone_number,
-                role,
-                bio,
-                resume,
-                resume_public_id
-            )
-            VALUES (
-                ${data.name},
-                ${data.email},
-                ${data.password},
-                ${data.phoneNumber},
-                ${data.role},
-                ${data.bio},
-                ${data.file},
-                ${data.resumePublicId}
-            )
-            RETURNING user_id, name, email, phone_number, role, bio, resume, created_at
-        `;
-        return result[0];
     }
     async update(userId, data) {
         const keys = Object.keys(data);
@@ -67,11 +43,16 @@ export class PostgresUserRepository {
             .join(", ");
         const values = [...Object.values(data), userId];
         const query = `
-            UPDATE users
-            SET ${setClause}
-            WHERE user_id = $${keys.length + 1}
-        `;
-        await sql.query(query, values);
+        UPDATE users
+        SET ${setClause}
+        WHERE user_id = $${keys.length + 1}
+        RETURNING *
+    `;
+        const result = await sql.query(query, values);
+        if (result.rowCount === 0) {
+            throw new AppError("User not found", 404);
+        }
+        return result[0];
     }
     async getUserWithSkills(userId) {
         const result = await sql `
@@ -85,6 +66,8 @@ export class PostgresUserRepository {
                 u.bio,
                 u.resume,
                 u.resume_public_id,
+                u.profile_pic,
+                u.profile_pic_public_id,
                 u.subscription,
                 ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
             FROM users u
