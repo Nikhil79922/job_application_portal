@@ -6,11 +6,6 @@ import logger from "./shared/middleware/logger.middleware.js";
 // IMPORTANT: this ensures container initializes
 import "./containers/InfraConnect.container.js";
 import './containers/rateLimiting.container.js';
-import './containers/user/login.container.js';
-import './containers/user/logout.container.js';
-import './containers/user/refreshToken.container.js';
-import './containers/user/myProfile.container.js';
-import './containers/user/reset.container.js';
 const app = express();
 app.use(logger);
 app.use(express.json());
