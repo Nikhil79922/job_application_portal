@@ -1,12 +1,12 @@
-import { IDeviceService } from "../interfaces/deviceInfo.interface.js";
+import { IDeviceService } from "../../interfaces/deviceInfo.interface.js";
 
-export interface DeviceInfo {
+export interface DeviceInfoType {
     device: string;
     deviceType: string;
   }
   
   export class DeviceService  implements IDeviceService{
-    parse(ua: any, userAgent: string): DeviceInfo {
+    parse(ua: any, userAgent: string): DeviceInfoType {
       const browser = ua?.browser?.name || "Unknown Browser";
       const os = ua?.os?.name || "Unknown OS";
       const deviceType = ua?.device?.type || "desktop";

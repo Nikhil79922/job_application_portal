@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserAgentParser } from "../utils/reqUserAgent.entity.js";
-import { DeviceService } from "../../domain/services/device.service.js";
+import { DeviceService } from "../../domain/services/helpers/device.service.js";
 
 const deviceService = new DeviceService();
 
@@ -12,6 +12,7 @@ export const deviceMiddleware = (
   const userAgentString = req.headers["user-agent"] || "unknown";
 
   const parser = new UserAgentParser();
+  
   const ua = parser.parse(userAgentString);
 
   const deviceInfo = deviceService.parse(ua, userAgentString);

@@ -86,7 +86,7 @@ export class PostgresUserRepository {
                 u.resume,
                 u.resume_public_id,
                 u.subscription,
-                ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as user_skills
+                ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
             FROM users u
             LEFT JOIN user_skills us ON u.user_id = us.user_id
             LEFT JOIN skills s ON s.skill_id = us.skill_id

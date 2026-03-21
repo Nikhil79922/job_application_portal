@@ -1,4 +1,4 @@
-import { RateLimitService } from "../domain/services/rateLimit.service.js";
+import { RateLimitService } from "../domain/services/helpers/rateLimit.service.js";
 import { RedisCacheService } from "../infra/cache/redis.client.js";
 
 const cacheService = new RedisCacheService();

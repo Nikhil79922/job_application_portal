@@ -88,7 +88,7 @@ export class PostgresUserRepository implements IUserRepository {
         await sql.query(query, values);
     }
 
-    async getUserWithSkills(userId: string) {
+    async getUserWithSkills(userId: number) {
         const result = await sql`
             SELECT 
                 u.user_id,
@@ -101,7 +101,7 @@ export class PostgresUserRepository implements IUserRepository {
                 u.resume,
                 u.resume_public_id,
                 u.subscription,
-                ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as user_skills
+                ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
             FROM users u
             LEFT JOIN user_skills us ON u.user_id = us.user_id
             LEFT JOIN skills s ON s.skill_id = us.skill_id

@@ -6,7 +6,7 @@ import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repositor
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUploadFile } from "../../interfaces/uploadFile.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
-import { DeviceInfo } from "../device.service.js";
+import { DeviceInfoType } from "../helpers/device.service.js";
 
 export class authRegister{
     constructor(
@@ -20,7 +20,7 @@ export class authRegister{
     async register(data: {
         body: RegisterDTO;
         file?: Express.Multer.File;
-        deviceInfo: DeviceInfo;
+        deviceInfo: DeviceInfoType;
         userAgent: string;
       }) {
         const { body, file, deviceInfo, userAgent } = data;

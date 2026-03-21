@@ -2,7 +2,7 @@ import AppError from "../../../shared/errors/AppError.js";
 import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
-import { DeviceInfo } from "../device.service.js";
+import { DeviceInfoType } from "../helpers/device.service.js";
 
 export class authRefreshToken{
     constructor(
@@ -13,7 +13,7 @@ export class authRefreshToken{
 
     async refreshToken(data: {
         refreshToken: string;
-        deviceInfo: DeviceInfo;
+        deviceInfo: DeviceInfoType;
         userAgent: string;
       }) {
         const { refreshToken, deviceInfo, userAgent } = data;

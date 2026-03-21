@@ -4,7 +4,7 @@ import { IPasswordService } from "../../interfaces/password.service.interface.js
 import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repository.interface.js";
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
-import { DeviceInfo } from "../device.service.js";
+import { DeviceInfoType } from "../helpers/device.service.js";
 
 export class authLogin{
     constructor(
@@ -16,7 +16,7 @@ export class authLogin{
 
     async login(data: {
         dto: LoginDTO;
-        deviceInfo: DeviceInfo;
+        deviceInfo: DeviceInfoType;
         userAgent: string;
       }) {
     

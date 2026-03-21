@@ -1,15 +1,10 @@
 import express from "express";
-import {myProfile} from "../controllers/user.controller.js";
-import uploadFile from "../../config/multer.config.js";
-import { deviceMiddleware } from "../../shared/middleware/device.middleware.js";
+import {getUserProfile, myProfile} from "../controllers/user.controller.js";
 import { verifyToken } from "../../shared/middleware/verifyToken.middleware.js";
 const router = express.Router();
 
 router.get("/me",verifyToken,myProfile);
-// router.post("/login",deviceMiddleware,loginUser);
-// router.post("/forgotPassword", forgotPassword);
-// router.post("/resetPassword/:token", resetPassword);
-// router.post("/refreshToken",deviceMiddleware,refreshToken);
-// router.post("/logout", logout);
+router.get("/:userId",verifyToken,getUserProfile);
+
 
 export default router;
