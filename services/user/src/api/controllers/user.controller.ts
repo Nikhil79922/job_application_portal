@@ -8,6 +8,8 @@ import { updateUserProfileSchema } from "../dtos/updateUserProfile.schema.js";
 import { updateUserProfiles } from "../../containers/user/updateUserProfile.container.js";
 import { updateProfilePicSchema } from "../dtos/updateProfilePic.schema.js";
 import { updateProfilePics } from "../../containers/user/updateProfilePic.container.js";
+import { updateResumeSchema } from "../dtos/updateResume.schema.js";
+import { updateResumesService } from "../../containers/user/updateResume.container.js";
 
 export const myProfile = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   sendResponse(res, 200, "Personal details fetched successfully", req.user);
@@ -43,3 +45,17 @@ const resData= await updateUserProfiles.updateDetails(dto,userData)
  const resData= await updateProfilePics.updatePic(dto.file,userData)
    sendResponse(res, 200 , "User profile pic updated successfully",resData)
   });
+
+
+  export const updateResume = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+    const userData= req.user;
+    if (!userData) {
+     throw new AppError("Unauthorized", 401);
+   }
+   const dto = updateResumeSchema.parse({
+    file: req.file,
+  });
+   
+   const resData= await updateResumesService.updateResume(dto.file,userData)
+     sendResponse(res, 200 , "User resume updated successfully",resData)
+    });

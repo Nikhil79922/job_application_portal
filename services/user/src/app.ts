@@ -11,6 +11,7 @@ import './containers/rateLimiting.container.js';
 import './containers/user/getUserProfile.container.js';
 import './containers/user/updateUserProfile.container.js';
 import './containers/user/updateProfilePic.container.js';
+import './containers/user/updateResume.container.js';
 
 const app = express();
 

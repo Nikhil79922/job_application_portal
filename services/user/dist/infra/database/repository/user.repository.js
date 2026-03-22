@@ -11,6 +11,7 @@ export class PostgresUserRepository {
             "role",
             "bio",
             "resume",
+            "resume_public_id",
             "profile_pic",
             "profile_pic_public_id",
             "created_at"

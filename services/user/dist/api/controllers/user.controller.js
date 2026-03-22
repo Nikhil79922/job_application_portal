@@ -6,6 +6,8 @@ import { updateUserProfileSchema } from "../dtos/updateUserProfile.schema.js";
 import { updateUserProfiles } from "../../containers/user/updateUserProfile.container.js";
 import { updateProfilePicSchema } from "../dtos/updateProfilePic.schema.js";
 import { updateProfilePics } from "../../containers/user/updateProfilePic.container.js";
+import { updateResumeSchema } from "../dtos/updateResume.schema.js";
+import { updateResumesService } from "../../containers/user/updateResume.container.js";
 export const myProfile = TryCatch(async (req, res) => {
     sendResponse(res, 200, "Personal details fetched successfully", req.user);
 });
@@ -33,4 +35,15 @@ export const updateProfilePic = TryCatch(async (req, res) => {
     });
     const resData = await updateProfilePics.updatePic(dto.file, userData);
     sendResponse(res, 200, "User profile pic updated successfully", resData);
+});
+export const updateResume = TryCatch(async (req, res) => {
+    const userData = req.user;
+    if (!userData) {
+        throw new AppError("Unauthorized", 401);
+    }
+    const dto = updateResumeSchema.parse({
+        file: req.file,
+    });
+    const resData = await updateResumesService.updateResume(dto.file, userData);
+    sendResponse(res, 200, "User resume updated successfully", resData);
 });
