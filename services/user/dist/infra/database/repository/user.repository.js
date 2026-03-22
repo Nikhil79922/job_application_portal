@@ -1,4 +1,4 @@
-import { sql } from "../../../config/database.config.js";
+import { pool } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
 export class PostgresUserRepository {
     constructor() {
@@ -17,19 +17,20 @@ export class PostgresUserRepository {
             "created_at"
         ];
     }
+    // 🔹 Normal usage (no transaction)
     async findByEmail(email) {
-        const result = await sql `
-            SELECT * FROM users WHERE email = ${email} LIMIT 1
-        `;
-        return result[0] ?? null;
+        const result = await pool.query(`SELECT * FROM users WHERE email = $1 LIMIT 1`, [email]);
+        return result.rows[0] ?? null;
     }
-    async findById(userId) {
-        const result = await sql `
-            SELECT * FROM users WHERE user_id = ${userId} LIMIT 1
-        `;
-        return result[0] ?? null;
+    // 🔹 Supports BOTH (tx + non-tx)
+    async findById(userId, client) {
+        const db = client ?? pool;
+        const result = await db.query(`SELECT * FROM users WHERE user_id = $1 LIMIT 1`, [userId]);
+        return result.rows[0] ?? null;
     }
-    async update(userId, data) {
+    // 🔹 Supports BOTH
+    async update(userId, data, client) {
+        const db = client ?? pool;
         const keys = Object.keys(data);
         if (!keys.length) {
             throw new AppError("Update data required", 400);
@@ -44,39 +45,39 @@ export class PostgresUserRepository {
             .join(", ");
         const values = [...Object.values(data), userId];
         const query = `
-        UPDATE users
-        SET ${setClause}
-        WHERE user_id = $${keys.length + 1}
-        RETURNING *
+      UPDATE users
+      SET ${setClause}
+      WHERE user_id = $${keys.length + 1}
+      RETURNING *
     `;
-        const result = await sql.query(query, values);
+        const result = await db.query(query, values);
         if (result.rowCount === 0) {
             throw new AppError("User not found", 404);
         }
-        return result[0];
+        return result.rows[0];
     }
-    async getUserWithSkills(userId) {
-        const result = await sql `
-            SELECT 
-                u.user_id,
-                u.name,
-                u.email,
-                u.password,
-                u.phone_number,
-                u.role,
-                u.bio,
-                u.resume,
-                u.resume_public_id,
-                u.profile_pic,
-                u.profile_pic_public_id,
-                u.subscription,
-                ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
-            FROM users u
-            LEFT JOIN user_skills us ON u.user_id = us.user_id
-            LEFT JOIN skills s ON s.skill_id = us.skill_id
-            WHERE u.user_id = ${userId}
-            GROUP BY u.user_id
-        `;
-        return result[0] ?? null;
+    // 🔹 Supports BOTH
+    async getUserWithSkills(userId, client) {
+        const db = client ?? pool;
+        const result = await db.query(`SELECT 
+          u.user_id,
+          u.name,
+          u.email,
+          u.password,
+          u.phone_number,
+          u.role,
+          u.bio,
+          u.resume,
+          u.resume_public_id,
+          u.profile_pic,
+          u.profile_pic_public_id,
+          u.subscription,
+          ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
+       FROM users u
+       LEFT JOIN user_skills us ON u.user_id = us.user_id
+       LEFT JOIN skills s ON s.skill_id = us.skill_id
+       WHERE u.user_id = $1
+       GROUP BY u.user_id`, [userId]);
+        return result.rows[0] ?? null;
     }
 }

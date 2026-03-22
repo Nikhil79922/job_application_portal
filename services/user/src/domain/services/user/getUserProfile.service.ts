@@ -1,6 +1,5 @@
-import { ParamsDictionary } from "express-serve-static-core";
 import AppError from "../../../shared/errors/AppError.js";
-import { IUserRepository } from "../../interfaces/user.repository.interface.js";
+import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 
 export class getUserProfileData{
     constructor ( private userRepo : IUserRepository){}

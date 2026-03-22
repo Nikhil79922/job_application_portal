@@ -31,4 +31,11 @@ export class RateLimitService {
         50, // allow more since it's read
         "Too many requests. Please slow down.");
     }
+    // 🔐  Data Insert (USER + IP)
+    async checkInsertLimit(userId, ip) {
+        // user-based
+        await this.checkLimit(`upload:user:${userId}`, 60, 10, "Too many uploads. Try later.");
+        // ip-based
+        await this.checkLimit(`upload:ip:${ip}`, 60, 15, "Too many uploads from this IP.");
+    }
 }

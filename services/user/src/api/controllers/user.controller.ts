@@ -11,6 +11,9 @@ import { updateProfilePics } from "../../composition-root/user/updateProfilePic.
 import { updateResumeSchema } from "../dtos/updateResume.schema.js";
 import { updateResumesService } from "../../composition-root/user/updateResume.container.js";
 import { rateLimit } from "../../composition-root/rateLimiting.container.js";
+import { addSkillsToUserService } from "../../composition-root/user/addSkillsToUser.container.js";
+import { SkillsToUserSchema } from "../dtos/SkillsToUser.schema.js";
+import { deleteSkillsToUserService } from "../../composition-root/user/deleteSkillsToUser.container.js";
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -18,6 +21,7 @@ const getClientIP = (req: Request) =>
   req.ip ||
   "unknown";
 
+ // Route Controller
 export const myProfile = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   sendResponse(res, 200, "Personal details fetched successfully", req.user);
 });
@@ -100,4 +104,37 @@ export const updateResume = TryCatch(async (req: AuthenticatedRequest, res: Resp
   const resData = await updateResumesService.updateResume(dto.file, userData);
 
   sendResponse(res, 200, "User resume updated successfully", resData);
+});
+
+export const addSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const ip = getClientIP(req);
+  //  STRONG RATE LIMIT (insert)
+  await rateLimit.checkInsertLimit(
+    String(userData.user_id),
+    ip
+  );
+
+  const dto = SkillsToUserSchema.parse(req.body);
+
+  const resData = await addSkillsToUserService.updateDetails(dto, userData);
+  sendResponse(res, 200, resData.message );
+});
+
+export const deleteSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const dto = SkillsToUserSchema.parse(req.body);
+
+  const resData = await deleteSkillsToUserService.updateDetails(dto, userData);
+  sendResponse(res, 200, resData.message );
 });

@@ -1,4 +1,10 @@
-import { neon } from "@neondatabase/serverless"
+import { Pool } from "pg";
 import { env } from "./env.js"
 
-export const sql = neon(env.DATABASE_URL as string)
+
+export const pool = new Pool({
+  connectionString: env.DATABASE_URL as string, 
+  ssl: {
+    rejectUnauthorized: false, 
+  },
+});

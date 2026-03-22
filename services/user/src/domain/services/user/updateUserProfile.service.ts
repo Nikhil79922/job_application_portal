@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../interfaces/user.repository.interface.js";
+import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 import { updateUserProfileDTO, updateUserResponseDTO } from "../../../api/dtos/updateUserProfile.schema.js";
 import { Users } from "../../../shared/types/user.type.js";
 
