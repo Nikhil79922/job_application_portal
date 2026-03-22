@@ -1,5 +1,6 @@
 import AppError from "../../../shared/errors/AppError.js";
 import getBuffer from "../../../shared/utils/buffer.js";
+import { AuthEntity } from "../../../domain/entities/auth-user.entity.js";
 export class authRegister {
     constructor(userRepo, refreshRepo, passwordService, tokenService, fileUpload) {
         this.userRepo = userRepo;
@@ -11,21 +12,20 @@ export class authRegister {
     async register(data) {
         const { body, file, deviceInfo, userAgent } = data;
         const existingUser = await this.userRepo.findByEmail(body.email);
-        if (existingUser) {
-            throw new AppError("User with this email already exists", 409);
+        // Entity → Error → AppError
+        try {
+            AuthEntity.ensureUserDoesNotExist(!!existingUser);
+            AuthEntity.ensureResumeForJobSeeker(body.role, file);
+        }
+        catch (err) {
+            throw new AppError(err.message, 400);
         }
         const hashedPassword = await this.passwordService.hash(body.password);
-        let bodyData = {
-            ...body,
-            password: hashedPassword,
-        };
-        // Upload resume only for jobseekers
+        let bodyData = AuthEntity.buildUserData(body, hashedPassword);
+        // resume upload
         if (body.role === "jobseeker") {
-            if (!file) {
-                throw new AppError("Resume file is required", 400);
-            }
             const allowedTypes = ["application/pdf"];
-            if (!allowedTypes.includes(file.mimetype)) {
+            if (!file || !allowedTypes.includes(file.mimetype)) {
                 throw new AppError("Only PDF files allowed", 400);
             }
             const fileBuffer = getBuffer(file);
@@ -36,11 +36,11 @@ export class authRegister {
             if (!uploadResult?.data?.url) {
                 throw new AppError("Upload failed", 500);
             }
-            bodyData.file = uploadResult.data.url;
-            bodyData.resumePublicId = uploadResult.data.public_id;
+            bodyData = AuthEntity.attachResume(bodyData, uploadResult.data.url, uploadResult.data.public_id);
         }
+        let registeredUser;
         try {
-            var registeredUser = await this.userRepo.create(bodyData);
+            registeredUser = await this.userRepo.create(bodyData);
         }
         catch (error) {
             if (error.code === "23505") {

@@ -1,4 +1,5 @@
 import AppError from "../../../shared/errors/AppError.js";
+import { AuthEntity } from "../../entities/auth-user.entity.js";
 export class authLogin {
     constructor(userRepo, refreshRepo, passwordService, tokenService) {
         this.userRepo = userRepo;
@@ -10,20 +11,26 @@ export class authLogin {
         const { dto, deviceInfo, userAgent } = data;
         const { email, password } = dto;
         const user = await this.userRepo.getUserWithSkills(email);
-        if (!user) {
-            throw new AppError("Invalid credentials", 401);
+        const isMatch = user
+            ? await this.passwordService.compare(password, user.password)
+            : false;
+        // Entity validation
+        try {
+            AuthEntity.validateCredentials(user, isMatch);
         }
-        const isMatch = await this.passwordService.compare(password, user.password);
-        if (!isMatch) {
-            throw new AppError("Invalid credentials", 401);
+        catch (err) {
+            throw new AppError(err.message, 401);
         }
-        // 🔐 Limit active sessions
         const sessions = await this.refreshRepo.count({
             user_id: user.user_id,
-            revoked: false
+            revoked: false,
         });
-        if (sessions > 10) {
-            throw new AppError("Too many active sessions", 403);
+        // Entity validation
+        try {
+            AuthEntity.validateSessionLimit(sessions);
+        }
+        catch (err) {
+            throw new AppError(err.message, 403);
         }
         const accessToken = await this.tokenService.generateAccessToken({
             userId: user.user_id,
@@ -31,13 +38,13 @@ export class authLogin {
         const rawRefreshToken = this.tokenService.generateRefreshToken();
         const tokenHash = this.tokenService.hashToken(rawRefreshToken);
         const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        // revoke previous token for same device
+        // revoke previous device session
         await this.refreshRepo.update({
             user_id: user.user_id,
             device: deviceInfo.device,
-            revoked: false
+            revoked: false,
         }, {
-            revoked: true
+            revoked: true,
         });
         await this.refreshRepo.create({
             user_id: user.user_id,

@@ -1,6 +1,7 @@
 import { updateProfilePicResponseDTO } from "../../../api/dtos/updateProfilePic.schema.js";
 import AppError from "../../../shared/errors/AppError.js";
 import getBuffer from "../../../shared/utils/buffer.js";
+import { UserEntity } from "../../entities/user.entity.js";
 export class updateProfilePic {
     constructor(userRepo, fileUpload) {
         this.userRepo = userRepo;
@@ -27,10 +28,9 @@ export class updateProfilePic {
         if (!uploadResult?.data?.url) {
             throw new AppError("Upload failed", 500);
         }
-        const updateData = {
-            profile_pic: uploadResult.data.url,
-            profile_pic_public_id: uploadResult.data.public_id,
-        };
+        //Entities introduced
+        const userEntity = new UserEntity();
+        const updateData = userEntity.updateProfilePic(uploadResult.data.url, uploadResult.data.public_id);
         const UpdatedData = await this.userRepo.update(userDetails.user_id, updateData);
         const resData = updateProfilePicResponseDTO.parse(UpdatedData);
         return resData;

@@ -1,19 +1,19 @@
 import { Request, Response } from "express";
 import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
-import { authRefreshService } from "../../containers/auth/refreshToken.container.js";
-import { authLoginService } from "../../containers/auth/login.container.js";
-import { authRegisterService } from "../../containers/auth/register.container.js";
-import { authResetService } from "../../containers/auth/reset.container.js";
-import { authLogoutService } from "../../containers/auth/logout.container.js";
-import { authForgotPasswordService } from "../../containers/auth/forgotPassword.container.js";
+import { authRefreshService } from "../../composition-root/auth/refreshToken.container.js";
+import { authLoginService } from "../../composition-root/auth/login.container.js";
+import { authRegisterService } from "../../composition-root/auth/register.container.js";
+import { authResetService } from "../../composition-root/auth/reset.container.js";
+import { authLogoutService } from "../../composition-root/auth/logout.container.js";
+import { authForgotPasswordService } from "../../composition-root/auth/forgotPassword.container.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js"
 import { forgotSchema } from "../dtos/authForgot.schema copy.js";
 import { ResetSchema } from "../dtos/authReset.schema copy.js";
 import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
-import { rateLimit } from "../../containers/rateLimiting.container.js";
+import { rateLimit } from "../../composition-root/rateLimiting.container.js";
 
 export const registerUser = TryCatch(async (req: Request, res: Response) => {
   const dto = registerSchema.parse({

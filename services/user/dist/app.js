@@ -4,12 +4,12 @@ import UserRouter from "./api/routes/user.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
 // IMPORTANT: this ensures container initializes
-import "./containers/InfraConnect.container.js";
-import './containers/rateLimiting.container.js';
-import './containers/user/getUserProfile.container.js';
-import './containers/user/updateUserProfile.container.js';
-import './containers/user/updateProfilePic.container.js';
-import './containers/user/updateResume.container.js';
+import "./composition-root/InfraConnect.container.js";
+import './composition-root/rateLimiting.container.js';
+import './composition-root/user/getUserProfile.container.js';
+import './composition-root/user/updateUserProfile.container.js';
+import './composition-root/user/updateProfilePic.container.js';
+import './composition-root/user/updateResume.container.js';
 const app = express();
 app.use(logger);
 app.use(express.json());

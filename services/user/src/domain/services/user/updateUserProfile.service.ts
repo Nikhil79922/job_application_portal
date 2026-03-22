@@ -2,7 +2,6 @@ import { IUserRepository } from "../../interfaces/user.repository.interface.js";
 import { updateUserProfileDTO, updateUserResponseDTO } from "../../../api/dtos/updateUserProfile.schema.js";
 import { Users } from "../../../shared/types/user.type.js";
 
-
 export class updateUserDetails {
     constructor(private userRepo: IUserRepository) { }
 
