@@ -8,11 +8,19 @@ import { updateProfilePicSchema } from "../dtos/updateProfilePic.schema.js";
 import { updateProfilePics } from "../../composition-root/user/updateProfilePic.container.js";
 import { updateResumeSchema } from "../dtos/updateResume.schema.js";
 import { updateResumesService } from "../../composition-root/user/updateResume.container.js";
+import { rateLimit } from "../../composition-root/rateLimiting.container.js";
+// Helper function
+const getClientIP = (req) => req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.ip ||
+    "unknown";
 export const myProfile = TryCatch(async (req, res) => {
     sendResponse(res, 200, "Personal details fetched successfully", req.user);
 });
 export const getUserProfile = TryCatch(async (req, res) => {
     const { userId } = req.params;
+    const ip = getClientIP(req);
+    //  light rate limit (read API)
+    await rateLimit.checkReadLimit(ip);
     const data = await getUserProfiles.getData(Number(userId));
     sendResponse(res, 200, "User details fetched successfully", data);
 });
@@ -21,6 +29,9 @@ export const updateUserProfile = TryCatch(async (req, res) => {
     if (!userData) {
         throw new AppError("Unauthorized", 401);
     }
+    const ip = getClientIP(req);
+    // 🔥 STRONG RATE LIMIT (user + ip)
+    await rateLimit.checkUpdateProfileLimit(String(userData.user_id), ip);
     const dto = updateUserProfileSchema.parse(req.body);
     const resData = await updateUserProfiles.updateDetails(dto, userData);
     sendResponse(res, 200, "User details updated successfully", resData);
@@ -30,6 +41,9 @@ export const updateProfilePic = TryCatch(async (req, res) => {
     if (!userData) {
         throw new AppError("Unauthorized", 401);
     }
+    const ip = getClientIP(req);
+    // 🔥 STRONG RATE LIMIT (upload)
+    await rateLimit.checkUploadLimit(String(userData.user_id), ip);
     const dto = updateProfilePicSchema.parse({
         file: req.file,
     });
@@ -41,6 +55,9 @@ export const updateResume = TryCatch(async (req, res) => {
     if (!userData) {
         throw new AppError("Unauthorized", 401);
     }
+    const ip = getClientIP(req);
+    //  STRONG RATE LIMIT (upload)
+    await rateLimit.checkUploadLimit(String(userData.user_id), ip);
     const dto = updateResumeSchema.parse({
         file: req.file,
     });

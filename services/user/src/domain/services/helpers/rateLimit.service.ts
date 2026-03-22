@@ -4,110 +4,72 @@ import { ICacheService } from "../../interfaces/cache.interface.js";
 export class RateLimitService {
   constructor(private cache: ICacheService) {}
 
-  async checkRegisterLimit(ip: string, email: string) {
-    const ipKey = `register:ip:${ip}`;
-    const emailKey = `register:email:${email}`;
+  // 🔥 generic reusable method
+  private async checkLimit(
+    key: string,
+    ttl: number,
+    limit: number,
+    message: string
+  ) {
+    const attempts = await this.cache.increment(key, ttl);
 
-    const ipAttempts = await this.cache.increment(ipKey, 600);
-    const emailAttempts = await this.cache.increment(emailKey, 600);
-
-    if (ipAttempts > 5) {
-      throw new AppError(
-        "Too many registration attempts. Try again later.",
-        429
-      );
-    }
-
-    if (emailAttempts > 3) {
-      throw new AppError(
-        "Too many attempts for this email. Try later.",
-        429
-      );
+    if (attempts > limit) {
+      throw new AppError(message, 429);
     }
   }
 
-  async checkLoginLimit(ip: string, email: string) {
-    const ipKey = `login:ip:${ip}`;
-    const emailKey = `login:email:${email}`;
+  // 🔐 PROFILE UPDATE (USER + IP + COMBINED)
+  async checkUpdateProfileLimit(userId: string, ip: string) {
+    // 1️⃣ User-based limit (prevents IP switching abuse)
+    await this.checkLimit(
+      `profile:update:user:${userId}`,
+      300,
+      10,
+      "Too many profile updates. Try later."
+    );
 
-    const ipAttempts = await this.cache.increment(ipKey, 900);
-    const emailAttempts = await this.cache.increment(emailKey, 900);
+    // 2️⃣ IP-based limit (prevents bot/DDOS)
+    await this.checkLimit(
+      `profile:update:ip:${ip}`,
+      300,
+      20,
+      "Too many requests from this IP. Try later."
+    );
 
-    if (ipAttempts > 20) {
-      throw new AppError(
-        "Too many login attempts. Try again later.",
-        429
-      );
-    }
-
-    if (emailAttempts > 5) {
-      throw new AppError(
-        "Too many attempts for this account. Try later.",
-        429
-      );
-    }
+    // 3️⃣ Combined (fine-grained control)
+    await this.checkLimit(
+      `profile:update:user:${userId}:ip:${ip}`,
+      300,
+      10,
+      "Too many requests. Try later."
+    );
   }
 
-  async checkForgotPasswordLimit(ip: string, email: string) {
-
-    const ipAttempts = await this.cache.increment(
-      `forgot:ip:${ip}`,
-      300 // 5 minutes
+  // 🔐 FILE UPLOAD (USER + IP)
+  async checkUploadLimit(userId: string, ip: string) {
+    // user-based
+    await this.checkLimit(
+      `upload:user:${userId}`,
+      300,
+      5,
+      "Too many uploads. Try later."
     );
-  
-    if (ipAttempts > 10) {
-      throw new AppError("Too many requests", 429);
-    }
-  
-    const cooldown = await this.cache.increment(
-        `forgot:cooldown:${email}`,
-        60
-      );
-      
-      if (cooldown > 1) {
-        throw new AppError("Please wait before requesting again", 429);
-      }
 
-    const emailAttempts = await this.cache.increment(
-      `forgot:email:${email}`,
-      900 // 15 minutes
+    // ip-based
+    await this.checkLimit(
+      `upload:ip:${ip}`,
+      300,
+      10,
+      "Too many uploads from this IP."
     );
-  
-    if (emailAttempts > 3) {
-      throw new AppError(
-        "Password reset already requested recently",
-        429
-      );
-    }
   }
 
-  async checkResetPasswordLimit(ip: string) {
-
-    const attempts = await this.cache.increment(
-      `reset:ip:${ip}`,
-      300 // 5 minutes
+  async checkReadLimit(ip: string) {
+    await this.checkLimit(
+      `read:ip:${ip}`,
+      60,      // 1 min
+      50,      // allow more since it's read
+      "Too many requests. Please slow down."
     );
-  
-    if (attempts > 5) {
-      throw new AppError(
-        "Too many reset attempts. Please try again later.",
-        429
-      );
-    }
-  }
-
-  async checkRefreshLimit(ip: string) {
-
-    const attempts = await this.cache.increment(
-      `refresh:ip:${ip}`,
-      60 // 1 minute
-    );
-  
-    if (attempts > 20) {
-      throw new AppError(
-        "Too many token refresh attempts. Try again later.",
-        429
-      );
-    }
   }
 }
