@@ -1,7 +1,6 @@
 import { sql } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { IUserRepository } from "../../../domain/interfaces/user.repository.interface.js";
-import { Users } from "../../../shared/types/user.type.js";
 
 export class PostgresUserRepository implements IUserRepository {
 
