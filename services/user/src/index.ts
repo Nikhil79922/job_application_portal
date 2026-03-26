@@ -34,6 +34,6 @@ async function initDB() {
 initDB().then(() => {
     app.listen(port, () => {
         console.log(`User Server is Listening at Port ${port}`)
-        // runMigrations()
+        runMigrations()
     })
 })

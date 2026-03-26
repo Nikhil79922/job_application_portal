@@ -3,7 +3,7 @@ import path from "path";
 import { pool } from "../../config/database.config.js";
 import { executeInTransaction } from "./transaction.js";
 
-const migrationsDir = path.join(process.cwd(), "migrations");
+const migrationsDir = path.join(process.cwd(), "src/infra/database/migrations");
 
 export const runMigrations = async () => {
     const client = await pool.connect();
