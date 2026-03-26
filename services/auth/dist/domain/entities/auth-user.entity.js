@@ -16,11 +16,11 @@ export class AuthEntity {
             password: hashedPassword,
         };
     }
-    static attachResume(bodyData, url, publicId) {
+    static attachResume(url, publicId, uploadStatus) {
         return {
-            ...bodyData,
-            file: url,
-            resumePublicId: publicId,
+            resume: url,
+            resume_public_id: publicId,
+            resume_upload_status: uploadStatus
         };
     }
     // 🔐 Login rules

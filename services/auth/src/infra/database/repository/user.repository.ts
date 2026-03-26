@@ -14,6 +14,8 @@ export class PostgresUserRepository implements IUserRepository {
         "role",
         "bio",
         "resume",
+        "resume_public_id",
+        "resume_upload_status",
         "created_at"
     ];
 
@@ -24,7 +26,7 @@ export class PostgresUserRepository implements IUserRepository {
         return result[0] ?? null;
     }
 
-    async findById(userId: string) {
+    async findById(userId: number) {
         const result = await sql`
             SELECT * FROM users WHERE user_id = ${userId} LIMIT 1
         `;
@@ -53,13 +55,13 @@ export class PostgresUserRepository implements IUserRepository {
                 ${data.file},
                 ${data.resumePublicId}
             )
-            RETURNING user_id, name, email, phone_number, role, bio, resume, created_at
+            RETURNING user_id, name, email, phone_number, role, bio, resume,resume_upload_status, created_at
         `;
 
         return result[0];
     }
 
-    async update(userId: string, data: Partial<any>) {
+    async update(userId: number, data: Partial<any>) {
         const keys = Object.keys(data);
 
         if (!keys.length) {

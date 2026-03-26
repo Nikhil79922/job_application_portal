@@ -21,11 +21,11 @@ export class AuthEntity {
         };
       }
     
-      static attachResume(bodyData: any, url: string, publicId: string) {
+      static attachResume( url: string, publicId: string, uploadStatus:string) {
         return {
-          ...bodyData,
-          file: url,
-          resumePublicId: publicId,
+          resume: url,
+          resume_public_id: publicId,
+          resume_upload_status:uploadStatus
         };
       }
   

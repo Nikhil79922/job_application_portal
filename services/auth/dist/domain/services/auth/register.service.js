@@ -22,25 +22,37 @@ export class authRegister {
         }
         const hashedPassword = await this.passwordService.hash(body.password);
         let bodyData = AuthEntity.buildUserData(body, hashedPassword);
-        // resume upload
-        if (body.role === "jobseeker") {
-            const allowedTypes = ["application/pdf"];
-            if (!file || !allowedTypes.includes(file.mimetype)) {
-                throw new AppError("Only PDF files allowed", 400);
-            }
-            const fileBuffer = getBuffer(file);
-            if (!fileBuffer?.content) {
-                throw new AppError("Failed to process file", 500);
-            }
-            const uploadResult = await this.fileUpload.uploadFile(fileBuffer);
-            if (!uploadResult?.data?.url) {
-                throw new AppError("Upload failed", 500);
-            }
-            bodyData = AuthEntity.attachResume(bodyData, uploadResult.data.url, uploadResult.data.public_id);
-        }
         let registeredUser;
         try {
             registeredUser = await this.userRepo.create(bodyData);
+            if (registeredUser.resume_upload_status == 'pending' || registeredUser.resume_upload_status == 'fail') {
+                console.log("registeredUser resume upload status: ", registeredUser.resume_upload_status);
+                delete registeredUser.resume;
+            }
+            // resume upload
+            if (registeredUser.role === "jobseeker") {
+                const allowedTypes = ["application/pdf"];
+                if (!file || !allowedTypes.includes(file.mimetype)) {
+                    throw new AppError("Only PDF files allowed", 400);
+                }
+                const fileBuffer = getBuffer(file);
+                if (!fileBuffer?.content) {
+                    await this.userRepo.update(registeredUser.user_id, {
+                        resume_upload_status: "fail",
+                    });
+                }
+                else {
+                    await this.userRepo.update(registeredUser.user_id, {
+                        resume_upload_status: "pending",
+                    });
+                    // fire and forget
+                    void this.uploadResumeSafe(fileBuffer, registeredUser.user_id);
+                }
+                // const uploadResult = await this.fileUpload.uploadFile(fileBuffer);
+                // if (!uploadResult?.data?.url) {
+                //   throw new AppError("Upload failed", 500);
+                // }
+            }
         }
         catch (error) {
             if (error.code === "23505") {
@@ -66,5 +78,37 @@ export class authRegister {
             accessToken,
             refreshToken: rawRefreshToken,
         };
+    }
+    ;
+    async uploadResumeSafe(buffer, userId) {
+        try {
+            await this.uploadResume(buffer, 3, userId);
+        }
+        catch (err) {
+            console.error("Upload failed completely", err);
+        }
+    }
+    async uploadResume(buffer, retry, userId) {
+        try {
+            const uploadResult = await this.fileUpload.uploadFile(buffer);
+            if (!uploadResult?.data?.url) {
+                throw new Error("Upload failed");
+            }
+            const bodyData = AuthEntity.attachResume(uploadResult.data.url, uploadResult.data.public_id, "success");
+            await this.userRepo.update(userId, bodyData);
+            console.log("Resume Uploaded !");
+        }
+        catch (err) {
+            console.error(`Upload retry failed | userId=${userId} | retries left=${retry}`, err);
+            if (retry <= 0) {
+                await this.userRepo.update(userId, {
+                    resume_upload_status: "fail",
+                });
+                return;
+            }
+            const delay = (4 - retry) * 2000;
+            await new Promise(res => setTimeout(res, delay));
+            return this.uploadResume(buffer, retry - 1, userId);
+        }
     }
 }

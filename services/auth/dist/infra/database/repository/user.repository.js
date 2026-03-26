@@ -11,6 +11,8 @@ export class PostgresUserRepository {
             "role",
             "bio",
             "resume",
+            "resume_public_id",
+            "resume_upload_status",
             "created_at"
         ];
     }
@@ -48,7 +50,7 @@ export class PostgresUserRepository {
                 ${data.file},
                 ${data.resumePublicId}
             )
-            RETURNING user_id, name, email, phone_number, role, bio, resume, created_at
+            RETURNING user_id, name, email, phone_number, role, bio, resume,resume_upload_status, created_at
         `;
         return result[0];
     }
