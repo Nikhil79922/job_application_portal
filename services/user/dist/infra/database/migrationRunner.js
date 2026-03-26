@@ -7,7 +7,7 @@ export const runMigrations = async () => {
     const client = await pool.connect();
     console.log(migrationsDir);
     try {
-        await client.query("SELECT pg_advisory_lock(123456)");
+        await client.query("SELECT pg_try_advisory_lock(123456) AS locked");
         const files = fs.readdirSync(migrationsDir).sort();
         for (const file of files) {
             const { rows } = await client.query("SELECT 1 FROM migrations WHERE name = $1", [file]);

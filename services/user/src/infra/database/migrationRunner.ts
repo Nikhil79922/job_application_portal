@@ -10,7 +10,7 @@ export const runMigrations = async () => {
     console.log(migrationsDir);
   
     try {
-      await client.query("SELECT pg_advisory_lock(123456)");
+      await client.query("SELECT pg_try_advisory_lock(123456) AS locked");
   
       const files = fs.readdirSync(migrationsDir).sort();
   
