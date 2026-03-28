@@ -15,8 +15,10 @@ export class PostgresUserRepository implements IUserRepository {
     "bio",
     "resume",
     "resume_public_id",
+    "resume_upload_status",
     "profile_pic",
     "profile_pic_public_id",
+    "profile_pic_upload_status",
     "created_at"
   ];
 
@@ -95,8 +97,10 @@ export class PostgresUserRepository implements IUserRepository {
           u.bio,
           u.resume,
           u.resume_public_id,
+          u.resume_upload_status,
           u.profile_pic,
           u.profile_pic_public_id,
+          u.profile_pic_upload_status,
           u.subscription,
           ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as skills
        FROM users u

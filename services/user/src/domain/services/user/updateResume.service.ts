@@ -12,36 +12,96 @@ export class updateResumeFile {
     private fileUpload: IUploadFile
   ) { }
 
-  async updateResume(file: Express.Multer.File, userDetails: Users) {
-    if (!file) {
+  async updateResume(data : {file: Express.Multer.File, checkUpload :boolean } ,userDetails: Users) {
+    if(data.checkUpload){
+      const userData= await this.userRepo.findById(userDetails.user_id);
+      if (userData.profile_pic_upload_status === "success") {
+    
+        const resData = updateResumeResponseDTO.parse(userData);
+        return {
+          message:'User Resume updated successfully',
+          data :resData
+        };
+      }
+      if (userData.profile_pic_upload_status === "fail") {
+        throw new AppError("Upload failed, please try again", 503);
+      }
+      if (userData.profile_pic_upload_status === "pending") {
+        throw new AppError("Upload not completed yet", 409);
+      }
+    }
+    if (!data.file) {
       throw new AppError("Resume file is required", 400);
     }
     const allowedTypes = ["application/pdf"];
-    if (!allowedTypes.includes(file.mimetype)) {
+    if (!allowedTypes.includes(data.file.mimetype)) {
       throw new AppError("Only PDF files allowed", 400);
     }
-    const fileBuffer = getBuffer(file);
+ // fire and forget
+ void this.nonBlockingUploadOps(data.file, userDetails);
 
-    if (!fileBuffer?.content) {
-      throw new AppError("Failed to process file", 500);
-    }
-    const oldPublicId = userDetails.resume_public_id;
-    const payload = {
-      buffer: fileBuffer.content,
-      public_id: oldPublicId
-    }
-    const uploadResult = await this.fileUpload.uploadFile(payload);
+ return {
+  message:"Resume uploading process initiated"
+ }
+  }
 
-    if (!uploadResult?.data?.url) {
-      throw new AppError("Upload failed", 500);
-    }
-    
-    //Entities introduced
-    const userEntity = new UserEntity()
-    const updateData = userEntity.updateProfilePic(uploadResult.data.url, uploadResult.data.public_id);
-    const UpdatedData: any = await this.userRepo.update(userDetails.user_id, updateData)
 
-    const resData = updateResumeResponseDTO.parse(UpdatedData);
-    return resData;
+  async nonBlockingUploadOps(file: any, userDetails: Users) {
+    try {
+      const oldPublicId = userDetails.profile_pic_public_id;
+     const fileBuffer = getBuffer(file);
+      if (!fileBuffer?.content) {
+        await this.userRepo.update(userDetails.user_id, {
+          resume_upload_status: "fail",
+        });
+        return;
+      }
+      await this.uploadProficPic(fileBuffer, 3, userDetails.user_id , oldPublicId);
+    } catch (err) {
+      console.error("Upload failed ", err);
+    }
+  }
+
+  async uploadProficPic(
+    buffer: any,
+    retry: number,
+    userId: number,
+    oldPublicId:string | null
+  ): Promise<void> {
+    try {
+
+      const payload = {
+        buffer: buffer.content,
+        public_id: oldPublicId
+      }
+      const uploadResult = await this.fileUpload.uploadFile(payload);
+  
+      if (!uploadResult?.data?.url) {
+        throw new Error("Upload failed");
+      }
+  
+      //Entities introduced
+      const userEntity = new UserEntity()
+      const updateData = userEntity.updateResume(uploadResult.data.url, uploadResult.data.public_id, 'success');
+      const updatedData: any = await this.userRepo.update(userId, updateData)
+      if(!updatedData){
+        throw new Error("User Deatils Update Fail");
+      }
+      console.log("Resume Uploaded!")
+    } catch (err) {
+      console.error(`Upload retry failed | userId=${userId} | retries left=${retry}`, err);
+
+      if (retry <= 0) {
+        await this.userRepo.update(userId, {
+          resume_upload_status: "fail",
+        });
+        return;
+      }
+
+      const delay = Math.pow(2, retry) * 1000;
+      await new Promise(res => setTimeout(res, delay));
+
+      return this.uploadProficPic(buffer, retry - 1, userId,oldPublicId);
+    }
   }
 }

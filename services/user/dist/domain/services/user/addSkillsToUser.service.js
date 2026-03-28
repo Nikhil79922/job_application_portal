@@ -1,5 +1,5 @@
-import AppError from "../../../shared/errors/AppError.js";
 import { executeInTransaction } from "../../../infra/database/transaction.js";
+import { performance } from "node:perf_hooks";
 export class addUserSKillDetails {
     constructor(userRepo, skillRepo, userSkillRepo) {
         this.userRepo = userRepo;
@@ -7,18 +7,28 @@ export class addUserSKillDetails {
         this.userSkillRepo = userSkillRepo;
     }
     async updateDetails(data, userDetails) {
+        const totalStart = performance.now();
         return executeInTransaction(async (tx) => {
-            const user = await this.userRepo.findById(userDetails.user_id, tx);
-            if (!user) {
-                throw new AppError("User not found", 404);
-            }
+            const txStart = performance.now();
+            // 🔹 Skill Insert / Get
+            const skillStart = performance.now();
             const skillId = await this.skillRepo.insertOrGetSkill(data.skillName.trim(), tx);
-            const wasSkillAdded = await this.userSkillRepo.addSkillToUser(user.user_id, skillId, tx);
+            const skillEnd = performance.now();
+            console.log(`[TIME] insertOrGetSkill: ${(skillEnd - skillStart).toFixed(2)} ms`);
+            // 🔹 Add Skill To User
+            const userSkillStart = performance.now();
+            const wasSkillAdded = await this.userSkillRepo.addSkillToUser(userDetails.user_id, skillId, tx);
+            const userSkillEnd = performance.now();
+            console.log(`[TIME] addSkillToUser: ${(userSkillEnd - userSkillStart).toFixed(2)} ms`);
+            const txEnd = performance.now();
+            console.log(`[TIME] transaction block: ${(txEnd - txStart).toFixed(2)} ms`);
             if (!wasSkillAdded) {
+                console.log(`[TIME] TOTAL: ${(performance.now() - totalStart).toFixed(2)} ms`);
                 return { message: "User already possesses this skill" };
             }
+            console.log(`[TIME] TOTAL: ${(performance.now() - totalStart).toFixed(2)} ms`);
             return {
-                message: `User ${data.skillName.trim()} skill added successfully`
+                message: `User ${data.skillName.trim()} skill added successfully`,
             };
         });
     }

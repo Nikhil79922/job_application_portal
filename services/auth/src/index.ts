@@ -6,6 +6,7 @@ import { RefreshTokenModel } from './infra/database/models/refreshToken.model.js
 import { env } from './config/env.js';
 import { startRefreshTokenCleanup } from './shared/job/refreshTokenCleanUp.cronJob.js';
 import { pool } from './config/database.config.js';
+import { runMigrations } from './infra/database/migrationRunner.js';
 
 let port = env.PORT
 
@@ -30,7 +31,7 @@ async function initDB() {
         console.log("✅ DataBase initialization successfully done",);
         // force multiple connections
         await Promise.all(
-            Array.from({ length: 5 }, () => pool.query("SELECT 1"))
+            Array.from({ length: 1 }, () => pool.query("SELECT 1"))
         );
         console.log("✅ DB warmed up");
     } catch (e) {
@@ -43,5 +44,6 @@ initDB().then(() => {
         console.log(`Auth Server is Listening at Port ${port}`)
         //Cron Clean Up 
         startRefreshTokenCleanup()
+        runMigrations()
     })
 })

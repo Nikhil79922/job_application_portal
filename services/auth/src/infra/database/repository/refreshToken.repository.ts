@@ -15,41 +15,32 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
     "created_at"
   ];
 
-async create(data: CreateRefreshTokenDTO) {
-  const result = await pool.query(
-    `
-    INSERT INTO refresh_tokens (
-      user_id,
-      token_hash,
-      device,
-      device_type,
-      user_agent,
-      expires_at
-    )
-    VALUES ($1, $2, $3, $4, $5, $6)
+  async create(data: CreateRefreshTokenDTO, tx = pool) {
+    const result = await tx.query(
+      `
+      INSERT INTO refresh_tokens (
+        user_id,
+        token_hash,
+        device,
+        device_type,
+        user_agent,
+        expires_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
+      `,
+      [
+        data.user_id,
+        data.token_hash,
+        data.device,
+        data.device_type,
+        data.user_agent,
+        data.expires_at,
+      ]
+    );
 
-    ON CONFLICT (user_id, device_type, user_agent)
-    DO UPDATE SET
-      token_hash = EXCLUDED.token_hash,
-      device = EXCLUDED.device,
-      revoked = false,
-      expires_at = EXCLUDED.expires_at,
-      created_at = NOW()
-
-    RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
-    `,
-    [
-      data.user_id,
-      data.token_hash,
-      data.device,
-      data.device_type,
-      data.user_agent,
-      data.expires_at,
-    ]
-  );
-
-  return result.rows[0];
-}
+    return result.rows[0];
+  }
 
   async find(
     conditions: Record<string, any>,
@@ -132,24 +123,26 @@ async create(data: CreateRefreshTokenDTO) {
     return result.rows;
   }
 
-  async count(conditions: Record<string, any>) {
-    const keys = Object.keys(conditions);
+  // async count(conditions: Record<string, any>) {
+  //   const keys = Object.keys(conditions);
 
-    const clauses = keys.map(
-      (key, index) => `${key} = $${index + 1}`
-    );
+  //   const clauses = keys.map(
+  //     (key, index) => `${key} = $${index + 1}`
+  //   );
+ 
+  //   const values = Object.values(conditions);
 
-    const values = Object.values(conditions);
+  //   const query = `
+  //         SELECT 1
+  //         FROM refresh_tokens
+  //         WHERE ${clauses.join(" AND ")}
+  //         LIMIT 10;
+  //       `;
 
-    const query = `
-          SELECT COUNT(*) as count
-          FROM refresh_tokens
-          WHERE ${clauses.join(" AND ")}
-        `;
 
-    const result = await pool.query(query, values);
-    return Number(result.rows[0].count);
-  }
+  //   const result = await pool.query(query, values);
+  //   return result.rowCount;
+  // }
 
   async revokeAll(userId: string) {
 
@@ -160,7 +153,7 @@ async create(data: CreateRefreshTokenDTO) {
     const query = `
           UPDATE refresh_tokens
           SET revoked = true
-          WHERE user_id = $1 AND revoked = false
+          WHERE user_id = $1 
         `;
 
     await pool.query(query, [userId]);

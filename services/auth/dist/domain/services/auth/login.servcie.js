@@ -10,42 +10,31 @@ export class authLogin {
     async login(data) {
         const { dto, deviceInfo, userAgent } = data;
         const { email, password } = dto;
+        // 1. Fetch user
         const user = await this.userRepo.getUserWithSkills(email);
         const isMatch = user
             ? await this.passwordService.compare(password, user.password)
             : false;
-        // Entity validation
+        // 2. Validate credentials
         try {
             AuthEntity.validateCredentials(user, isMatch);
         }
         catch (err) {
             throw new AppError(err.message, 401);
         }
-        const sessions = await this.refreshRepo.count({
-            user_id: user.user_id,
-            revoked: false,
-        });
-        // Entity validation
         try {
-            AuthEntity.validateSessionLimit(sessions);
+            AuthEntity.validateSessionLimit(user.sessions);
         }
         catch (err) {
-            throw new AppError(err.message, 403);
+            throw new AppError(err.message, 401);
         }
+        // 5. Generate tokens
         const accessToken = await this.tokenService.generateAccessToken({
             userId: user.user_id,
         });
         const rawRefreshToken = this.tokenService.generateRefreshToken();
         const tokenHash = this.tokenService.hashToken(rawRefreshToken);
         const expiryDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        // revoke previous device session
-        await this.refreshRepo.update({
-            user_id: user.user_id,
-            device: deviceInfo.device,
-            revoked: false,
-        }, {
-            revoked: true,
-        });
         await this.refreshRepo.create({
             user_id: user.user_id,
             token_hash: tokenHash,
@@ -54,6 +43,7 @@ export class authLogin {
             user_agent: userAgent,
             expires_at: expiryDate,
         });
+        // 7. Remove sensitive data
         const { password: _, ...safeUser } = user;
         return {
             user: safeUser,

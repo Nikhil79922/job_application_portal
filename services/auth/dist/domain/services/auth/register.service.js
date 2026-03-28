@@ -17,15 +17,11 @@ export class authRegister {
         catch (err) {
             throw new AppError(err.message, 400);
         }
-        console.time("Password hash");
         const hashedPassword = await this.passwordService.hash(body.password);
-        console.timeEnd("Password hash");
         let bodyData = AuthEntity.buildUserData(body, hashedPassword);
         let registeredUser;
         try {
-            console.time("user create");
             registeredUser = await this.userRepo.create(bodyData);
-            console.timeEnd("user create");
             if (registeredUser.resume_upload_status == 'pending' || registeredUser.resume_upload_status == 'fail') {
                 delete registeredUser.resume;
             }
@@ -36,9 +32,7 @@ export class authRegister {
                     throw new AppError("Only PDF files allowed", 400);
                 }
                 // fire and forget
-                console.time("upload resume");
                 void this.nonBlockingUploadOps(file, registeredUser.user_id);
-                console.timeEnd("upload resume");
             }
         }
         catch (error) {
@@ -52,9 +46,15 @@ export class authRegister {
         });
         const rawRefreshToken = this.tokenService.generateRefreshToken();
         // fire and forget
-        console.time("Create Refresh Token");
-        void this.nonBlockingRefreshTokenOps(registeredUser.user_id, deviceInfo, userAgent, rawRefreshToken);
-        console.timeEnd("Create Refresh Token");
+        const tokenHash = this.tokenService.hashToken(rawRefreshToken);
+        await this.refreshRepo.create({
+            user_id: registeredUser.user_id,
+            token_hash: tokenHash,
+            device: deviceInfo.device,
+            device_type: deviceInfo.deviceType,
+            user_agent: userAgent,
+            expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        });
         return {
             registeredUser,
             accessToken,
@@ -64,9 +64,7 @@ export class authRegister {
     ;
     async nonBlockingUploadOps(file, userId) {
         try {
-            console.time("file buffer create");
             const fileBuffer = getBuffer(file);
-            console.timeEnd("file buffer create");
             if (!fileBuffer?.content) {
                 await this.userRepo.update(userId, {
                     resume_upload_status: "fail",
@@ -77,15 +75,6 @@ export class authRegister {
         }
         catch (err) {
             console.error("Upload failed completely", err);
-        }
-    }
-    async nonBlockingRefreshTokenOps(userId, deviceInfo, userAgent, rawRefreshToken) {
-        try {
-            await this.createRefreshToken(userId, deviceInfo, userAgent, rawRefreshToken);
-            console.log("Refresh Token Inserted!");
-        }
-        catch (err) {
-            console.error("Refresh Token Creation failed", err);
         }
     }
     async uploadResume(buffer, retry, userId) {
@@ -110,16 +99,5 @@ export class authRegister {
             await new Promise(res => setTimeout(res, delay));
             return this.uploadResume(buffer, retry - 1, userId);
         }
-    }
-    async createRefreshToken(userId, deviceInfo, userAgent, rawRefreshToken) {
-        const tokenHash = this.tokenService.hashToken(rawRefreshToken);
-        await this.refreshRepo.create({
-            user_id: userId,
-            token_hash: tokenHash,
-            device: deviceInfo.device,
-            device_type: deviceInfo.deviceType,
-            user_agent: userAgent,
-            expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        });
     }
 }

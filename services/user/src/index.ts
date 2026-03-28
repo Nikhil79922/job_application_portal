@@ -28,7 +28,7 @@ async function initDB() {
        
         console.log("✅ DataBase initialization successfully done",);
         await Promise.all(
-            Array.from({ length: 5 }, () => pool.query("SELECT 1"))
+            Array.from({ length: 1 }, () => pool.query("SELECT 1"))
         );
         console.log("✅ DB warmed up");
     } catch (e) {

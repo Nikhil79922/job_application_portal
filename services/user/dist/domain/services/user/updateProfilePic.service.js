@@ -7,32 +7,82 @@ export class updateProfilePic {
         this.userRepo = userRepo;
         this.fileUpload = fileUpload;
     }
-    async updatePic(file, userDetails) {
-        if (!file) {
+    async updatePic(data, userDetails) {
+        if (data.checkUpload) {
+            const userData = await this.userRepo.findById(userDetails.user_id);
+            if (userData.profile_pic_upload_status === "success") {
+                const resData = updateProfilePicResponseDTO.parse(userData);
+                return {
+                    message: 'User profile pic updated successfully',
+                    data: resData
+                };
+            }
+            if (userData.profile_pic_upload_status === "fail") {
+                throw new AppError("Upload failed, please try again", 503);
+            }
+            if (userData.profile_pic_upload_status === "pending") {
+                throw new AppError("Upload not completed yet", 409);
+            }
+        }
+        if (!data.file) {
             throw new AppError("Image file is required", 400);
         }
         const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-        if (!allowedTypes.includes(file.mimetype)) {
+        if (!allowedTypes.includes(data.file.mimetype)) {
             throw new AppError("Only image files are allowed", 400);
         }
-        const oldPublicId = userDetails.profile_pic_public_id;
-        const fileBuffer = getBuffer(file);
-        if (!fileBuffer?.content) {
-            throw new AppError("Failed to process file", 500);
-        }
-        const payload = {
-            buffer: fileBuffer.content,
-            public_id: oldPublicId
+        // fire and forget
+        void this.nonBlockingUploadOps(data.file, userDetails);
+        return {
+            message: "Image uploading process initiated"
         };
-        const uploadResult = await this.fileUpload.uploadFile(payload);
-        if (!uploadResult?.data?.url) {
-            throw new AppError("Upload failed", 500);
+    }
+    async nonBlockingUploadOps(file, userDetails) {
+        try {
+            const oldPublicId = userDetails.profile_pic_public_id;
+            const fileBuffer = getBuffer(file);
+            if (!fileBuffer?.content) {
+                await this.userRepo.update(userDetails.user_id, {
+                    profile_pic_upload_status: "fail",
+                });
+                return;
+            }
+            await this.uploadProficPic(fileBuffer, 3, userDetails.user_id, oldPublicId);
         }
-        //Entities introduced
-        const userEntity = new UserEntity();
-        const updateData = userEntity.updateProfilePic(uploadResult.data.url, uploadResult.data.public_id);
-        const UpdatedData = await this.userRepo.update(userDetails.user_id, updateData);
-        const resData = updateProfilePicResponseDTO.parse(UpdatedData);
-        return resData;
+        catch (err) {
+            console.error("Upload failed completely", err);
+        }
+    }
+    async uploadProficPic(buffer, retry, userId, oldPublicId) {
+        try {
+            const payload = {
+                buffer: buffer.content,
+                public_id: oldPublicId
+            };
+            const uploadResult = await this.fileUpload.uploadFile(payload);
+            if (!uploadResult?.data?.url) {
+                throw new Error("Upload failed");
+            }
+            //Entities introduced
+            const userEntity = new UserEntity();
+            const updateData = userEntity.updateProfilePic(uploadResult.data.url, uploadResult.data.public_id, 'success');
+            const updatedData = await this.userRepo.update(userId, updateData);
+            if (!updatedData) {
+                throw new Error("User Deatils Update Fail");
+            }
+            console.log("Profile Image Uploaded!");
+        }
+        catch (err) {
+            console.error(`Upload retry failed | userId=${userId} | retries left=${retry}`, err);
+            if (retry <= 0) {
+                await this.userRepo.update(userId, {
+                    profile_pic_upload_status: "fail",
+                });
+                return;
+            }
+            const delay = Math.pow(2, retry) * 1000;
+            await new Promise(res => setTimeout(res, delay));
+            return this.uploadProficPic(buffer, retry - 1, userId, oldPublicId);
+        }
     }
 }

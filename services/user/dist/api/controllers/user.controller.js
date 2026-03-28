@@ -34,7 +34,7 @@ export const updateUserProfile = TryCatch(async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const ip = getClientIP(req);
-    // 🔥 STRONG RATE LIMIT (user + ip)
+    //  STRONG RATE LIMIT (user + ip)
     await rateLimit.checkUpdateProfileLimit(String(userData.user_id), ip);
     const dto = updateUserProfileSchema.parse(req.body);
     const resData = await updateUserProfiles.updateDetails(dto, userData);
@@ -46,13 +46,28 @@ export const updateProfilePic = TryCatch(async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const ip = getClientIP(req);
-    // 🔥 STRONG RATE LIMIT (upload)
-    await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    //  Rate limit
+    if (req.file) {
+        await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    }
+    // Normalize file (multer gives undefined if not present)
+    const fileData = req.file
+        ? {
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            originalname: req.file.originalname,
+        }
+        : undefined;
+    // Strict validation
     const dto = updateProfilePicSchema.parse({
-        file: req.file,
+        file: fileData,
+        checkUpload: req.body.checkUpload,
     });
-    const resData = await updateProfilePics.updatePic(dto.file, userData);
-    sendResponse(res, 200, "User profile pic updated successfully", resData);
+    const resData = await updateProfilePics.updatePic({
+        file: req.file, // actual file passed to service
+        checkUpload: dto.checkUpload,
+    }, userData);
+    sendResponse(res, 200, resData.message, resData.data);
 });
 export const updateResume = TryCatch(async (req, res) => {
     const userData = req.user;
@@ -60,13 +75,27 @@ export const updateResume = TryCatch(async (req, res) => {
         throw new AppError("Unauthorized", 401);
     }
     const ip = getClientIP(req);
-    //  STRONG RATE LIMIT (upload)
-    await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    if (req.file) {
+        await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    }
+    // Normalize multer file
+    const fileData = req.file
+        ? {
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            originalname: req.file.originalname,
+        }
+        : undefined;
+    // Strict validation
     const dto = updateResumeSchema.parse({
-        file: req.file,
+        file: fileData,
+        checkUpload: req.body.checkUpload,
     });
-    const resData = await updateResumesService.updateResume(dto.file, userData);
-    sendResponse(res, 200, "User resume updated successfully", resData);
+    const resData = await updateResumesService.updateResume({
+        file: req.file, // actual file passed to service
+        checkUpload: dto.checkUpload,
+    }, userData);
+    sendResponse(res, 200, resData.message, resData.data);
 });
 export const addSkillToUser = TryCatch(async (req, res) => {
     const userData = req.user;

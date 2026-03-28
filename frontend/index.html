@@ -1,13 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Test</title>
 </head>
+
 <body>
-    <div style="overflow: auto; height: 100vh;">
-        <img src="./dir_structure.svg" />
-      </div>
+  <div style="padding: 20px;">
+    <h2>Login API Test</h2>
+
+    <!-- Single request -->
+    <button id="single">Single Login</button>
+
+    <!-- Load test -->
+    <button id="multi">20 Parallel Requests</button>
+
+    <pre id="output" style="margin-top:20px; background:#111; color:#0f0; padding:10px;"></pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:3000/api/auth/login";
+
+    const output = document.getElementById("output");
+
+    function log(data) {
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function loginRequest() {
+      const res = await fetch("http://localhost:3000/api/auth/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  credentials: "include",
+  body: JSON.stringify({
+    email: "nikkssy.dev@gmail.com",
+    password: "Gasmonkey@123"
+  })
+});;
+
+      return res.json();
+    }
+
+    // ✅ Single request
+    document.getElementById("single").addEventListener("click", async () => {
+      try {
+        console.time("Single Request");
+        const data = await loginRequest();
+        console.timeEnd("Single Request");
+
+        log(data);
+      } catch (err) {
+        console.error(err);
+        log({ error: "Request failed" });
+      }
+    });
+
+    // 🔥 Multiple requests (load test)
+    document.getElementById("multi").addEventListener("click", async () => {
+      try {
+        console.time("Parallel Requests");
+
+        const requests = Array.from({ length: 20 }, () => loginRequest());
+
+        const results = await Promise.all(requests);
+
+        console.timeEnd("Parallel Requests");
+
+        log(results);
+      } catch (err) {
+        console.error(err);
+        log({ error: "Load test failed" });
+      }
+    });
+  </script>
 </body>
 </html>

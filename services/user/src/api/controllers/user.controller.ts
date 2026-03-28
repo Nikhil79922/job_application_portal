@@ -45,7 +45,7 @@ export const updateUserProfile = TryCatch(async (req: AuthenticatedRequest, res:
 
   const ip = getClientIP(req);
 
-  // 🔥 STRONG RATE LIMIT (user + ip)
+  //  STRONG RATE LIMIT (user + ip)
   await rateLimit.checkUpdateProfileLimit(
     String(userData.user_id),
     ip
@@ -58,53 +58,88 @@ export const updateUserProfile = TryCatch(async (req: AuthenticatedRequest, res:
   sendResponse(res, 200, "User details updated successfully", resData);
 });
 
-export const updateProfilePic = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
-  const userData = req.user;
+export const updateProfilePic = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userData = req.user;
 
-  if (!userData) {
-    throw new AppError("Unauthorized", 401);
+    if (!userData) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    const ip = getClientIP(req);
+
+    //  Rate limit
+    if(req.file){
+      await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    }
+
+    // Normalize file (multer gives undefined if not present)
+    const fileData = req.file
+      ? {
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          originalname: req.file.originalname,
+        }
+      : undefined;
+
+    // Strict validation
+    const dto = updateProfilePicSchema.parse({
+      file: fileData,
+      checkUpload: req.body.checkUpload,
+    });
+
+    const resData: any = await updateProfilePics.updatePic(
+      {
+        file: req.file as Express.Multer.File, // actual file passed to service
+        checkUpload: dto.checkUpload,
+      },
+      userData
+    );
+
+    sendResponse(res, 200, resData.message, resData.data);
   }
+);
 
-  const ip = getClientIP(req);
+export const updateResume = TryCatch(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const userData = req.user;
 
-  // 🔥 STRONG RATE LIMIT (upload)
-  await rateLimit.checkUploadLimit(
-    String(userData.user_id),
-    ip
-  );
+    if (!userData) {
+      throw new AppError("Unauthorized", 401);
+    }
 
-  const dto = updateProfilePicSchema.parse({
-    file: req.file,
-  });
+    const ip = getClientIP(req);
 
-  const resData = await updateProfilePics.updatePic(dto.file, userData);
+    if(req.file){
+      await rateLimit.checkUploadLimit(String(userData.user_id), ip);
+    }
 
-  sendResponse(res, 200, "User profile pic updated successfully", resData);
-});
+    // Normalize multer file
+    const fileData = req.file
+      ? {
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          originalname: req.file.originalname,
+        }
+      : undefined;
 
-export const updateResume = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
-  const userData = req.user;
+    // Strict validation
+    const dto = updateResumeSchema.parse({
+      file: fileData,
+      checkUpload: req.body.checkUpload,
+    });
 
-  if (!userData) {
-    throw new AppError("Unauthorized", 401);
+    const resData = await updateResumesService.updateResume(
+      {
+        file: req.file as Express.Multer.File, // actual file passed to service
+        checkUpload: dto.checkUpload,
+      },
+      userData
+    );
+
+    sendResponse(res, 200, resData.message, resData.data);
   }
-
-  const ip = getClientIP(req);
-
-  //  STRONG RATE LIMIT (upload)
-  await rateLimit.checkUploadLimit(
-    String(userData.user_id),
-    ip
-  );
-
-  const dto = updateResumeSchema.parse({
-    file: req.file,
-  });
-
-  const resData = await updateResumesService.updateResume(dto.file, userData);
-
-  sendResponse(res, 200, "User resume updated successfully", resData);
-});
+);
 
 export const addSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   const userData = req.user;

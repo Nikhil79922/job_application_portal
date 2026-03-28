@@ -8,7 +8,17 @@ export const pool = new Pool({
     ? { rejectUnauthorized: false }
     : false,
 
-  max: 10,                  
-  idleTimeoutMillis: 30000,
+  max: 20,                  
+  idleTimeoutMillis: 120000,
   connectionTimeoutMillis: 10000,
 });
+
+// ADD HERE (keep-alive)
+setInterval(async () => {
+    try {
+      await pool.query("SELECT 1");
+      console.log("[DB] keep-alive ping");
+    } catch (err) {
+      console.error("[DB] ping failed", err);
+    }
+  }, 2 * 60 * 1000); // every 2 minutes

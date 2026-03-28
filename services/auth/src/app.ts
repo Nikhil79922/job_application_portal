@@ -1,5 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+
 
 import authRouter from "./api/routes/auth.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
@@ -16,6 +18,11 @@ import './composition-root/auth/reset.container.js'
 
 const app = express();
 
+
+// app.use(cors({
+//     origin: "http://127.0.0.1:5500",
+//     credentials: true
+//   }));
 app.use(logger);
 app.use(express.json());
 app.use(cookieParser());

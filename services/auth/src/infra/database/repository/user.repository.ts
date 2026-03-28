@@ -34,8 +34,8 @@ export class PostgresUserRepository implements IUserRepository {
          return result.rows[0] ?? null;
     }
 
-    async create(data: RegisterDTO & { role: string }) {
-        const result = await pool.query(
+    async create(data: RegisterDTO & { role: string } , tx=pool) {
+        const result = await tx.query(
           `
           INSERT INTO users (
             name,
@@ -107,16 +107,14 @@ export class PostgresUserRepository implements IUserRepository {
             u.resume,
             u.resume_public_id,
             u.subscription,
-            ARRAY_AGG(s.name) FILTER (WHERE s.name IS NOT NULL) as user_skills
+            count(rt.token_id) FILTER (WHERE revoked = false) as sessions
           FROM users u
-          LEFT JOIN user_skills us ON u.user_id = us.user_id
-          LEFT JOIN skills s ON s.skill_id = us.skill_id
+          LEFT JOIN refresh_tokens rt ON rt.user_id = u.user_id
           WHERE u.email = $1
           GROUP BY u.user_id
           `,
           [email]
         );
-      
         return result.rows[0] ?? null;
       }
 }

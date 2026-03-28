@@ -10,8 +10,10 @@ export interface Users{
     bio :string,
     resume : string | null,
     resume_public_id : string | null,
+    resume_upload_status: string,
     profile_pic : string | null,
     profile_pic_public_id : string | null,
+    profile_pic_upload_status : string,
     skills: string[],
     subscription : string | null,
 }

@@ -14,28 +14,19 @@ export class RefreshTokenTable {
             "created_at"
         ];
     }
-    async create(data) {
-        const result = await pool.query(`
-    INSERT INTO refresh_tokens (
-      user_id,
-      token_hash,
-      device,
-      device_type,
-      user_agent,
-      expires_at
-    )
-    VALUES ($1, $2, $3, $4, $5, $6)
-
-    ON CONFLICT (user_id, device_type, user_agent)
-    DO UPDATE SET
-      token_hash = EXCLUDED.token_hash,
-      device = EXCLUDED.device,
-      revoked = false,
-      expires_at = EXCLUDED.expires_at,
-      created_at = NOW()
-
-    RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
-    `, [
+    async create(data, tx = pool) {
+        const result = await tx.query(`
+      INSERT INTO refresh_tokens (
+        user_id,
+        token_hash,
+        device,
+        device_type,
+        user_agent,
+        expires_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
+      `, [
             data.user_id,
             data.token_hash,
             data.device,
@@ -104,18 +95,21 @@ export class RefreshTokenTable {
         const result = await pool.query(query, values);
         return result.rows;
     }
-    async count(conditions) {
-        const keys = Object.keys(conditions);
-        const clauses = keys.map((key, index) => `${key} = $${index + 1}`);
-        const values = Object.values(conditions);
-        const query = `
-          SELECT COUNT(*) as count
-          FROM refresh_tokens
-          WHERE ${clauses.join(" AND ")}
-        `;
-        const result = await pool.query(query, values);
-        return Number(result.rows[0].count);
-    }
+    // async count(conditions: Record<string, any>) {
+    //   const keys = Object.keys(conditions);
+    //   const clauses = keys.map(
+    //     (key, index) => `${key} = $${index + 1}`
+    //   );
+    //   const values = Object.values(conditions);
+    //   const query = `
+    //         SELECT 1
+    //         FROM refresh_tokens
+    //         WHERE ${clauses.join(" AND ")}
+    //         LIMIT 10;
+    //       `;
+    //   const result = await pool.query(query, values);
+    //   return result.rowCount;
+    // }
     async revokeAll(userId) {
         if (!userId) {
             throw new AppError("User ID required", 400);
@@ -123,7 +117,7 @@ export class RefreshTokenTable {
         const query = `
           UPDATE refresh_tokens
           SET revoked = true
-          WHERE user_id = $1 AND revoked = false
+          WHERE user_id = $1 
         `;
         await pool.query(query, [userId]);
     }

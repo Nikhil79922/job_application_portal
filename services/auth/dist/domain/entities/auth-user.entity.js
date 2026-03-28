@@ -1,13 +1,14 @@
+import AppError from "../../shared/errors/AppError.js";
 export class AuthEntity {
     // 🔐 Register rules
     static ensureUserDoesNotExist(existingUser) {
         if (existingUser) {
-            throw new Error("User with this email already exists");
+            throw new AppError("User with this email already exists", 400);
         }
     }
     static ensureResumeForJobSeeker(role, file) {
         if (role === "jobseeker" && !file) {
-            throw new Error("Resume file is required");
+            throw new AppError("Resume file is required", 400);
         }
     }
     static buildUserData(body, hashedPassword) {
@@ -27,45 +28,45 @@ export class AuthEntity {
     // 🔐 Login rules
     static validateCredentials(user, isMatch) {
         if (!user || !isMatch) {
-            throw new Error("Invalid credentials");
+            throw new AppError("Invalid credentials", 400);
         }
     }
     static validateSessionLimit(sessionCount) {
         if (sessionCount > 10) {
-            throw new Error("Too many active sessions");
+            throw new AppError("Too many active sessions", 400);
         }
     }
     // 🔐 Reset rules 
     static validateResetToken(decoded) {
         if (!decoded || decoded.type !== "reset") {
-            throw new Error("Invalid or expired token");
+            throw new AppError("Invalid or expired token", 400);
         }
     }
     static validateStoredToken(storedToken, token) {
         if (!storedToken || storedToken !== token) {
-            throw new Error("Invalid or expired token");
+            throw new AppError("Invalid or expired token", 400);
         }
     }
     static ensureUserExists(user) {
         if (!user) {
-            throw new Error("User not found");
+            throw new AppError("User not found", 400);
         }
     }
     // 🔐 RefreshToken Rules
     static validateRefreshToken(tokenRow) {
         if (!tokenRow) {
-            throw new Error("Invalid refresh token");
+            throw new AppError("Invalid refresh token", 400);
         }
         if (tokenRow.revoked) {
-            throw new Error("Invalid refresh token");
+            throw new AppError("Invalid refresh token", 400);
         }
         if (new Date() > tokenRow.expires_at) {
-            throw new Error("Invalid refresh token");
+            throw new AppError("Invalid refresh token", 400);
         }
     }
     static validateDeviceMatch(tokenDevice, currentDevice) {
         if (tokenDevice !== currentDevice) {
-            throw new Error("Device mismatch");
+            throw new AppError("Device mismatch", 400);
         }
     }
 }

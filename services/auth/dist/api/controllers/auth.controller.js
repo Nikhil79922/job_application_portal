@@ -20,7 +20,7 @@ export const registerUser = TryCatch(async (req, res) => {
     });
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
         req.ip;
-    // await rateLimit.checkRegisterLimit(ip as string, dto.email);
+    await rateLimit.checkRegisterLimit(ip, dto.email);
     const result = await authRegisterService.register({
         body: dto,
         file: req.file,
