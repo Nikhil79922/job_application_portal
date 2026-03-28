@@ -11,6 +11,7 @@ export class AuthEntity {
         }
     }
     static buildUserData(body, hashedPassword) {
+        body.file = null;
         return {
             ...body,
             password: hashedPassword,

@@ -15,6 +15,7 @@ export class AuthEntity {
     }
 
     static buildUserData(body: RegisterDTO, hashedPassword: string) {
+      body.file=null;
         return {
           ...body,
           password: hashedPassword,

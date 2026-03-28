@@ -1,10 +1,14 @@
 import { Pool } from "pg";
-import { env } from "./env.js"
-
+import { env } from "./env.js";
 
 export const pool = new Pool({
-  connectionString: env.DATABASE_URL as string, 
-  ssl: {
-    rejectUnauthorized: false, 
-  },
+  connectionString: env.DATABASE_URL as string,
+
+  ssl: env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false,
+
+  max: 10,                  
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });

@@ -5,6 +5,7 @@ import { UserSkillsModel } from './infra/database/models/userSkills.model.js';
 import { env } from './config/env.js';
 import { MigrationModel } from './infra/database/models/migration.model.js';
 import { runMigrations } from './infra/database/migrationRunner.js';
+import { pool } from './config/database.config.js';
 let port = env.PORT
 
 const users= new UserModel();
@@ -26,6 +27,10 @@ async function initDB() {
        await migrations.createTable()
        
         console.log("✅ DataBase initialization successfully done",);
+        await Promise.all(
+            Array.from({ length: 5 }, () => pool.query("SELECT 1"))
+        );
+        console.log("✅ DB warmed up");
     } catch (e) {
         console.log("❌ Error in DataBase initialization", e);
         process.exit(1);

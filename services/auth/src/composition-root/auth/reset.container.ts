@@ -3,7 +3,7 @@
 import { RedisCacheService } from "../../infra/cache/redis.client.js";
 
 // Services
-import { BcryptPasswordService } from "../../infra/security/password.service.js";
+import { Argon2PasswordService } from "../../infra/security/password.service.js";
 import { JwtTokenService } from "../../infra/security/token.service.js";
 
 // Repositories
@@ -18,7 +18,7 @@ const cacheService = new RedisCacheService();
 const userRepo = new PostgresUserRepository();
 const refreshRepo = new RefreshTokenTable();
 
-const passwordService = new BcryptPasswordService();
+const passwordService = new Argon2PasswordService();
 const tokenService = new JwtTokenService();
 // const deviceService = new DeviceService();
 

@@ -1,4 +1,4 @@
-import { sql } from "../../../config/database.config.js";
+import { pool } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
 export class RefreshTokenTable {
     constructor() {
@@ -15,35 +15,35 @@ export class RefreshTokenTable {
         ];
     }
     async create(data) {
-        const result = await sql `
-          INSERT INTO refresh_tokens (
-            user_id,
-            token_hash,
-            device,
-            device_type,
-            user_agent,
-            expires_at
-          )
-          VALUES (
-            ${data.user_id},
-            ${data.token_hash},
-            ${data.device},
-            ${data.device_type},
-            ${data.user_agent},
-            ${data.expires_at}
-          )
-      
-          ON CONFLICT (user_id, device_type, user_agent)
-          DO UPDATE SET
-            token_hash = EXCLUDED.token_hash,
-            device = EXCLUDED.device,
-            revoked = false,
-            expires_at = EXCLUDED.expires_at,
-            created_at = NOW()
-      
-          RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
-        `;
-        return result[0];
+        const result = await pool.query(`
+    INSERT INTO refresh_tokens (
+      user_id,
+      token_hash,
+      device,
+      device_type,
+      user_agent,
+      expires_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
+
+    ON CONFLICT (user_id, device_type, user_agent)
+    DO UPDATE SET
+      token_hash = EXCLUDED.token_hash,
+      device = EXCLUDED.device,
+      revoked = false,
+      expires_at = EXCLUDED.expires_at,
+      created_at = NOW()
+
+    RETURNING user_id, token_hash, device, device_type, user_agent, revoked, expires_at, created_at
+    `, [
+            data.user_id,
+            data.token_hash,
+            data.device,
+            data.device_type,
+            data.user_agent,
+            data.expires_at,
+        ]);
+        return result.rows[0];
     }
     async find(conditions, selectFields = ["user_id"]) {
         const keys = Object.keys(conditions);
@@ -67,7 +67,8 @@ export class RefreshTokenTable {
           FROM refresh_tokens
           WHERE ${clauses.join(" AND ")}
         `;
-        return await sql.query(query, values);
+        const result = await pool.query(query, values);
+        return result.rows;
     }
     async update(conditions, data) {
         const dataKeys = Object.keys(data);
@@ -100,7 +101,8 @@ export class RefreshTokenTable {
     SET ${setClause}
     WHERE ${whereClause}
   `;
-        return await sql.query(query, values);
+        const result = await pool.query(query, values);
+        return result.rows;
     }
     async count(conditions) {
         const keys = Object.keys(conditions);
@@ -111,8 +113,8 @@ export class RefreshTokenTable {
           FROM refresh_tokens
           WHERE ${clauses.join(" AND ")}
         `;
-        const result = await sql.query(query, values);
-        return Number(result[0].count);
+        const result = await pool.query(query, values);
+        return Number(result.rows[0].count);
     }
     async revokeAll(userId) {
         if (!userId) {
@@ -123,6 +125,6 @@ export class RefreshTokenTable {
           SET revoked = true
           WHERE user_id = $1 AND revoked = false
         `;
-        return await sql.query(query, [userId]);
+        await pool.query(query, [userId]);
     }
 }

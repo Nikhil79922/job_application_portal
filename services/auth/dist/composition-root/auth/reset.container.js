@@ -1,7 +1,7 @@
 // Infra
 import { RedisCacheService } from "../../infra/cache/redis.client.js";
 // Services
-import { BcryptPasswordService } from "../../infra/security/password.service.js";
+import { Argon2PasswordService } from "../../infra/security/password.service.js";
 import { JwtTokenService } from "../../infra/security/token.service.js";
 // Repositories
 import { PostgresUserRepository } from "../../infra/database/repository/user.repository.js";
@@ -10,7 +10,7 @@ import { authResetPassword } from "../../domain/services/auth/resetPassword.serv
 const cacheService = new RedisCacheService();
 const userRepo = new PostgresUserRepository();
 const refreshRepo = new RefreshTokenTable();
-const passwordService = new BcryptPasswordService();
+const passwordService = new Argon2PasswordService();
 const tokenService = new JwtTokenService();
 // const deviceService = new DeviceService();
 export const authResetService = new authResetPassword(userRepo, tokenService, cacheService, passwordService, refreshRepo);

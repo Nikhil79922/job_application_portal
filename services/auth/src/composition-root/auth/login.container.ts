@@ -4,7 +4,7 @@
 
 // Services
 import { authRegister } from "../../domain/services/auth/register.service.js";
-import { BcryptPasswordService } from "../../infra/security/password.service.js";
+import { Argon2PasswordService } from "../../infra/security/password.service.js";
 import { JwtTokenService } from "../../infra/security/token.service.js";
 
 // Repositories
@@ -16,7 +16,7 @@ import { authLogin } from "../../domain/services/auth/login.servcie.js";
 const userRepo = new PostgresUserRepository();
 const refreshRepo = new RefreshTokenTable();
 
-const passwordService = new BcryptPasswordService();
+const passwordService = new Argon2PasswordService();
 const tokenService = new JwtTokenService();
 // const deviceService = new DeviceService();
 
