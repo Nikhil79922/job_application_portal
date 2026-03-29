@@ -6,22 +6,12 @@ import { env } from './config/env.js';
 import { MigrationModel } from './infra/database/models/migration.model.js';
 import { runMigrations } from './infra/database/migrationRunner.js';
 import { pool } from './config/database.config.js';
-import { JobServiceEnums } from './infra/database/models/jobEnums.model.js';
-import { CompaniesModel } from './infra/database/models/companies.model.js';
-import { JobsModel } from './infra/database/models/jobs.model.js';
-import { ApplicationsModel } from './infra/database/models/applications.model.js';
-
-
 let port = env.PORT
 
 const users= new UserModel();
 const skills= new SkillsModel();
 const userSkills= new UserSkillsModel();
-const migrations= new MigrationModel();
-const jobEnums = new JobServiceEnums();
-const companies = new CompaniesModel();
-const jobs = new JobsModel();
-const applications = new ApplicationsModel();
+const migrations= new MigrationModel()
 
 //DB
 async function initDB() {
@@ -34,15 +24,7 @@ async function initDB() {
 
        await userSkills.createTable();
 
-       await migrations.createTable();
-
-       await jobEnums.createEnums();
-
-       await companies.createTable();
-
-       await jobs.createTable();
-
-       await applications.createTable();
+       await migrations.createTable()
        
         console.log("✅ DataBase initialization successfully done",);
         await Promise.all(
@@ -56,7 +38,7 @@ async function initDB() {
 }
 initDB().then(() => {
     app.listen(port, () => {
-        console.log(`User Server is Listening at Port ${port}`)
+        console.log(`Job Server is Listening at Port ${port}`)
         runMigrations()
     })
 })
