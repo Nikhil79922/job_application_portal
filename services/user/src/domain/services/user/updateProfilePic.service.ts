@@ -3,7 +3,7 @@ import AppError from "../../../shared/errors/AppError.js";
 import { Users } from "../../../shared/types/user.type.js";
 import getBuffer from "../../../shared/utils/buffer.js";
 import { UserEntity } from "../../entities/user.entity.js";
-import { IUploadFile } from "../../interfaces/uploadFile.interface.js";
+import { IUploadFile } from "../../interfaces/infraInterfaces/uploadFile.interface.js";
 import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 
 export class updateProfilePic {

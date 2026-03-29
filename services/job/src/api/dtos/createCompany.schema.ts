@@ -19,6 +19,7 @@ export const createCompanySchema = z
     .max(500, "Website is too long"),
 
     file: z.object({
+        buffer: z.instanceof(Buffer),
       mimetype: z.string().refine(
         (type) => ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(type),
         "Invalid file type"

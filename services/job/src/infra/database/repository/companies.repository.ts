@@ -38,9 +38,9 @@ export class PostgresICompaniesRepository implements ICompaniesRepository {
         name,
         description,
         website,
-        recruiter_id,
+        recruiter_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
+      VALUES ($1, $2, $3, $4)
       RETURNING *
       `,
       [
@@ -78,7 +78,7 @@ export class PostgresICompaniesRepository implements ICompaniesRepository {
     const query = `
       UPDATE companies
       SET ${setClause}
-      WHERE user_id = $${keys.length + 1}
+      WHERE company_id = $${keys.length + 1}
       RETURNING *
     `;
 
@@ -89,5 +89,20 @@ export class PostgresICompaniesRepository implements ICompaniesRepository {
     }
 
     return result.rows[0];
+  }
+
+  async delete(companyId: number,userId:number){
+
+    const result = await pool.query(`
+      DELETE FROM companies 
+      WHERE company_id = $1 AND 
+      recruiter_id = $2
+      `,[companyId , userId]);
+
+    if (result.rowCount === 0) {
+      throw new AppError("Company not found", 404);
+    }
+
+    return result.rowCount;
   }
 }

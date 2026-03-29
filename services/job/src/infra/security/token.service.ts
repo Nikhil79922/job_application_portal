@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { ITokenService } from "../../domain/interfaces/token.service.interface.js";
+import { ITokenService } from "../../domain/interfaces/infraInterfaces/token.service.interface.js";
 import { env } from "../../config/env.js";
 
 export class JwtTokenService implements ITokenService {

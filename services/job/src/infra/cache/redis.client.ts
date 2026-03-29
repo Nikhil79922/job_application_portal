@@ -1,6 +1,6 @@
 import { redisClient } from "../../config/redis.config.js";
 import AppError from "../../shared/errors/AppError.js";
-import { ICacheService } from "../../domain/interfaces/cache.interface.js";
+import { ICacheService } from "../../domain/interfaces/infraInterfaces/cache.interface.js";
 
 export class RedisCacheService implements ICacheService {
   async connect(): Promise<void> {

@@ -1,13 +1,13 @@
-export class UserEntity {
-    updateProfilePic(url: string, publicId: string , updateStatus:string) {
+export class CompanyEntity {
+    updatelogoPic(url: string, publicId: string , updateStatus:string) {
       if (!url) {
         throw new Error("Invalid profile picture");
       }
   
       return {
-        profile_pic: url,
-        profile_pic_public_id: publicId,
-        profile_pic_upload_status: updateStatus
+        logo: url,
+        logo_public_id: publicId,
+        logo_upload_status: updateStatus
       };
     }
   

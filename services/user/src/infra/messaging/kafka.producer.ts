@@ -1,7 +1,7 @@
 import { Producer } from "kafkajs";
 import { kafka } from "../../config/kafka.config.js";
 import AppError from "../../shared/errors/AppError.js";
-import { IMessageBroker } from "../../domain/interfaces/message-broker.interface.js";
+import { IMessageBroker } from "../../domain/interfaces/infraInterfaces/message-broker.interface.js";
 
 export class KafkaProducer implements IMessageBroker{
   private producer: Producer | null = null;

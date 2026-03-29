@@ -1,5 +1,5 @@
 import AppError from "../../../shared/errors/AppError.js";
-import { ICacheService } from "../../interfaces/cache.interface.js";
+import { ICacheService } from "../../interfaces/infraInterfaces/cache.interface.js";
 
 export class RateLimitService {
   constructor(private cache: ICacheService) {}

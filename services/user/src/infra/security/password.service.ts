@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { IPasswordService } from "../../domain/interfaces/password.service.interface.js";
+import { IPasswordService } from "../../domain/interfaces/infraInterfaces/password.service.interface.js";
 
 export class BcryptPasswordService implements IPasswordService {
     async hash(password: string) {

@@ -2,17 +2,23 @@ import { createCompanyDTO } from "../../../../api/dtos/createCompany.schema.js";
 import AppError from "../../../../shared/errors/AppError.js";
 import { Users } from "../../../../shared/types/user.type.js";
 import getBuffer from "../../../../shared/utils/buffer.js";
+import { CompanyEntity } from "../../../entities/company.entity.js";
 import { ICompaniesRepository } from "../../../interfaces/repoInterfaces/companies.repository.interface.js";
+import { IUploadFile } from "../../../interfaces/infraInterfaces/uploadFile.interface.js";
 
 export class createCompanySer{
-    constructor( private companyRepo : ICompaniesRepository){ }
+    constructor( 
+      private companyRepo : ICompaniesRepository,
+      private fileUpload : IUploadFile
+    ) { }
 
     async createCompany(data: {
       body: createCompanyDTO;
       file: Express.Multer.File;
     }, userDetails:Users ){
         try {
-         const registeredCompany = await this.companyRepo.create(data.body);
+          const insert= {...data.body,recruiter_id:userDetails.user_id}
+         const registeredCompany = await this.companyRepo.create(insert);
           if (registeredCompany.logo_upload_status == 'pending' || registeredCompany.logo_upload_status == 'fail') {
             delete registeredCompany.logo;
           }
@@ -23,8 +29,8 @@ export class createCompanySer{
             throw new AppError("Only image files are allowed", 400);
           }
          // fire and forget
-         void this.nonBlockingUploadOps(data.file, userDetails);
-
+         void this.nonBlockingUploadOps(data.file, registeredCompany);
+return registeredCompany;
         } catch (error: any) {
             if (error.code === "23505") {
               throw new AppError("Company with this same name already exists ", 409);
@@ -34,26 +40,26 @@ export class createCompanySer{
     }
 
 
-    async nonBlockingUploadOps(file: any, userDetails: Users) {
+    async nonBlockingUploadOps(file: any, registeredCompany: any) {
       try {
-        const oldPublicId = userDetails.profile_pic_public_id;
+        const oldPublicId = registeredCompany.logo_public_id;
        const fileBuffer = getBuffer(file);
         if (!fileBuffer?.content) {
-          await this.companyRepo.update(userDetails.user_id, {
-            profile_pic_upload_status: "fail",
+          await this.companyRepo.update(registeredCompany.company_id, {
+            logo_upload_status: "fail",
           });
           return;
         }
-        await this.uploadProficPic(fileBuffer, 3, userDetails.user_id , oldPublicId);
+        await this.uploadLogoPic(fileBuffer, 3, registeredCompany.company_id , oldPublicId);
       } catch (err) {
         console.error("Upload failed completely", err);
       }
     }
   
-    async uploadProficPic(
+    async uploadLogoPic(
       buffer: any,
       retry: number,
-      userId: number,
+      companyId: number,
       oldPublicId:string | null
     ): Promise<void> {
       try {
@@ -69,19 +75,19 @@ export class createCompanySer{
         }
     
         //Entities introduced
-        const userEntity = new UserEntity()
-        const updateData = userEntity.updateProfilePic(uploadResult.data.url, uploadResult.data.public_id, 'success');
-        const updatedData: any = await this.userRepo.update(userId, updateData)
+        const companyEntity = new CompanyEntity()
+        const updateData = companyEntity.updatelogoPic(uploadResult.data.url, uploadResult.data.public_id, 'success');
+        const updatedData: any = await this.companyRepo.update(companyId, updateData)
         if(!updatedData){
-          throw new Error("User Deatils Update Fail");
+          throw new Error("Company Deatils Update Fail");
         }
-        console.log("Profile Image Uploaded!")
+        console.log("Logo Image Uploaded!")
       } catch (err) {
-        console.error(`Upload retry failed | userId=${userId} | retries left=${retry}`, err);
+        console.error(`Upload retry failed | companyId=${companyId} | retries left=${retry}`, err);
   
         if (retry <= 0) {
-          await this.userRepo.update(userId, {
-            profile_pic_upload_status: "fail",
+          await this.companyRepo.update(companyId, {
+            logo_upload_status: "fail",
           });
           return;
         }
@@ -89,7 +95,7 @@ export class createCompanySer{
         const delay = Math.pow(2, retry) * 1000;
         await new Promise(res => setTimeout(res, delay));
   
-        return this.uploadProficPic(buffer, retry - 1, userId,oldPublicId);
+        return this.uploadLogoPic(buffer, retry - 1, companyId,oldPublicId);
       }
     }
 }
