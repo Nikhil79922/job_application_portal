@@ -8,8 +8,7 @@ import { ITokenService } from "../../../domain/interfaces/token.service.interfac
 import { IUploadFile } from "../../../domain/interfaces/uploadFile.interface.js";
 import { IUserRepository } from "../../../domain/interfaces/user.repository.interface.js";
 import { DeviceInfoType } from "../../../domain/services/helpers/device.service.js";
-import { setRefreshCookie } from "../../../infra/http/cookies.js";
-import { pool } from "../../../config/database.config.js";
+
 
 export class authRegister {
   constructor(

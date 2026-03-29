@@ -17,6 +17,15 @@ export const createCompanySchema = z
     .string()
     .url("Invalid website URL")
     .max(500, "Website is too long"),
+
+    file: z.object({
+      mimetype: z.string().refine(
+        (type) => ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(type),
+        "Invalid file type"
+      ),
+      size: z.number().max(5 * 1024 * 1024, "File too large (2MB max)"),
+      originalname: z.string().min(1),
+    })
 })
 .strict();
 
