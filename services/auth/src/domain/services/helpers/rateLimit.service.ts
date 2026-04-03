@@ -10,7 +10,7 @@ export class RateLimitService {
 
     const ipAttempts = await this.cache.increment(ipKey, 600);
     const emailAttempts = await this.cache.increment(emailKey, 600);
-
+ 
     if (ipAttempts > 5) {
       throw new AppError(
         "Too many registration attempts. Try again later.",
