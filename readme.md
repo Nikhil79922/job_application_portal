@@ -1,8 +1,8 @@
 # 🚀 Job Portal Application (Microservices Backend)
 
-A scalable and modular **Job Portal Backend System** built using **Node.js, TypeScript, PostgreSQL**, and a **Microservices Architecture**.
+A scalable and production-ready **Job Portal Backend System** built using **Node.js, TypeScript, PostgreSQL**, and a **Microservices Architecture with an API Gateway**.
 
-This project follows **Clean Architecture principles**, ensuring separation of concerns, maintainability, and production readiness.
+This project follows **Clean Architecture principles** and implements **real-world backend patterns** like centralized authentication, rate limiting, and service orchestration.
 
 ---
 
@@ -10,51 +10,70 @@ This project follows **Clean Architecture principles**, ensuring separation of c
 
 This system is designed to handle:
 
-* 👤 User Management (Profile, Skills, Resume)
-* 🔐 Authentication & Authorization (JWT, Refresh Tokens)
-* 🏢 Company Management (Recruiters)
-* 💼 Job Management (Creation, Listings)
-* 📄 Applications System (Apply, Track Status)
-* 📦 File Upload System (Profile Pic, Resume, Company Logo)
-* ⚡ Async Processing (Kafka-based architecture - planned/partial)
+- 👤 User Management (Profile, Skills, Resume)
+- 🔐 Authentication & Authorization (JWT, Refresh Tokens)
+- 🏢 Company Management (Recruiters)
+- 💼 Job Management (Creation, Listings)
+- 📄 Applications System (Apply, Track Status)
+- 📦 File Upload System (Resume, Profile Pic, Logos)
+- ⚡ Async Processing (Kafka - partial)
+- 🌐 API Gateway (Routing, Auth, Rate Limiting)
 
 ---
 
 ## 🏗️ Architecture
 
-The project follows a **Microservices + Clean Architecture** approach:
+This project follows a **Microservices + API Gateway + Clean Architecture** approach:
 
-```
-services/
-  ├── auth     → Authentication & session management
-  ├── user     → User profile & skills
-  ├── job      → Companies, Jobs, Applications
-```
+Client
+↓
+API Gateway (Fastify)
+├── Rate Limiting (Redis)
+├── JWT Authentication
+├── Request Logging
+├── Reverse Proxy (Streaming)
+↓
+| Auth Service (Node.js) |
+| User Service (Node.js) |
+| Job Service (Node.js) |
 
-Each service is independently structured with:
+↓
+PostgreSQL / Redis / Kafka
 
-```
-src/
-├── api/                → Controllers, Routes, DTOs
-├── domain/             → Business logic (Entities, Services, Interfaces)
-├── infra/              → DB, Repositories, Kafka, Storage
-├── shared/             → Utils, Middlewares, Errors
-├── config/             → Environment & service configs
-├── composition-root/   → Dependency Injection setup
-```
+---
+
+## 🌐 API Gateway
+
+A dedicated **API Gateway layer** built using **Fastify**.
+
+### Responsibilities:
+
+- Centralized **JWT Authentication**
+- **Redis-based Rate Limiting**
+- **Streaming Reverse Proxy** (`@fastify/http-proxy`)
+- Request logging (Pino)
+- Error handling standardization
+
+### Why this matters:
+
+- Services remain **clean and independent**
+- Security handled at one place
+- Prevents overload using rate limiting
+- Production-level request routing
 
 ---
 
 ## ⚙️ Tech Stack
 
-* **Backend:** Node.js, TypeScript, Express
-* **Database:** PostgreSQL (with manual migration system)
-* **Caching:** Redis
-* **Messaging:** Kafka (Producer setup, async-ready)
-* **Validation:** Zod
-* **File Upload:** Multer + Cloud Storage
-* **Auth:** JWT + Refresh Token Rotation
-* **Architecture:** Clean Architecture + Repository Pattern
+### Core
+
+- **Backend:** Node.js, TypeScript
+- **Gateway:** Fastify
+- **Database:** PostgreSQL
+- **Caching / Rate Limit:** Redis
+- **Messaging:** Kafka (partial)
+- **Validation:** Zod
+- **Auth:** JWT + Refresh Tokens
 
 ---
 
@@ -62,198 +81,110 @@ src/
 
 ### 🔐 Auth Service
 
-* User Registration & Login
-* Refresh Token Management
-* Password Reset Flow
-* Device Tracking
-* Rate Limiting
+- Login / Register
+- Refresh Token Rotation
+- Password Reset
+- Device Tracking
+- Service-level rate limiting
 
 ---
 
 ### 👤 User Service
 
-* Profile Management
-* Resume Upload
-* Profile Picture Upload
-* Skills Management
+- Profile Management
+- Resume Upload
+- Skills Management
+- Profile Picture Upload
 
 ---
 
 ### 💼 Job Service
 
-* Company Management (Recruiter-based)
-* Job Creation & Listing (in progress)
-* Application System (in progress)
-* Async File Upload Handling with retry logic
+- Company Management
+- Job Creation & Listing (WIP)
+- Application System (WIP)
+- Async file handling with retry
 
 ---
 
-## 🗄️ Database Design
+## 📁 Project Structure
 
-Relational structure:
+api-gateway/ → API Gateway (Fastify)
+services/
+├── auth/
+├── user/
+├── job/
+frontend/ → (Planned)
 
-```
-users
-  ↓
-companies (recruiter_id FK)
-  ↓
-jobs (company_id FK)
-  ↓
-applications (job_id + applicant_id UNIQUE)
-```
 
-Key features:
+### Features:
 
-* Foreign Key constraints for integrity
-* ENUM-based status fields
-* Unique constraints (e.g., one application per job per user)
-* Custom migration system
+- Foreign key constraints
+- ENUM-based statuses
+- Unique constraints
+- Custom migration system
 
 ---
 
 ## 🔄 Migration System
 
-Unlike ORMs, this project uses a **custom migration runner**:
+Custom SQL-based migration runner:
 
-* SQL-based migrations
-* Version tracking via migration table
-* Controlled execution order
-* Service-level isolation
-
----
-
-## 📁 Project Structure (Simplified)
-
-```
-frontend/              → (Planned)
-services/
-  ├── auth/
-  ├── user/
-  ├── job/
-  └── utils/           → Kafka consumers, shared utilities
-```
-
----
-
-## 🚧 Current Status
-
-| Module       | Status         |
-| ------------ | -------------- |
-| Auth         | ✅ Completed    |
-| User         | ✅ Completed    |
-| Companies    | ✅ Completed    |
-| Jobs         | 🚧 In Progress |
-| Applications | 🚧 In Progress |
-| Kafka Flow   | ⚠️ Partial     |
-| Frontend     | ❌ Pending      |
+- Version-controlled migrations
+- Service-level isolation
+- No ORM dependency
 
 ---
 
 ## 🔥 Key Features
 
-* Clean separation of layers (API → Domain → Infra)
-* Non-blocking file upload with retry mechanism
-* Strong validation using Zod
-* Manual migration system (no ORM dependency)
-* Scalable microservice design
-* Production-oriented error handling & logging
+- API Gateway with centralized control
+- Redis-backed rate limiting (distributed)
+- JWT authentication at gateway level
+- Streaming proxy (no request mutation)
+- Clean Architecture (API → Domain → Infra)
+- Structured logging (Pino)
+- Scalable microservices design
 
 ---
 
-## ⚠️ Known Improvements (Planned)
+## 🚧 Current Status
 
-* Kafka consumer integration for async workflows
-* Idempotent upload handling
-* Distributed transaction handling (Saga pattern)
-* Advanced job filtering & search
-* Notification system (email / push)
-* Full frontend integration
+| Module        | Status         |
+|--------------|--------------|
+| API Gateway  | ✅ Completed   |
+| Auth Service | ✅ Completed   |
+| User Service | ✅ Completed   |
+| Companies    | ✅ Completed   |
+| Jobs         | 🚧 In Progress |
+| Applications | 🚧 In Progress |
+| Kafka Flow   | ⚠️ Partial     |
+| Frontend     | ❌ Pending     |
+
+---
+
+## ⚠️ Planned Improvements
+
+- Circuit Breaker (resilience layer)
+- Request tracing (x-request-id)
+- Redis caching layer
+- Role-based access control (RBAC)
+- Kafka consumers (async workflows)
+- Docker + Nginx setup
+- AWS deployment
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone the repository
+### 1. Clone repo
 
 ```bash
 git clone <repo-url>
 cd job_portal_application
-```
 
----
+cd api-gateway && npm install
 
-### 2. Install dependencies (per service)
-
-```bash
-cd services/auth
-npm install
-
-cd ../user
-npm install
-
-cd ../job
-npm install
-```
-
----
-
-### 3. Setup environment variables
-
-Create `.env` files for each service:
-
-```
-DATABASE_URL=
-JWT_SECRET=
-REDIS_URL=
-KAFKA_BROKER=
-```
-
----
-
-### 4. Run services
-
-```bash
-npm run dev
-```
-
-Each service runs on its own port.
-
----
-
-## 🧪 API Testing
-
-Use:
-
-* Postman
-* Thunder Client
-
----
-
-## 🧠 Design Philosophy
-
-This project focuses on:
-
-* **Control over abstraction** (no heavy ORM)
-* **Explicit data handling**
-* **Scalable architecture from day one**
-* **Separation of business logic from infrastructure**
-
----
-
-## 👨‍💻 Author
-
-**Nikhil Singh**
-
-Backend Developer focused on:
-
-* Scalable system design
-* Microservices architecture
-* Performance optimization
-
----
-
-## ⭐ Final Note
-
-This project is actively evolving into a **production-grade job platform backend**, with emphasis on **scalability, reliability, and clean architecture**.
-
----
+cd ../services/auth && npm install
+cd ../user && npm install
+cd ../job && npm install
