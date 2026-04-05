@@ -4,6 +4,7 @@ const TryCatch = (handle) => {
             await handle(req, res, next);
         }
         catch (error) {
+            console.log(`Catched Error`, error);
             next(error);
         }
     };
