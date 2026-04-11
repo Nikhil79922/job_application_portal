@@ -31,7 +31,7 @@ app.addContentTypeParser("*", (req, payload, done) => {
       data += chunk;
     });
     payload.on("end", () => {
-      done(null, data); // raw string instead of stream
+      done(null, data); //raw string instead of stream
     });
   });
 
