@@ -13,7 +13,7 @@ export const proxyRequest = async (req: any, reply: any, target: string) => {
         });
         return response.data;
     } catch (error: any) {
-        console.error(" PROXY ERROR ::: ", error?.response?.data || error.message);
+        console.error("PROXY ERROR ::: ", error?.response?.data || error.message);
 
         if (error.response) {
             return reply

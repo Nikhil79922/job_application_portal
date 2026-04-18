@@ -8,12 +8,14 @@ import { verifyToken } from "./middlewares/auth.middleware";
 
 
 const app = Fastify({ 
-    logger: true ,
+  logger: {
+    level: "info"
+  },
     bodyLimit: 10485760, // optional (10MB)
 });
 
-async function init(){
-    await app.register(rateLimit, {
+     app.register(rateLimit, {
+      global:true,
         max: 200,
         timeWindow: "1 minute",
         redis : redis ,
@@ -21,8 +23,7 @@ async function init(){
           return req.headers.authorization || req.ip;
         },
       });
-}
-init();
+
 
 
 app.addContentTypeParser("*", (req, payload, done) => {
