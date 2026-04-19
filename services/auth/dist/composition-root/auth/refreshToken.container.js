@@ -1,4 +1,4 @@
-// Infra
+// Services
 import { JwtTokenService } from "../../infra/security/token.service.js";
 // Repositories
 import { PostgresUserRepository } from "../../infra/database/repository/user.repository.js";

@@ -183,8 +183,8 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
     const query = `
       UPDATE refresh_tokens
       SET revoked = true
-      WHERE id = (
-        SELECT id
+      WHERE token_id = (
+        SELECT token_id
         FROM refresh_tokens
         WHERE user_id = $1
           AND revoked = false

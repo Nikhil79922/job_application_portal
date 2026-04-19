@@ -24,6 +24,7 @@ export class authLogin {
         }
         try {
             if (AuthEntity.validateSessionLimit(user.sessions)) {
+                console.log("Id missing");
                 await this.refreshRepo.deleteOldest(user.user_id);
             }
             ;
