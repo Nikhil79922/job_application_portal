@@ -4,7 +4,7 @@ import { pool } from "../../../config/database.config.js";
 import { ICompaniesRepository } from "../../../domain/interfaces/repoInterfaces/companies.repository.interface.js";
 import AppError from "../../../shared/errors/AppError.js";
 
-export class PostgresICompaniesRepository implements ICompaniesRepository {
+export class PostgresCompaniesRepository implements ICompaniesRepository {
 
   private allowedColumns = [
     "company_id",

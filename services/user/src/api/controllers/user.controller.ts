@@ -21,6 +21,8 @@ const getClientIP = (req: Request) =>
   req.ip ||
   "unknown";
 
+
+  
  // Route Controller
 export const myProfile = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   sendResponse(res, 200, "Personal details fetched successfully", req.user);

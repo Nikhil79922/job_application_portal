@@ -4,7 +4,7 @@ import { ICacheService } from "../../interfaces/infraInterfaces/cache.interface.
 export class RateLimitService {
   constructor(private cache: ICacheService) {}
 
-  // 🔥 generic reusable method
+  // generic reusable method
   private async checkLimit(
     key: string,
     ttl: number,
@@ -36,7 +36,7 @@ export class RateLimitService {
       "Too many requests from this IP. Try later."
     );
 
-    // 3️⃣ Combined (fine-grained control)
+    // Combined (fine-grained control)
     await this.checkLimit(
       `profile:update:user:${userId}:ip:${ip}`,
       300,
@@ -45,7 +45,7 @@ export class RateLimitService {
     );
   }
 
-  // 🔐 FILE UPLOAD (USER + IP)
+  // FILE UPLOAD (USER + IP)
   async checkUploadLimit(userId: string, ip: string) {
     // user-based
     await this.checkLimit(

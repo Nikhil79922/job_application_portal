@@ -35,9 +35,11 @@ app.register(rateLimit, {
 }
 });
 
+// Auth hook (clean)
 app.addHook("onRequest", async (req, reply) => {
   if (!req.url.startsWith("/api/auth")) {
-    await verifyToken(req, reply);
+    req.log.info("req.url========================>")
+    await verifyToken(req);
   }
 });
 
