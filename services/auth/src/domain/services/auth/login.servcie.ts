@@ -33,13 +33,15 @@ export class authLogin {
 
     // 2. Validate credentials
     try {
-      AuthEntity.validateCredentials(user, isMatch);
+      AuthEntity.validateCredentials(user, isMatch)
     } catch (err: any) {
       throw new AppError(err.message, 401);
     }
 
     try {
-      AuthEntity.validateSessionLimit(user.sessions);
+      if(AuthEntity.validateSessionLimit(user.sessions)){
+        await this.refreshRepo.deleteOldest(user.user_id)
+      };
     } catch (err: any) {
       throw new AppError(err.message, 401);
     }

@@ -23,7 +23,10 @@ export class authLogin {
             throw new AppError(err.message, 401);
         }
         try {
-            AuthEntity.validateSessionLimit(user.sessions);
+            if (AuthEntity.validateSessionLimit(user.sessions)) {
+                await this.refreshRepo.deleteOldest(user.user_id);
+            }
+            ;
         }
         catch (err) {
             throw new AppError(err.message, 401);

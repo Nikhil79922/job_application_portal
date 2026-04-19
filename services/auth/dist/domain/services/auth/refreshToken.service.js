@@ -21,7 +21,7 @@ export class authRefreshToken {
         const newRefreshToken = this.tokenService.generateRefreshToken();
         const newTokenHash = this.tokenService.hashToken(newRefreshToken);
         const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        await this.refreshRepo.revokeAll(tokenHash);
+        await this.refreshRepo.revokeOne(tokenHash);
         await this.refreshRepo.create({
             user_id: user.user_id,
             token_hash: newTokenHash,

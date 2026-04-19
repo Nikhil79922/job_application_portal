@@ -13,4 +13,6 @@ export interface IRefreshTokenRepository {
     update(conditions: Record<string, any>, data: Record<string, any>):Promise<any>;
     // count(conditions: Record<string, any>):Promise<any>;
     revokeAll(userId: string): Promise<any>;
+    revokeOne(tokenHash: string): Promise<any>;
+    deleteOldest(userId:string) : Promise<any>;
 }

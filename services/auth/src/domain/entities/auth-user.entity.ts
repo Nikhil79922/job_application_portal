@@ -38,10 +38,9 @@ export class AuthEntity {
       }
     }
   
-    static validateSessionLimit(sessionCount: number) {
-      if (sessionCount > 10) {
-        throw new AppError("Too many active sessions",400);
-      }
+    static validateSessionLimit(sessionCount: number) : boolean {
+       return sessionCount >= 3
+       
     }
   
     // 🔐 Reset rules 
