@@ -3,10 +3,8 @@ import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
 import { AuthenticatedRequest } from "../../shared/types/user.type.js";
 import AppError from "../../shared/errors/AppError.js";
-import { createCompanySchema } from "../dtos/createCompany.schema.js";
-import { createCompanyService } from "../../composition-root/company/createCompany.container.js";
-import { deleteCompanySchema } from "../dtos/deleteCompany.schema.js";
-import { deleteCompanyService } from "../../composition-root/company/deleteCompany.container.js";
+import { createJobSchema } from "../dtos/job/createJob.schema.js";
+import { createJobService } from "../../composition-root/job/createJob.container.js";
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -15,7 +13,7 @@ const getClientIP = (req: Request) =>
   "unknown";
 
 // Route Controller
-export const createCompanyController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+export const createJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   const userData = req.user;
 
   if (!userData) {
@@ -26,38 +24,32 @@ export const createCompanyController = TryCatch(async (req: AuthenticatedRequest
     throw new AppError("Only recruiter can create a company", 403);
   }
 
-  const dto = createCompanySchema.parse({
-    ...req.body,
-    file: req.file,
-  })
-let body={
-  ...req.body
-}
-  const resData = await createCompanyService.createCompany({body ,file:dto.file as Express.Multer.File}  ,userData)
+  const dto = createJobSchema.parse(req.body)
 
-    sendResponse(res, 200, "Company created successfully", resData);
+  const resData = await createJobService.createJob(dto ,userData)
+
+    sendResponse(res, 200, "Job created successfully", resData);
 });
 
-export const deleteCompanyController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
-  const userData = req.user;
+// export const deleteCompanyController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+//   const userData = req.user;
 
-  if (!userData) {
-    throw new AppError("Unauthorized", 401);
-  }
+//   if (!userData) {
+//     throw new AppError("Unauthorized", 401);
+//   }
 
-  if (userData.role !== 'recruiter') {
-    throw new AppError("Only recruiter can create a company", 403);
-  }
+//   if (userData.role !== 'recruiter') {
+//     throw new AppError("Only recruiter can create a company", 403);
+//   }
 
-  const dto = deleteCompanySchema.parse({
-    ...req.body
-  })
+//   const dto = deleteCompanySchema.parse({
+//     ...req.body
+//   })
 
-  const resData = await deleteCompanyService.deleteCompany(dto ,userData)
+//   const resData = await deleteCompanyService.deleteCompany(dto ,userData)
 
-    sendResponse(res, 200, resData?.message);
-});
-
+//     sendResponse(res, 200, resData?.message);
+// });
 
 
 

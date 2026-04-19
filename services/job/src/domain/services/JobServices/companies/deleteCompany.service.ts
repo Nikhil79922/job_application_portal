@@ -1,4 +1,4 @@
-import { deleteCompanyDTO } from "../../../../api/dtos/deleteCompany.schema.js";
+import { deleteCompanyDTO } from "../../../../api/dtos/company/deleteCompany.schema.js";
 import { Users } from "../../../../shared/types/user.type.js";
 import { ICompaniesRepository } from "../../../interfaces/repoInterfaces/companies.repository.interface.js";
 
