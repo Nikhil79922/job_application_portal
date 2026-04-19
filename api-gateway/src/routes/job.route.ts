@@ -3,10 +3,11 @@
 import { FastifyInstance } from "fastify";
 import { proxyRequest } from "../services/proxy.service";
 import { env } from "../config/env";
+import { jobBreaker } from "../utils/breakers";
 
 export default async function jobRoutes(fastify: FastifyInstance) {
   fastify.all("/api/job/*", async (req, reply) => {
-    const data = await proxyRequest(req,reply, env.SERVICES.JOB);
-    return reply.send(data);
+    const result = await proxyRequest(req, env.SERVICES.JOB,jobBreaker);
+    return reply.status(result.status).send(result.data);
   });
 }

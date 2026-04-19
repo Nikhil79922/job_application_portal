@@ -1,5 +1,5 @@
 const errorMiddleware = (err, req, res, next) => {
-    // 🔥 ZOD VALIDATION ERRORS
+    //  ZOD VALIDATION ERRORS
     if (err?.name === "ZodError") {
         console.log(err.message);
         return res.status(400).json({
