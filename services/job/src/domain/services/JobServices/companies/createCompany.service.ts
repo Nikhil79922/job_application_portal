@@ -1,4 +1,4 @@
-import { createCompanyDTO } from "../../../../api/dtos/createCompany.schema.js";
+import { createCompanyDTO } from "../../../../api/dtos/company/createCompany.schema.js";
 import AppError from "../../../../shared/errors/AppError.js";
 import { Users } from "../../../../shared/types/user.type.js";
 import getBuffer from "../../../../shared/utils/buffer.js";

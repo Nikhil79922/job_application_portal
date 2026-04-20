@@ -13,6 +13,7 @@ import { ResetSchema } from "../dtos/authReset.schema copy.js";
 import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
 import { rateLimit } from "../../composition-root/rateLimiting.container.js";
+//Register User
 export const registerUser = TryCatch(async (req, res) => {
     const dto = registerSchema.parse({
         ...req.body,
@@ -31,6 +32,7 @@ export const registerUser = TryCatch(async (req, res) => {
     setRefreshCookie(res, refreshToken);
     sendResponse(res, 200, "Registered Successfully", responseData);
 });
+//Login User
 export const loginUser = TryCatch(async (req, res) => {
     const dto = loginSchema.parse(req.body);
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
@@ -45,6 +47,7 @@ export const loginUser = TryCatch(async (req, res) => {
     setRefreshCookie(res, refreshToken);
     sendResponse(res, 200, "Login Successful", responseData);
 });
+//Forgot Password
 export const forgotPassword = TryCatch(async (req, res) => {
     const dto = forgotSchema.parse(req.body);
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
@@ -55,6 +58,7 @@ export const forgotPassword = TryCatch(async (req, res) => {
     // always generic response
     sendResponse(res, 200, "If the account exists, a reset link has been sent");
 });
+//Reset Password
 export const resetPassword = TryCatch(async (req, res) => {
     const dto = ResetSchema.parse({
         ...req.body,
@@ -67,6 +71,7 @@ export const resetPassword = TryCatch(async (req, res) => {
     const result = await authResetService.resetPassword(dto);
     sendResponse(res, 200, "Password reset successful", result);
 });
+//Refresh Token 
 export const refreshToken = TryCatch(async (req, res) => {
     const oldRefreshToken = req.cookies.refreshToken;
     if (!oldRefreshToken) {
@@ -86,6 +91,7 @@ export const refreshToken = TryCatch(async (req, res) => {
         accessToken: result.accessToken,
     });
 });
+//Logout
 export const logout = TryCatch(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {

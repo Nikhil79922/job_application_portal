@@ -3,8 +3,10 @@ import TryCatch from "../../shared/constants/tryCatch.js";
 import sendResponse from "../../shared/constants/successRes.js";
 import { AuthenticatedRequest } from "../../shared/types/user.type.js";
 import AppError from "../../shared/errors/AppError.js";
-import { createCompanySchema } from "../dtos/createCompany.schema.js";
+import { createCompanySchema } from "../dtos/company/createCompany.schema.js";
 import { createCompanyService } from "../../composition-root/company/createCompany.container.js";
+import { deleteCompanySchema } from "../dtos/company/deleteCompany.schema.js";
+import { deleteCompanyService } from "../../composition-root/company/deleteCompany.container.js";
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -34,6 +36,26 @@ let body={
   const resData = await createCompanyService.createCompany({body ,file:dto.file as Express.Multer.File}  ,userData)
 
     sendResponse(res, 200, "Company created successfully", resData);
+});
+
+export const deleteCompanyController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'recruiter') {
+    throw new AppError("Only recruiter can create a company", 403);
+  }
+
+  const dto = deleteCompanySchema.parse({
+    ...req.body
+  })
+
+  const resData = await deleteCompanyService.deleteCompany(dto ,userData)
+
+    sendResponse(res, 200, resData?.message);
 });
 
 

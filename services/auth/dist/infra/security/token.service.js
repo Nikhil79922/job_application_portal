@@ -4,7 +4,7 @@ import { env } from "../../config/env.js";
 export class JwtTokenService {
     async generateAccessToken(payload) {
         return jwt.sign(payload, env.JWT_SECRET, {
-            expiresIn: "15m"
+            expiresIn: "15d" // only till the development phase
         });
     }
     generateRefreshToken() {

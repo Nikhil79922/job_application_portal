@@ -1,12 +1,12 @@
 import express from "express";
 import { verifyToken } from "../../../shared/middleware/verifyToken.middleware.js";
 import uploadFile from "../../../config/multer.config.js";
-import { createCompanyController, deleteCompanyController } from "../../controllers/company.jobController.js";
+import { createCompanyController, deleteCompanyController } from "../../controllers/companyController.js";
 
 const router = express.Router();
 
-router.post("/company/new",verifyToken, uploadFile,createCompanyController);
-router.delete("/company/delete",verifyToken, deleteCompanyController);
+router.post("/new",verifyToken, uploadFile,createCompanyController);
+router.delete("/delete",verifyToken, deleteCompanyController);
 
 // router.get("/me",verifyToken,myProfile);
 // router.get("/:userId",verifyToken,getUserProfile);

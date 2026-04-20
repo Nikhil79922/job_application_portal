@@ -15,6 +15,8 @@ import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
 import { rateLimit } from "../../composition-root/rateLimiting.container.js";
 
+
+//Register User
 export const registerUser = TryCatch(async (req: Request, res: Response) => {
   const dto = registerSchema.parse({
     ...req.body,
@@ -41,6 +43,8 @@ export const registerUser = TryCatch(async (req: Request, res: Response) => {
   sendResponse(res, 200, "Registered Successfully", responseData);
 });
 
+
+//Login User
 export const loginUser = TryCatch(async (req: Request, res: Response) => {
 
   const dto = loginSchema.parse(req.body);
@@ -64,6 +68,8 @@ export const loginUser = TryCatch(async (req: Request, res: Response) => {
   sendResponse(res, 200, "Login Successful", responseData);
 });
 
+
+//Forgot Password
 export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
 
   const dto = forgotSchema.parse(req.body);
@@ -81,6 +87,8 @@ export const forgotPassword = TryCatch(async (req: Request, res: Response) => {
   sendResponse(res, 200, "If the account exists, a reset link has been sent");
 });
 
+
+//Reset Password
 export const resetPassword = TryCatch(async (req: Request, res: Response) => {
 
   const dto = ResetSchema.parse({
@@ -100,6 +108,8 @@ export const resetPassword = TryCatch(async (req: Request, res: Response) => {
   sendResponse(res, 200, "Password reset successful", result);
 });
 
+
+//Refresh Token 
 export const refreshToken = TryCatch(async (req: Request, res: Response) => {
 
   const oldRefreshToken = req.cookies.refreshToken;
@@ -128,6 +138,8 @@ export const refreshToken = TryCatch(async (req: Request, res: Response) => {
   });
 });
 
+
+//Logout
 export const logout = TryCatch(async (req: Request, res: Response) => {
 
   const refreshToken = req.cookies.refreshToken;

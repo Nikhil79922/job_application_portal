@@ -1,5 +1,4 @@
 import { PoolClient } from "../../../../node_modules/@types/pg/index.js";
-import { createCompanyDTO } from "../../../api/dtos/createCompany.schema.js";
 import { pool } from "../../../config/database.config.js";
 import { ICompaniesRepository } from "../../../domain/interfaces/repoInterfaces/companies.repository.interface.js";
 import AppError from "../../../shared/errors/AppError.js";
@@ -18,16 +17,14 @@ export class PostgresCompaniesRepository implements ICompaniesRepository {
     "created_at"
   ];
 
-  async existingCompanies(campanyName: string, client?: PoolClient): Promise<number> {
+  async existingCompanies(company_id: number, client?: PoolClient): Promise<boolean> {
     const db = client ?? pool;
 
     const result = await db.query(
-      `SELECT * FROM companies WHERE name = $1
-       RETURNING skill_id`,
-      [campanyName]
+      `SELECT company_id FROM companies WHERE company_id = $1`,
+      [company_id]
     );
-
-    return result.rows[0].skill_id;
+    return result.rowCount !== 0 ? true : false;
   }
 
 
