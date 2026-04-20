@@ -1,5 +1,4 @@
 import { PoolClient } from "../../../../node_modules/@types/pg/index.js";
-import { createCompanyDTO } from "../../../api/dtos/company/createCompany.schema.js";
 import { pool } from "../../../config/database.config.js";
 import { ICompaniesRepository } from "../../../domain/interfaces/repoInterfaces/companies.repository.interface.js";
 import AppError from "../../../shared/errors/AppError.js";

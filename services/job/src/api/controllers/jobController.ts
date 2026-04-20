@@ -5,6 +5,8 @@ import { AuthenticatedRequest } from "../../shared/types/user.type.js";
 import AppError from "../../shared/errors/AppError.js";
 import { createJobSchema } from "../dtos/job/createJob.schema.js";
 import { createJobService } from "../../composition-root/job/createJob.container.js";
+import { updateJobSchema } from "../dtos/job/updateJob.schema.js";
+import { updateJobService } from "../../composition-root/job/updateJob.container.js";
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -30,6 +32,27 @@ export const createJobController = TryCatch(async (req: AuthenticatedRequest, re
 
     sendResponse(res, 200, "Job created successfully", resData);
 });
+
+export const udpateJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'recruiter') {
+    throw new AppError("Only recruiter can create a company", 403);
+  }
+
+  const dto = updateJobSchema.parse(req.body)
+
+  const resData = await updateJobService.updateJob(dto ,userData)
+
+    sendResponse(res, 200, "Job updated successfully", resData);
+});
+
+
+
 
 // export const deleteCompanyController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
 //   const userData = req.user;

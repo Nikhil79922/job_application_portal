@@ -26,7 +26,6 @@ export class JobsModel {
         is_active BOOLEAN NOT NULL DEFAULT true
     );
 
-
     CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON jobs(company_id);
     CREATE INDEX IF NOT EXISTS idx_jobs_job_type ON jobs(job_type);
     CREATE INDEX IF NOT EXISTS idx_jobs_location ON jobs(location);

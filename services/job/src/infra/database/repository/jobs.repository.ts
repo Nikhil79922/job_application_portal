@@ -20,11 +20,11 @@ export class PostgresJobsRepository {
     const db = client ?? pool;
 
     const result = await db.query(
-      `SELECT job_id FROM jobs WHERE job_id = $1`,
+      `SELECT * FROM jobs WHERE job_id = $1`,
       [job_id]
     );
 
-    return result.rows[0].job_id ? true : false;
+    return result.rows[0];
   }
 
   async create(data: any, client?: PoolClient) {
@@ -73,7 +73,7 @@ export class PostgresJobsRepository {
       throw new AppError("Update data required", 400);
     }
 
-    // 🔒 column whitelist protection
+    // column whitelist protection
     keys.forEach((key) => {
       if (!this.allowedColumns.includes(key)) {
         throw new AppError(`Invalid update column: ${key}`, 400);
