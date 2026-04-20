@@ -9,8 +9,13 @@ import logger from "./shared/middleware/logger.middleware.js";
 // IMPORTANT: this ensures container initializes
 import "./composition-root/InfraConnect.container.js";
 import './composition-root/rateLimiting.container.js';
-import './composition-root/company/createCompany.container.js'
-import './composition-root/job/createJob.container.js'
+import './composition-root/company/createCompany.container.js';
+import './composition-root/company/getAllCompany.container.js';
+import './composition-root/company/getCompanyDeatils.container.js';
+import './composition-root/company/deleteCompany.container.js';
+import './composition-root/job/createJob.container.js';
+import './composition-root/job/updateJob.container.js';
+
 
 const app = express();
 

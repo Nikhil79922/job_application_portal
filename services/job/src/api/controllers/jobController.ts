@@ -23,7 +23,7 @@ export const createJobController = TryCatch(async (req: AuthenticatedRequest, re
   }
 
   if (userData.role !== 'recruiter') {
-    throw new AppError("Only recruiter can create a company", 403);
+    throw new AppError("Only recruiter can create a job", 403);
   }
 
   const dto = createJobSchema.parse(req.body)
@@ -41,7 +41,7 @@ export const udpateJobController = TryCatch(async (req: AuthenticatedRequest, re
   }
 
   if (userData.role !== 'recruiter') {
-    throw new AppError("Only recruiter can create a company", 403);
+    throw new AppError("Only recruiter can update a job", 403);
   }
 
   const dto = updateJobSchema.parse(req.body)

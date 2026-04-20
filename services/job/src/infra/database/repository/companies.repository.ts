@@ -27,8 +27,25 @@ export class PostgresCompaniesRepository implements ICompaniesRepository {
     return result.rowCount !== 0 ? true : false;
   }
 
+  async companyDetails(company_id: number, client?: PoolClient): Promise<boolean> {
+    const db = client ?? pool;
 
-  async create(data : any , tx=pool) {
+    const result = await db.query(
+      `SELECT * FROM companies WHERE company_id = $1`,
+      [company_id]
+    );
+    return result.rows[0];
+  }
+
+  async getAll(user_id: number) {
+    const result = await pool.query(`
+    SELECT * FROM companies WHERE recruiter_id= $1;
+    `, [user_id])
+
+    return result.rows;
+  }
+
+  async create(data: any, tx = pool) {
     const result = await tx.query(
       `
       INSERT INTO companies (
@@ -44,10 +61,10 @@ export class PostgresCompaniesRepository implements ICompaniesRepository {
         data.name,
         data.description,
         data.website,
-        data.recruiter_id, 
+        data.recruiter_id,
       ]
     );
-  
+
     return result.rows[0] ?? null;
   }
 
@@ -88,13 +105,13 @@ export class PostgresCompaniesRepository implements ICompaniesRepository {
     return result.rows[0];
   }
 
-  async delete(companyId: number,userId:number){
+  async delete(companyId: number, userId: number) {
 
     const result = await pool.query(`
       DELETE FROM companies 
       WHERE company_id = $1 AND 
       recruiter_id = $2
-      `,[companyId , userId]);
+      `, [companyId, userId]);
 
     if (result.rowCount === 0) {
       throw new AppError("Company not found", 404);
