@@ -1,8 +1,7 @@
 import { executeInTransaction } from "../../../infra/database/transaction.js";
 import { performance } from "node:perf_hooks";
 export class addUserSKillDetails {
-    constructor(userRepo, skillRepo, userSkillRepo) {
-        this.userRepo = userRepo;
+    constructor(skillRepo, userSkillRepo) {
         this.skillRepo = skillRepo;
         this.userSkillRepo = userSkillRepo;
     }

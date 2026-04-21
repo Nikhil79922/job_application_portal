@@ -10,13 +10,6 @@ router.get("/:id",verifyToken, getCompanyDetailsController);
 router.post("/new",verifyToken, uploadFile,createCompanyController);
 router.delete("/delete",verifyToken, deleteCompanyController);
 
-// router.get("/me",verifyToken,myProfile);
-// router.get("/:userId",verifyToken,getUserProfile);
-// router.put("/update/profile",verifyToken,updateUserProfile);
-// router.put("/update/pic",verifyToken, uploadFile,updateProfilePic);
-// router.put("/update/resume",verifyToken, uploadFile,updateResume);
-// router.post("/skill/add",verifyToken,addSkillToUser);
-// router.delete("/skill/delete",verifyToken,deleteSkillToUser);
 
 
 export default router;

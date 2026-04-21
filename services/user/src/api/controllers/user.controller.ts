@@ -28,6 +28,8 @@ export const myProfile = TryCatch(async (req: AuthenticatedRequest, res: Respons
   sendResponse(res, 200, "Personal details fetched successfully", req.user);
 });
 
+
+
 export const getUserProfile = TryCatch(async (req: Request, res: Response) => {
   const { userId } = req.params;
   const ip = getClientIP(req);
@@ -37,6 +39,8 @@ await rateLimit.checkReadLimit(ip);
   const data = await getUserProfiles.getData(Number(userId));
   sendResponse(res, 200, "User details fetched successfully", data);
 });
+
+
 
 export const updateUserProfile = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   const userData = req.user;
@@ -59,6 +63,8 @@ export const updateUserProfile = TryCatch(async (req: AuthenticatedRequest, res:
 
   sendResponse(res, 200, "User details updated successfully", resData);
 });
+
+
 
 export const updateProfilePic = TryCatch(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -102,6 +108,8 @@ export const updateProfilePic = TryCatch(
   }
 );
 
+
+
 export const updateResume = TryCatch(
   async (req: AuthenticatedRequest, res: Response) => {
     const userData = req.user;
@@ -143,6 +151,8 @@ export const updateResume = TryCatch(
   }
 );
 
+
+
 export const addSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   const userData = req.user;
 
@@ -163,6 +173,8 @@ export const addSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Re
   sendResponse(res, 200, resData.message );
 });
 
+
+
 export const deleteSkillToUser = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
   const userData = req.user;
 
@@ -174,4 +186,45 @@ export const deleteSkillToUser = TryCatch(async (req: AuthenticatedRequest, res:
 
   const resData = await deleteSkillsToUserService.updateDetails(dto, userData);
   sendResponse(res, 200, resData.message );
+});
+
+
+export const applyForJobController = TryCatch(async (req: AuthenticatedRequest, res: Response)=>{
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'jobseeker') {
+    throw new AppError("Forbidden you are not allowed for applying the job ", 403);
+  }
+
+  const applicant_id= userData.user_id;
+
+  const resume = userData.resume;
+  if(!resume || resume==''){
+    throw new AppError("Resume is required for this job, Please add your resume in your profile", 400);
+  };
+
+  const {jobId} =req.body;
+  if (!jobId || typeof jobId !== "string") {
+    throw new AppError("Job ID is required", 400);
+  }
+
+  if (!/^\d+$/.test(jobId)) {
+    throw new AppError("Job ID must be a valid number", 400);
+  }
+
+  if (!Number.isInteger(jobId) || Number(jobId) <= 0) {
+    throw new AppError("Job ID must be a positive integer", 400);
+  }
+
+  if ( Number(jobId) > 1_000_000_000) {
+    throw new AppError("job ID too large", 400);
+  }
+
+  // const resData= await
+
+
 });

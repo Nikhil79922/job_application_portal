@@ -118,3 +118,32 @@ export const deleteSkillToUser = TryCatch(async (req, res) => {
     const resData = await deleteSkillsToUserService.updateDetails(dto, userData);
     sendResponse(res, 200, resData.message);
 });
+export const applyForJobController = TryCatch(async (req, res) => {
+    const userData = req.user;
+    if (!userData) {
+        throw new AppError("Unauthorized", 401);
+    }
+    if (userData.role !== 'jobseeker') {
+        throw new AppError("Forbidden you are not allowed for applying the job ", 403);
+    }
+    const applicant_id = userData.user_id;
+    const resume = userData.resume;
+    if (!resume || resume == '') {
+        throw new AppError("Resume is required for this job, Please add your resume in your profile", 400);
+    }
+    ;
+    const { jobId } = req.body;
+    if (!jobId || typeof jobId !== "string") {
+        throw new AppError("Job ID is required", 400);
+    }
+    if (!/^\d+$/.test(jobId)) {
+        throw new AppError("Job ID must be a valid number", 400);
+    }
+    if (!Number.isInteger(jobId) || Number(jobId) <= 0) {
+        throw new AppError("Job ID must be a positive integer", 400);
+    }
+    if (Number(jobId) > 1000000000) {
+        throw new AppError("job ID too large", 400);
+    }
+    // const resData= await
+});
