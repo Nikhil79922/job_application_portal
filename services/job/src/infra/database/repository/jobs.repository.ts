@@ -1,8 +1,9 @@
 import { PoolClient } from "pg";
 import { pool } from "../../../config/database.config.js";
 import AppError from "../../../shared/errors/AppError.js";
+import { IJobsRepository } from "../../../domain/interfaces/repoInterfaces/job.repository.interface copy.js";
 
-export class PostgresJobsRepository {
+export class PostgresJobsRepository implements IJobsRepository {
 
   private allowedColumns = [
     "title",
@@ -15,6 +16,54 @@ export class PostgresJobsRepository {
     "work_location",
     "is_active"
   ];
+
+  async findAllActive(
+    title?: string,
+    location?: string,
+    client?: PoolClient
+  ): Promise<any> {
+    const db = client ?? pool;
+  
+    let query = `
+      SELECT 
+        j.job_id,
+        j.title,
+        j.description,
+        j.salary,
+        j.location,
+        j.job_type,
+        j.role,
+        j.work_location,
+        j.created_at,
+        c.name AS company_name,
+        c.logo AS company_logo,
+        c.company_id
+      FROM jobs j
+      JOIN companies c ON j.company_id = c.company_id
+      WHERE j.is_active = true
+    `;
+  
+    let partialIndex = 1;
+    const values: any[] = [];
+  
+    if (title) {
+      query += ` AND j.title ILIKE $${partialIndex}`;
+      values.push(`%${title}%`);
+      partialIndex++;
+    }
+  
+    if (location) {
+      query += ` AND j.location ILIKE $${partialIndex}`;
+      values.push(`%${location}%`);
+      partialIndex++;
+    }
+ 
+    query += ` ORDER BY j.created_at DESC`;
+  
+    const result = await db.query(query, values);
+  
+    return result.rows;
+  }
 
   async existingJob(job_id: number, client?: PoolClient): Promise<boolean> {
     const db = client ?? pool;

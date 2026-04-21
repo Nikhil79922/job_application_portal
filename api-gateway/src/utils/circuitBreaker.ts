@@ -9,7 +9,7 @@ type AxiosConfig = {
 };
 
 async function axiosCall(config: AxiosConfig & { meta?: any }) {
-    const { meta, ...axiosConfig } = config; // 🔥 separate meta
+    const { meta, ...axiosConfig } = config; 
   
     const start = meta?.startTime || Date.now();
   
@@ -26,7 +26,7 @@ async function axiosCall(config: AxiosConfig & { meta?: any }) {
         const err: any = new Error(`Server error: ${response.status}`);
         err.statusCode = response.status;
         err.meta = {
-          ...meta, // 🔥 preserve logger
+          ...meta,
           url: config.url,
           duration,
           status: response.status,
@@ -38,7 +38,7 @@ async function axiosCall(config: AxiosConfig & { meta?: any }) {
         status: response.status,
         data: response.data,
         meta: {
-          ...meta, // 🔥 preserve logger
+          ...meta,
           url: config.url,
           duration,
           status: response.status,
@@ -50,7 +50,7 @@ async function axiosCall(config: AxiosConfig & { meta?: any }) {
   
       err.statusCode = err.response?.status || 500;
       err.meta = {
-        ...meta, // 🔥 preserve logger
+        ...meta,
         url: config.url,
         duration,
         status: err.statusCode,

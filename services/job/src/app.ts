@@ -15,6 +15,8 @@ import './composition-root/company/getCompanyDeatils.container.js';
 import './composition-root/company/deleteCompany.container.js';
 import './composition-root/job/createJob.container.js';
 import './composition-root/job/updateJob.container.js';
+import './composition-root/job/getAllActiveJob.container.js';
+import './composition-root/job/getJobDetails.container.js';
 
 
 const app = express();

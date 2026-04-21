@@ -5,8 +5,8 @@ import { createCompanyController, deleteCompanyController, getAllCompanyControll
 
 const router = express.Router();
 
-router.get("/getAll",verifyToken, getAllCompanyController);
-router.get("/get/:id",verifyToken, getCompanyDetailsController);
+router.get("/all",verifyToken, getAllCompanyController);
+router.get("/:id",verifyToken, getCompanyDetailsController);
 router.post("/new",verifyToken, uploadFile,createCompanyController);
 router.delete("/delete",verifyToken, deleteCompanyController);
 

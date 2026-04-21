@@ -31,7 +31,7 @@ export class PostgresCompaniesRepository implements ICompaniesRepository {
     const db = client ?? pool;
 
     const result = await db.query(
-      `SELECT * FROM companies WHERE company_id = $1`,
+      `SELECT c.*  , COALESCE( jsonb_agg(j.*) FILTER(WHERE j.job_id IS NOT NULL), '[]'::jsonb ) AS jobs FROM companies c JOIN jobs j ON c.company_id =j.company_id GROUP BY c.company_id HAVING c.company_id = $1`,
       [company_id]
     );
     return result.rows[0];
