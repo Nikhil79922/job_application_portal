@@ -82,7 +82,7 @@ export class PostgresUserRepository implements IUserRepository {
     return result.rows[0];
   }
 
-  // 🔹 Supports BOTH
+  // Supports BOTH
   async getUserWithSkills(userId: number, client?: PoolClient) {
     const db = client ?? pool;
 
