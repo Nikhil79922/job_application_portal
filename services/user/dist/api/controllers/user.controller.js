@@ -8,7 +8,7 @@ import { updateProfilePicSchema } from "../dtos/updateProfilePic.schema.js";
 import { updateProfilePics } from "../../composition-root/user/updateProfilePic.container.js";
 import { updateResumeSchema } from "../dtos/updateResume.schema.js";
 import { updateResumesService } from "../../composition-root/user/updateResume.container.js";
-import { rateLimit } from "../../composition-root/rateLimiting.container.js";
+import { rateLimit } from "../../composition-root/helper/rateLimiting.container.js";
 import { addSkillsToUserService } from "../../composition-root/user/addSkillsToUser.container.js";
 import { SkillsToUserSchema } from "../dtos/SkillsToUser.schema.js";
 import { deleteSkillsToUserService } from "../../composition-root/user/deleteSkillsToUser.container.js";

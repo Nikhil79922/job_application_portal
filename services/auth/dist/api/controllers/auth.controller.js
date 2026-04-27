@@ -12,7 +12,7 @@ import { forgotSchema } from "../dtos/authForgot.schema copy.js";
 import { ResetSchema } from "../dtos/authReset.schema copy.js";
 import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
-import { rateLimit } from "../../composition-root/rateLimiting.container.js";
+import { rateLimit } from "../../composition-root/helper/rateLimiting.container.js";
 //Register User
 export const registerUser = TryCatch(async (req, res) => {
     const dto = registerSchema.parse({

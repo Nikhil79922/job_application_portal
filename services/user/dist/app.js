@@ -4,8 +4,8 @@ import UserRouter from "./api/routes/user.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
 // IMPORTANT: this ensures container initializes
-import "./composition-root/InfraConnect.container.js";
-import './composition-root/rateLimiting.container.js';
+import "./composition-root/helper/InfraConnect.container.js";
+import './composition-root/helper/rateLimiting.container.js';
 import './composition-root/user/getUserProfile.container.js';
 import './composition-root/user/updateUserProfile.container.js';
 import './composition-root/user/updateProfilePic.container.js';
