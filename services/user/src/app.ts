@@ -14,6 +14,8 @@ import './composition-root/user/updateProfilePic.container.js';
 import './composition-root/user/updateResume.container.js';
 import './composition-root/user/addSkillsToUser.container.js';
 import './composition-root/user/deleteSkillsToUser.container.js';
+import './composition-root/user/appliedForJob.container.js'
+import './composition-root/user/getAllJobApplications.container.js'
 
 const app = express();
 
