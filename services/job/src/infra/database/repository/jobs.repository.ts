@@ -76,6 +76,23 @@ export class PostgresJobsRepository implements IJobsRepository {
     return result.rows[0];
   }
 
+  async findJobData(
+    job_id: number,
+    fields: string[] = ["job_id"], // default
+    client?: PoolClient
+  ) {
+    const db = client ?? pool;
+  
+    const selectedFields = fields.join(", ");
+  
+    const result = await db.query(
+      `SELECT ${selectedFields} FROM jobs WHERE job_id = $1`,
+      [job_id]
+    );
+  
+    return result.rows[0] || null;
+  }
+
   async create(data: any, client?: PoolClient) {
     const db = client ?? pool;
 

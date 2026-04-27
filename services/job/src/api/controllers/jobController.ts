@@ -9,6 +9,7 @@ import { updateJobSchema } from "../dtos/job/updateJob.schema.js";
 import { updateJobService } from "../../composition-root/job/updateJob.container.js";
 import { getAllActiveJobService } from "../../composition-root/job/getAllActiveJob.container.js";
 import { getJobDetailsService } from "../../composition-root/job/getJobDetails.container.js";
+import { getAllApplicationForJobService } from "../../composition-root/job/getAllApplicationForJob.container.js";
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -96,6 +97,43 @@ export const getJobController = TryCatch(async (req: Request, res: Response) => 
     }
 
   const resData = await getJobDetailsService.getJobsDetails(jobId);
+
+    sendResponse(res, 200, resData?.message, resData?.data);
+});
+
+export const getAllApplicationForJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'recruiter') {
+    throw new AppError("Only recruiter can access this Route", 403);
+  }
+
+  const { id } = req.params;
+  
+  if (!id || typeof id !== "string") {
+    throw new AppError("Job ID is required", 400);
+  }
+
+  if (!/^\d+$/.test(id)) {
+    throw new AppError("Job ID must be a valid number", 400);
+  }
+
+  const jobId = Number(id);
+
+  if (!Number.isInteger(jobId) || jobId <= 0) {
+    throw new AppError("Job ID must be a positive integer", 400);
+  }
+
+  if (jobId > 1_000_000_000) {
+    throw new AppError("job ID too large", 400);
+  }
+
+  const resData = await getAllApplicationForJobService.getAllApplication(jobId,userData);
 
     sendResponse(res, 200, resData?.message, resData?.data);
 });
