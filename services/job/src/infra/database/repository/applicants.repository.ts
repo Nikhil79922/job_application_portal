@@ -36,6 +36,21 @@ export class PostgresApplicationRepository implements IApplicantionsRepository {
     return result.rows;
   }
 
+  async find(
+    applicant_id: number,
+    client?: PoolClient
+  ): Promise<any> {
+    const db = client ?? pool;
+
+    let query = `
+      SELECT  * FROM applications WHERE application_id = $1
+    `;
+
+    const result = await db.query(query, [applicant_id]);
+
+    return result.rows[0];
+  }
+
   async findAllOnJobId(jobId:number , client?:PoolClient){
 const db =client ?? pool;
 const result= await db.query(`
@@ -83,48 +98,48 @@ const result= await db.query(`
     return result.rows;
   }
 
-  async update(jobId: number, data: Partial<any>, client?: PoolClient) {
+  async update(application_id: number, data: Partial<any>, client?: PoolClient) {
     const db = client ?? pool;
-
+  
     const keys = Object.keys(data);
-
+  
     if (!keys.length) {
       throw new AppError("Update data required", 400);
     }
-
-    // column whitelist protection
+  
+    // whitelist protection
     keys.forEach((key) => {
       if (!this.allowedColumns.includes(key)) {
         throw new AppError(`Invalid update column: ${key}`, 400);
       }
     });
-
+  
     const setClause = keys
       .map((key, index) => `${key} = $${index + 1}`)
       .join(", ");
-
-    const values = [...Object.values(data), jobId];
-
+  
+    const values = [...Object.values(data), application_id];
+  
     const query = `
-      UPDATE jobs
+      UPDATE applications
       SET ${setClause}
-      WHERE job_id = $${keys.length + 1}
+      WHERE application_id = $${keys.length + 1}
       RETURNING *
     `;
-
+  
     const result = await db.query(query, values);
-
+  
     if (result.rowCount === 0) {
-      throw new AppError("Job not found", 404);
+      throw new AppError("Application not found", 404);
     }
-
+  
     return result.rows[0];
   }
 
   async delete(jobId: number, userId: number) {
     const result = await pool.query(
       `
-      DELETE FROM jobs
+      DELETE FROM applications
       WHERE job_id = $1 
       AND posted_by_recruiter = $2
       `,

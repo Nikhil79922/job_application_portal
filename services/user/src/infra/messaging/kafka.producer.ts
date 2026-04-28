@@ -34,6 +34,7 @@ export class KafkaProducer implements IMessageBroker{
   }
 
   async publish<T>(topic: string, message: T): Promise<void> {
+    await this.connect()
     if (!this.producer) {
       throw new AppError(
         "Kafka Producer is not initialized. Call connect() first.",

@@ -18,6 +18,7 @@ import './composition-root/job/updateJob.container.js';
 import './composition-root/job/getAllActiveJob.container.js';
 import './composition-root/job/getJobDetails.container.js';
 import './composition-root/job/getAllApplicationForJob.container.js';
+import './composition-root/job/updateApplication.container.js';
 
 
 const app = express();

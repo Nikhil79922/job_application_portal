@@ -27,6 +27,7 @@ export class KafkaProducer {
         return this.connecting;
     }
     async publish(topic, message) {
+        await this.connect();
         if (!this.producer) {
             throw new AppError("Kafka Producer is not initialized. Call connect() first.", 503);
         }

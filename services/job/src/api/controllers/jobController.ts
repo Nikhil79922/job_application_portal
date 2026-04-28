@@ -10,6 +10,9 @@ import { updateJobService } from "../../composition-root/job/updateJob.container
 import { getAllActiveJobService } from "../../composition-root/job/getAllActiveJob.container.js";
 import { getJobDetailsService } from "../../composition-root/job/getJobDetails.container.js";
 import { getAllApplicationForJobService } from "../../composition-root/job/getAllApplicationForJob.container.js";
+import { updateApplicationSchema } from "../dtos/job/updateApplication.schema.js";
+import { updateApplicationService } from "../../composition-root/job/updateApplication.container.js";
+
 
 // Helper function
 const getClientIP = (req: Request) =>
@@ -137,3 +140,25 @@ export const getAllApplicationForJobController = TryCatch(async (req: Authentica
 
     sendResponse(res, 200, resData?.message, resData?.data);
 });
+
+export const updateApplicationController = TryCatch(async (req:AuthenticatedRequest , res:Response)=>{
+
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'recruiter') {
+    throw new AppError("Only recruiter can access this Route", 403);
+  }
+
+  const dto = updateApplicationSchema.parse({
+    application_id: req.params.id,
+    ...req.body,
+  });
+
+  console.log(dto)
+  const resData = await updateApplicationService.updateApplications(dto,userData);
+  sendResponse(res, 200, resData?.message, resData?.data);
+})
