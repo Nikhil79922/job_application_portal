@@ -58,10 +58,10 @@ export const proxyRequest = async (req: any, target: string, breaker: any) => {
     req.log.error(error);
 
     return {
-      status: error.statusCode || 500,
+      status: error.statusCode || 503,
       data: {
         success: false,
-        message: "Service unavailable",
+        message: "Service temporarily unavailable",
       },
     };
   }
