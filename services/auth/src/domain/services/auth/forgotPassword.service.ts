@@ -1,4 +1,4 @@
-import { forgotDTO } from "../../../api/dtos/authForgot.schema copy.js";
+import { forgotDTO } from "../../../api/dtos/authForgot.schema.js";
 import { env } from "../../../config/env.js";
 import { emailTemp } from "../../../shared/utils/emailTemplate.js";
 import { ICacheService } from "../../interfaces/cache.interface.js";

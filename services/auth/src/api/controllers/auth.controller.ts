@@ -9,7 +9,7 @@ import { authLogoutService } from "../../composition-root/auth/logout.container.
 import { authForgotPasswordService } from "../../composition-root/auth/forgotPassword.container.js";
 import { loginSchema } from "../dtos/authLogin.schema.js";
 import { registerSchema } from "../dtos/authResgister.schema.js"
-import { forgotSchema } from "../dtos/authForgot.schema copy.js";
+import { forgotSchema } from "../dtos/authForgot.schema.js";
 import { ResetSchema } from "../dtos/authReset.schema copy.js";
 import AppError from "../../shared/errors/AppError.js";
 import { clearRefreshCookie, setRefreshCookie } from "../../infra/http/cookies.js";
