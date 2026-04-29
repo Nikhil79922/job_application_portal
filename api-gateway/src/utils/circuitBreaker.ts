@@ -124,7 +124,7 @@ export function createBreaker(serviceName: string) {
     status: 503,
     data: {
       success: false,
-      message: `${serviceName} service unavailable`,
+      message: `${serviceName} service temporarily unavailable`,
     },
   }));
 
