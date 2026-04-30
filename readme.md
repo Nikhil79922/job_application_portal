@@ -126,7 +126,7 @@ frontend/ → (Planned)
 
 ---
 
-## 🔄 Migration System
+## Migration System
 
 Custom SQL-based migration runner:
 
