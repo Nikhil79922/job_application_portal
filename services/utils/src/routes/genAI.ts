@@ -56,7 +56,6 @@ router.post('/career' , async(req,res)=>{
     }
 })
 
-
 router.post('/resume-analyser' , async(req,res)=>{
     try {
         const { pdfBase64 } = resumeAnalyserSchema.parse(req.body);
