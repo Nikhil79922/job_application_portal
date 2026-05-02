@@ -6,13 +6,15 @@ import genAIRoutes from './routes/genAI.js';
 import { v2 as cloudinary } from 'cloudinary';
 import { sendMailConsumer } from './infra/messaging/consumers/sendEmail.consumer.js';
 import { KafkaAdmin } from './infra/messaging/config/kafka.admin.js';
+import "./config/database.config.js";
+import { env } from './config/env.js';
+import { startUploadConsumer } from './infra/messaging/consumers/upload.consumer.js';
 
-dotenv.config();
 // Configuration
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+    cloud_name: env.CLOUDINARY.CLOUD_NAME,
+    api_key: env.CLOUDINARY.API_KEY,
+    api_secret: env.CLOUDINARY.API_SECRET,
 });
 
 const app = express();
@@ -21,6 +23,8 @@ const app = express();
 const KA = new KafkaAdmin();
 await KA.connect();
 sendMailConsumer();
+startUploadConsumer();
+
 let port = process.env.PORT
 
 app.use(cors())

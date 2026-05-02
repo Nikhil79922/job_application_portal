@@ -1,6 +1,6 @@
 
 // Infra
-import { upload } from "../../infra/storage/fileUpload.js"
+import { KafkaProducer } from "../../infra/messaging/kafka.producer.js";
 
 // Services
 import { authRegister } from "../../domain/services/auth/register.service.js";
@@ -12,7 +12,8 @@ import { PostgresUserRepository } from "../../infra/database/repository/user.rep
 import { RefreshTokenTable } from "../../infra/database/repository/refreshToken.repository.js";
 
 
-const fileUpload = new upload()
+
+const kafkaUploadFile = new KafkaProducer()
 
 const userRepo = new PostgresUserRepository();
 const refreshRepo = new RefreshTokenTable();
@@ -26,5 +27,5 @@ export const authRegisterService = new authRegister(
   refreshRepo,
   passwordService,
   tokenService,
-  fileUpload
+  kafkaUploadFile
 );

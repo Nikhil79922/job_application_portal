@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
-import { kafka } from '../config/kafka.config.js';
+import { kafka } from '../../../config/kafka.config.js';
 
 dotenv.config();
 

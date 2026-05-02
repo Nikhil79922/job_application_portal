@@ -1,5 +1,5 @@
 import { Admin } from "kafkajs";
-import { kafka } from "./kafka.config.js";
+import { kafka } from "../../../config/kafka.config.js";
 
 export class KafkaAdmin {
   private admin: Admin | null = null;
@@ -15,7 +15,7 @@ export class KafkaAdmin {
         const admin = kafka.admin();
        await admin.connect();
         console.log("✅ Kafka Admin connected");
-        
+
         await admin.createTopics({
           topics: [
             {

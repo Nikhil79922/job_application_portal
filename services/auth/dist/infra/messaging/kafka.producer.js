@@ -6,7 +6,7 @@ export class KafkaProducer {
         this.producer = null;
         this.connecting = null;
     }
-    // 🔹 Centralized connection logic (safe + idempotent)
+    //  Centralized connection logic (safe + idempotent)
     async ensureConnected() {
         if (this.producer)
             return;
@@ -15,7 +15,7 @@ export class KafkaProducer {
             this.connecting = (async () => {
                 try {
                     const producer = kafka.producer({
-                        createPartitioner: Partitioners.LegacyPartitioner, // silence warning
+                        createPartitioner: Partitioners.LegacyPartitioner,
                     });
                     await producer.connect();
                     console.log("✅ Kafka Producer connected");
@@ -37,14 +37,15 @@ export class KafkaProducer {
     async connect() {
         await this.ensureConnected();
     }
-    // 🔥 FIXED: publish auto-connects
-    async publish(topic, message) {
-        await this.ensureConnected(); // ✅ THIS IS THE MAIN FIX
+    // FIXED: publish auto-connects
+    async publish(topic, message, key) {
+        await this.ensureConnected();
         try {
             await this.producer.send({
                 topic,
                 messages: [
                     {
+                        key: key || undefined,
                         value: JSON.stringify(message),
                     },
                 ],

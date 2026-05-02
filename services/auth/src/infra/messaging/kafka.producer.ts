@@ -7,7 +7,7 @@ export class KafkaProducer implements IMessageBroker {
   private producer: Producer | null = null;
   private connecting: Promise<void> | null = null;
 
-  // 🔹 Centralized connection logic (safe + idempotent)
+  //  Centralized connection logic (safe + idempotent)
   private async ensureConnected(): Promise<void> {
     if (this.producer) return;
 
@@ -17,7 +17,7 @@ export class KafkaProducer implements IMessageBroker {
       this.connecting = (async () => {
         try {
           const producer = kafka.producer({
-            createPartitioner: Partitioners.LegacyPartitioner, // silence warning
+            createPartitioner: Partitioners.LegacyPartitioner, 
           });
 
           await producer.connect();
@@ -48,24 +48,29 @@ export class KafkaProducer implements IMessageBroker {
     await this.ensureConnected();
   }
 
-  // 🔥 FIXED: publish auto-connects
-  async publish<T>(topic: string, message: T): Promise<void> {
-    await this.ensureConnected(); // ✅ THIS IS THE MAIN FIX
-
+  // FIXED: publish auto-connects
+  async publish<T>(
+    topic: string,
+    message: T,
+    key?: string
+  ): Promise<void> {
+    await this.ensureConnected();
+  
     try {
       await this.producer!.send({
         topic,
         messages: [
           {
+            key: key || undefined,
             value: JSON.stringify(message),
           },
         ],
       });
-
+  
       console.log(`📤 Message sent to topic: ${topic}`);
     } catch (error) {
       console.error("❌ Kafka publish error:", error);
-
+  
       throw new AppError(
         `Failed to publish message to topic: ${topic}`,
         503
