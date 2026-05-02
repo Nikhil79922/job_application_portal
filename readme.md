@@ -160,7 +160,6 @@ api → domain → infra → shared → composition-root
 * PostgreSQL (no ORM)
 * SQL-based migrations
 * Strong constraints:
-
   * Foreign keys
   * ENUM statuses
   * Unique indexes
@@ -251,9 +250,6 @@ KAFKA_BROKER=
 JWT_SECRET=
 GEMINI_API_KEY=
 4. Run services
-
-Run each service separately:
-
 npm run dev
 🧪 Development Notes
 Each service runs independently
@@ -279,6 +275,3 @@ GenAI-powered workflows
 maintainable architecture
 
 Built to explore how modern backend systems integrate AI within microservices at scale.
-
-
----
