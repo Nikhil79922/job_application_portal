@@ -4,7 +4,8 @@ import cors from 'cors'
 import uplaodFileRoutes from './routes/uploadFile.js';
 import genAIRoutes from './routes/genAI.js';
 import { v2 as cloudinary } from 'cloudinary';
-import { sendMailConsumer } from './consumer.js';
+import { sendMailConsumer } from './infra/messaging/consumers/sendEmail.consumer.js';
+import { KafkaAdmin } from './infra/messaging/config/kafka.admin.js';
 
 dotenv.config();
 // Configuration
@@ -16,7 +17,9 @@ cloudinary.config({
 
 const app = express();
 
-//Kafka consumer
+//Kafka consumer and Admin 
+const KA = new KafkaAdmin();
+await KA.connect();
 sendMailConsumer();
 let port = process.env.PORT
 

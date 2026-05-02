@@ -1,6 +1,5 @@
 import { Admin } from "kafkajs";
-import { kafka } from "../../config/kafka.config.js";
-import AppError from "../../shared/errors/AppError.js";
+import { kafka } from "./kafka.config.js";
 
 export class KafkaAdmin {
   private admin: Admin | null = null;
@@ -13,9 +12,9 @@ export class KafkaAdmin {
     this.connecting = (async () => {
       try {
         const admin = kafka.admin();
-        await admin.connect();
+       await admin.connect();
         console.log("✅ Kafka Admin connected");
-        const topics = await admin.listTopics();
+        const topics = await admin.listTopics(); 
 
         if (!topics.includes(this.SEND_MAIL_TOPIC)) {
           await admin.createTopics({
@@ -32,9 +31,8 @@ export class KafkaAdmin {
         this.admin = admin;
       } catch (error) {
         this.admin = null;
-        throw new AppError(
-          "Kafka Admin connection failed. Service unavailable.",
-          503
+        throw new Error(
+          "Kafka Admin connection failed. Service unavailable."
         );
       } finally {
         this.connecting = null;
@@ -51,18 +49,16 @@ export class KafkaAdmin {
       await this.admin.disconnect();
       this.admin = null;
     } catch (error) {
-      throw new AppError(
-        "Kafka Admin disconnection failed.",
-        500
+      throw new Error(
+        "Kafka Admin disconnection failed."
       );
     }
   }
 
   getInstance(): Admin {
     if (!this.admin) {
-      throw new AppError(
-        "Kafka Admin is not initialized. Call connect() first.",
-        503
+      throw new Error(
+        "Kafka Admin is not initialized. Call connect() first."
       );
     }
 
