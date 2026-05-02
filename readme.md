@@ -1,65 +1,67 @@
-# 🚀 Job Portal Application (Microservices Backend)
+# 🚀 Job Portal Backend (Microservices Architecture)
 
-A scalable and production-ready **Job Portal Backend System** built using **Node.js, TypeScript, PostgreSQL**, and a **Microservices Architecture with an API Gateway**.
+A production-oriented **Job Portal Backend System** built using **Node.js, TypeScript, PostgreSQL**, and a **Microservices Architecture with an API Gateway**.
 
-This project follows **Clean Architecture principles** and implements **real-world backend patterns** like centralized authentication, rate limiting, and service orchestration.
+This project focuses on **scalability, separation of concerns, and real-world backend patterns**, including centralized authentication, distributed rate limiting, and async processing.
 
 ---
 
-## 🧠 Overview
+## 🧠 System Overview
 
-This system is designed to handle:
+The platform supports:
 
-- 👤 User Management (Profile, Skills, Resume)
-- 🔐 Authentication & Authorization (JWT, Refresh Tokens)
-- 🏢 Company Management (Recruiters)
-- 💼 Job Management (Creation, Listings)
-- 📄 Applications System (Apply, Track Status)
-- 📦 File Upload System (Resume, Profile Pic, Logos)
-- ⚡ Async Processing (Kafka - partial)
-- 🌐 API Gateway (Routing, Auth, Rate Limiting)
+* 👤 User profile & resume management
+* 🔐 Authentication (JWT + refresh tokens)
+* 🏢 Company & recruiter workflows
+* 💼 Job creation & listing
+* 📄 Application tracking
+* 📦 File uploads (resume, profile, assets)
+* ⚡ Event-driven workflows (Kafka – partial)
+* 🌐 API Gateway for routing, security, and control
 
 ---
 
 ## 🏗️ Architecture
 
-This project follows a **Microservices + API Gateway + Clean Architecture** approach:
-
+```
 Client
-↓
+  ↓
 API Gateway (Fastify)
-├── Rate Limiting (Redis)
-├── JWT Authentication
-├── Request Logging
-├── Reverse Proxy (Streaming)
-↓
-| Auth Service (Node.js) |
-| User Service (Node.js) |
-| Job Service (Node.js) |
-
-↓
-PostgreSQL / Redis / Kafka
+  ├── Authentication (JWT)
+  ├── Rate Limiting (Redis)
+  ├── Logging (Pino)
+  ├── Reverse Proxy (Streaming)
+  ↓
+Services
+  ├── Auth Service
+  ├── User Service
+  ├── Job Service
+  └── Utils Service (Kafka Consumers)
+  ↓
+Infrastructure
+  ├── PostgreSQL
+  ├── Redis
+  └── Kafka (partial)
+```
 
 ---
 
 ## 🌐 API Gateway
 
-A dedicated **API Gateway layer** built using **Fastify**.
+### Responsibilities
 
-### Responsibilities:
+* Centralized **JWT validation**
+* Distributed **rate limiting (Redis)**
+* **Streaming reverse proxy** (`@fastify/http-proxy`)
+* Request logging (Pino)
+* Standardized error handling
 
-- Centralized **JWT Authentication**
-- **Redis-based Rate Limiting**
-- **Streaming Reverse Proxy** (`@fastify/http-proxy`)
-- Request logging (Pino)
-- Error handling standardization
+### Why this layer exists
 
-### Why this matters:
-
-- Services remain **clean and independent**
-- Security handled at one place
-- Prevents overload using rate limiting
-- Production-level request routing
+* Keeps services **independent**
+* Avoids duplicated authentication logic
+* Protects services via rate limiting
+* Enables scalable routing
 
 ---
 
@@ -67,124 +69,219 @@ A dedicated **API Gateway layer** built using **Fastify**.
 
 ### Core
 
-- **Backend:** Node.js, TypeScript
-- **Gateway:** Fastify
-- **Database:** PostgreSQL
-- **Caching / Rate Limit:** Redis
-- **Messaging:** Kafka (partial)
-- **Validation:** Zod
-- **Auth:** JWT + Refresh Tokens
+* Node.js + TypeScript
+* Fastify (API Gateway)
+* PostgreSQL
+* Redis
+* Kafka (partial)
+
+### Supporting
+
+* Zod (validation)
+* JWT (authentication)
+* Pino (logging)
 
 ---
 
-## 📦 Services Breakdown
+## 📦 Services
 
 ### 🔐 Auth Service
 
-- Login / Register
-- Refresh Token Rotation
-- Password Reset
-- Device Tracking
-- Service-level rate limiting
+* Login / Register
+* Refresh token rotation
+* Password reset
+* Device/session tracking
+* Service-level rate limiting
 
 ---
 
 ### 👤 User Service
 
-- Profile Management
-- Resume Upload
-- Skills Management
-- Profile Picture Upload
+* Profile management
+* Resume upload
+* Skills management
+* Profile picture handling
 
 ---
 
 ### 💼 Job Service
 
-- Company Management
-- Job Creation & Listing (WIP)
-- Application System (WIP)
-- Async file handling with retry
+* Company management
+* Job creation & updates
+* Application handling
+* Async file processing with retry
+
+---
+
+### 🧰 Utils Service
+
+* Kafka consumers (email + upload)
+* Async background processing
+* Decouples heavy operations from request flow
 
 ---
 
 ## 📁 Project Structure
 
-api-gateway/ → API Gateway (Fastify)
+```
+api-gateway/
 services/
-├── auth/
-├── user/
-├── job/
-frontend/ → (Planned)
+  ├── auth/
+  ├── user/
+  ├── job/
+  └── utils/
+frontend/ (planned)
+```
 
+Each service follows:
 
-### Features:
-
-- Foreign key constraints
-- ENUM-based statuses
-- Unique constraints
-- Custom migration system
-
----
-
-## Migration System
-
-Custom SQL-based migration runner:
-
-- Version-controlled migrations
-- Service-level isolation
-- No ORM dependency
+```
+api → domain → infra → shared → composition-root
+```
 
 ---
 
-## 🔥 Key Features
+## 🧱 Database Design
 
-- API Gateway with centralized control
-- Redis-backed rate limiting (distributed)
-- JWT authentication at gateway level
-- Streaming proxy (no request mutation)
-- Clean Architecture (API → Domain → Infra)
-- Structured logging (Pino)
-- Scalable microservices design
+* PostgreSQL (no ORM)
+* SQL-based migrations
+* Strong constraints:
+
+  * Foreign keys
+  * ENUM statuses
+  * Unique indexes
+
+### Migration System
+
+* Custom SQL migration runner
+* Version-controlled migrations
+* Service-level isolation
+
+---
+
+## 🔄 Async Processing (Kafka)
+
+* Producers in services
+* Consumers in utils service
+* Retry logic implemention planned
+* DLQ (Dead Letter Queue) planned
+
+### Current Use Cases
+
+* File uploads
+* Email processing
+
+---
+
+## 🔥 Key Engineering Decisions
+
+* API Gateway for centralized control
+* No ORM → predictable SQL behavior
+* Service isolation → independent scaling
+* Async + retry → resilience
+* Clean Architecture → maintainability
 
 ---
 
 ## 🚧 Current Status
 
-| Module        | Status         |
-|--------------|--------------|
-| API Gateway  | ✅ Completed   |
-| Auth Service | ✅ Completed   |
-| User Service | ✅ Completed   |
-| Companies    | ✅ Completed   |
-| Jobs         | 🚧 In Progress |
-| Applications | 🚧 In Progress |
-| Kafka Flow   | ⚠️ Partial     |
-| Frontend     | ❌ Pending     |
+| Module       | Status     |
+| ------------ | ---------- |
+| API Gateway  | ✅ Stable   |
+| Auth Service | ✅ Stable   |
+| User Service | ✅ Stable   |
+| Company APIs | ✅ Done     |
+| Job APIs     | 🚧 Ongoing |
+| Applications | 🚧 Ongoing |
+| Kafka Flow   | ⚠️ Partial |
+| Frontend     | ❌ Pending  |
 
 ---
 
 ## ⚠️ Planned Improvements
 
-- Circuit Breaker (resilience layer)
-- Request tracing (x-request-id)
-- Redis caching layer
-- Role-based access control (RBAC)
-- Kafka consumers (async workflows)
-- Docker + Nginx setup
-- AWS deployment
+* Circuit breaker
+* Request tracing (`x-request-id`)
+* Redis caching layer
+* RBAC (role-based access)
+* Full Kafka pipeline (retry + DLQ)
+* Docker + Nginx
+* Cloud deployment (AWS)
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone repo
+### 1. Clone repository
 
 ```bash
 git clone <repo-url>
 cd job_portal_application
+```
 
+---
+
+### 2. Install dependencies
+
+```bash
 cd api-gateway && npm install
 
 cd ../services/auth && npm install
 cd ../user && npm install
 cd ../job && npm install
+cd ../utils && npm install
+```
+
+---
+
+### 3. Environment Setup
+
+Create `.env` for each service:
+
+```env
+PORT=5000
+DATABASE_URL=
+REDIS_URL=
+KAFKA_BROKER=
+JWT_SECRET=
+```
+
+---
+
+### 4. Run services
+
+Run each service separately:
+
+```bash
+npm run dev
+```
+
+---
+
+## 🧪 Development Notes
+
+* Each service runs independently
+* API Gateway must run first
+* Kafka consumers run in `utils` service
+
+---
+
+## 🧠 Design Philosophy
+
+This project emphasizes:
+
+* Clear separation of concerns
+* Explicit data flow
+* Predictable infrastructure
+* Production-oriented backend patterns
+
+---
+
+## 📌 Final Note
+
+This is not just a CRUD backend — it reflects **real-world scalable backend architecture**, focusing on:
+
+* service isolation
+* async processing
+* centralized control
+* maintainable structure
