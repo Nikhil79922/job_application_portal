@@ -10,8 +10,12 @@
 
 # Node
 node_modules/
+**/node_modules/
 
-#Enviroment 
+# Env
 .env
+**/.env
 
+# Build
 dist/
+**/dist/

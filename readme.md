@@ -2,7 +2,7 @@
 
 A production-oriented **Job Portal Backend System** built using **Node.js, TypeScript, PostgreSQL**, and a **Microservices Architecture with an API Gateway**.
 
-This project focuses on **scalability, separation of concerns, and real-world backend patterns**, including centralized authentication, distributed rate limiting, and async processing.
+This project focuses on **scalability, separation of concerns, and real-world backend patterns**, including centralized authentication, distributed rate limiting, async processing, and **GenAI-powered workflows**.
 
 ---
 
@@ -16,6 +16,7 @@ The platform supports:
 * 💼 Job creation & listing
 * 📄 Application tracking
 * 📦 File uploads (resume, profile, assets)
+* 🤖 GenAI-powered resume analysis & career recommendations
 * ⚡ Event-driven workflows (Kafka – partial)
 * 🌐 API Gateway for routing, security, and control
 
@@ -23,26 +24,29 @@ The platform supports:
 
 ## 🏗️ Architecture
 
-```
+
 Client
-  ↓
+↓
 API Gateway (Fastify)
-  ├── Authentication (JWT)
-  ├── Rate Limiting (Redis)
-  ├── Logging (Pino)
-  ├── Reverse Proxy (Streaming)
-  ↓
+├── Authentication (JWT)
+├── Rate Limiting (Redis)
+├── Logging (Pino)
+├── Reverse Proxy (Streaming)
+↓
 Services
-  ├── Auth Service
-  ├── User Service
-  ├── Job Service
-  └── Utils Service (Kafka Consumers)
-  ↓
+├── Auth Service
+├── User Service
+├── Job Service
+└── Utils Service
+├── Kafka Consumers
+├── GenAI (Gemini API)
+└── Background Processing
+↓
 Infrastructure
-  ├── PostgreSQL
-  ├── Redis
-  └── Kafka (partial)
-```
+├── PostgreSQL
+├── Redis
+└── Kafka (partial)
+
 
 ---
 
@@ -113,31 +117,41 @@ Infrastructure
 
 ---
 
-### 🧰 Utils Service
+### 🧰 Utils Service (Async + GenAI Layer)
 
-* Kafka consumers (email + upload)
+* Kafka consumers (email, uploads, background jobs)
+* GenAI integration (Gemini API)
+* Resume analysis & structured data extraction
+* Career recommendation engine
 * Async background processing
-* Decouples heavy operations from request flow
+* Decouples heavy + AI workloads from request flow
+
+### 🤖 GenAI Capabilities
+
+* Resume parsing → skills, experience, keywords
+* Context-aware career recommendations
+* AI-generated insights for job matching
+* Designed to run asynchronously via Kafka (scalable)
 
 ---
 
 ## 📁 Project Structure
 
-```
+
 api-gateway/
 services/
-  ├── auth/
-  ├── user/
-  ├── job/
-  └── utils/
+├── auth/
+├── user/
+├── job/
+└── utils/
 frontend/ (planned)
-```
+
 
 Each service follows:
 
-```
+
 api → domain → infra → shared → composition-root
-```
+
 
 ---
 
@@ -163,13 +177,14 @@ api → domain → infra → shared → composition-root
 
 * Producers in services
 * Consumers in utils service
-* Retry logic implemention planned
+* Retry logic implementation planned
 * DLQ (Dead Letter Queue) planned
 
 ### Current Use Cases
 
 * File uploads
 * Email processing
+* GenAI resume analysis (async)
 
 ---
 
@@ -179,6 +194,7 @@ api → domain → infra → shared → composition-root
 * No ORM → predictable SQL behavior
 * Service isolation → independent scaling
 * Async + retry → resilience
+* AI workloads handled asynchronously via dedicated service
 * Clean Architecture → maintainability
 
 ---
@@ -217,71 +233,52 @@ api → domain → infra → shared → composition-root
 ```bash
 git clone <repo-url>
 cd job_portal_application
-```
-
----
-
-### 2. Install dependencies
-
-```bash
+2. Install dependencies
 cd api-gateway && npm install
 
 cd ../services/auth && npm install
 cd ../user && npm install
 cd ../job && npm install
 cd ../utils && npm install
-```
+3. Environment Setup
 
----
+Create .env for each service:
 
-### 3. Environment Setup
-
-Create `.env` for each service:
-
-```env
 PORT=5000
 DATABASE_URL=
 REDIS_URL=
 KAFKA_BROKER=
 JWT_SECRET=
-```
-
----
-
-### 4. Run services
+GEMINI_API_KEY=
+4. Run services
 
 Run each service separately:
 
-```bash
 npm run dev
-```
-
----
-
-## 🧪 Development Notes
-
-* Each service runs independently
-* API Gateway must run first
-* Kafka consumers run in `utils` service
-
----
-
-## 🧠 Design Philosophy
+🧪 Development Notes
+Each service runs independently
+API Gateway must run first
+Kafka consumers run in utils service
+🧠 Design Philosophy
 
 This project emphasizes:
 
-* Clear separation of concerns
-* Explicit data flow
-* Predictable infrastructure
-* Production-oriented backend patterns
+Clear separation of concerns
+Explicit data flow
+Predictable infrastructure
+Production-oriented backend patterns
+AI integration in distributed systems
+📌 Final Note
+
+This is not just a CRUD backend — it reflects a real-world scalable backend system combining:
+
+service isolation
+async processing
+centralized control
+GenAI-powered workflows
+maintainable architecture
+
+Built to explore how modern backend systems integrate AI within microservices at scale.
+
 
 ---
-
-## 📌 Final Note
-
-This is not just a CRUD backend — it reflects **real-world scalable backend architecture**, focusing on:
-
-* service isolation
-* async processing
-* centralized control
-* maintainable structure
