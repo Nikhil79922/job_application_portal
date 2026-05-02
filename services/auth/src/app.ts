@@ -6,15 +6,10 @@ import cors from "cors";
 import authRouter from "./api/routes/auth.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
+import { initApp } from "./composition-root/index.js";
 
 // IMPORTANT: this ensures container initializes
-import "./composition-root/helper/InfraConnect.container.js";
-import './composition-root/helper/rateLimiting.container.js'
-import './composition-root/auth/login.container.js'
-import './composition-root/auth/logout.container.js'
-import './composition-root/auth/refreshToken.container.js'
-import './composition-root/auth/register.container.js'
-import './composition-root/auth/reset.container.js'
+await initApp()
 
 const app = express();
 

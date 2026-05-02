@@ -5,20 +5,11 @@ import CompanyRoute from "./api/routes/company/company.route.js";
 import JobRoute from "./api/routes/job/job.route.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
+import { initApp } from "./composition-root/index.js";
+
 
 // IMPORTANT: this ensures container initializes
-import "./composition-root/helper/InfraConnect.container.js";
-import './composition-root/helper/rateLimiting.container.js';
-import './composition-root/company/createCompany.container.js';
-import './composition-root/company/getAllCompany.container.js';
-import './composition-root/company/getCompanyDeatils.container.js';
-import './composition-root/company/deleteCompany.container.js';
-import './composition-root/job/createJob.container.js';
-import './composition-root/job/updateJob.container.js';
-import './composition-root/job/getAllActiveJob.container.js';
-import './composition-root/job/getJobDetails.container.js';
-import './composition-root/job/getAllApplicationForJob.container.js';
-import './composition-root/job/updateApplication.container.js';
+await initApp()
 
 
 const app = express();
