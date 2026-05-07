@@ -45,7 +45,7 @@ export const sendMailConsumer = async () => {
           }
 
           await transporter.sendMail({
-            from: "HireHeaven <noreply>",
+            from: "TalentForge <noreply>",
             to: payload.to,
             subject: payload.subject,
             html: payload.html
