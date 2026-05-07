@@ -100,7 +100,7 @@
         <tr>
         <td class="footer">
         <p class="footer-text">
-        © 2025 HireHeaven. All rights reserved.
+        © 2025 TalentForge. All rights reserved.
         </p>
         <p class="footer-text">
         This is an automated message, please do not reply.

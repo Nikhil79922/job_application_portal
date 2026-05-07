@@ -38,7 +38,7 @@ export class authForgotPassword{
     
         await this.messageBroker.publish("send-mail", {
           to: email,
-          subject: "RESET YOUR PASSWORD - HireHeaven",
+          subject: "RESET YOUR PASSWORD - TalentForge",
           html: emailTemp(resetLink),
         });
     
