@@ -8,11 +8,14 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   Building2,
+  ChevronDown,
   CircleHelp,
   Home,
   LogIn,
+  LogOut,
   Menu,
   SearchCheck,
+  User,
   UserPlus,
 } from "lucide-react"
 
@@ -25,6 +28,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import ThemeToggle from "@/components/shared/theme-toggle"
 
@@ -121,7 +132,7 @@ const Navbar = () => {
                 }`}
               >
 
-                {/* HOVER BACKGROUND EFFECT */}
+                {/* HOVER BACKGROUND */}
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.04] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                 <Icon className="relative z-10 h-[18px] w-[18px] opacity-90 transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-[1px]" />
@@ -170,11 +181,69 @@ const Navbar = () => {
               </Link>
             </>
           ) : (
-            <Link href="/dashboard">
-              <Button className="h-11 rounded-full bg-emerald-600 px-6 font-semibold text-white transition-all duration-500 hover:bg-emerald-500 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
-                Dashboard
-              </Button>
-            </Link>
+            <DropdownMenu>
+
+              <DropdownMenuTrigger asChild>
+                <button className="group flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 shadow-sm transition-all duration-500 hover:-translate-y-[1px] hover:border-emerald-200 hover:shadow-[0_10px_30px_rgba(16,185,129,0.08)] dark:border-white/10 dark:bg-zinc-900 dark:hover:border-emerald-500/20 dark:hover:bg-zinc-800">
+
+                  {/* AVATAR */}
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white shadow-[0_6px_18px_rgba(16,185,129,0.28)]">
+                    N
+                  </div>
+
+                  {/* INFO */}
+                  <div className="hidden text-left sm:block">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                      Nikhil
+                    </p>
+                  </div>
+
+                  <ChevronDown className="h-4 w-4 text-slate-500 transition-all duration-500 group-data-[state=open]:rotate-180 dark:text-zinc-400" />
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                className="mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-[#111111]"
+              >
+
+                {/* PROFILE HEADER */}
+                <div className="flex items-center gap-3 rounded-xl px-3 py-3">
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white shadow-[0_6px_18px_rgba(16,185,129,0.28)]">
+                    N
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                      Nikhil Singh
+                    </h3>
+
+                    <p className="text-xs text-slate-500 dark:text-zinc-400">
+                      nikhil@gmail.com
+                    </p>
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/10" />
+
+                {/* PROFILE */}
+                <DropdownMenuItem className="mt-1 cursor-pointer rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition-all duration-300 focus:bg-emerald-50 focus:text-emerald-600 dark:text-zinc-300 dark:focus:bg-emerald-500/10 dark:focus:text-emerald-400">
+                  <User className="mr-3 h-4 w-4" />
+
+                  Manage Profile
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/10" />
+
+                {/* LOGOUT */}
+                <DropdownMenuItem className="cursor-pointer rounded-xl px-3 py-3 text-sm font-medium text-red-500 transition-all duration-300 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10">
+                  <LogOut className="mr-3 h-4 w-4" />
+
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
@@ -191,7 +260,6 @@ const Navbar = () => {
               side="right"
               className="w-[88%] border-l border-slate-200 bg-white px-6 text-slate-900 dark:border-white/10 dark:bg-[#09090B] dark:text-white sm:w-[400px]"
             >
-              {/* ACCESSIBILITY */}
               <SheetHeader className="sr-only">
                 <SheetTitle>
                   Mobile Navigation Menu
@@ -205,7 +273,6 @@ const Navbar = () => {
 
                   <div className="flex items-center gap-4">
 
-                    {/* MOBILE ICON */}
                     <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-zinc-900">
 
                       <div className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
@@ -213,7 +280,6 @@ const Navbar = () => {
                       <BriefcaseBusiness className="h-5 w-5 text-slate-950 dark:text-white" />
                     </div>
 
-                    {/* MOBILE BRAND */}
                     <div>
                       <h1 className="text-2xl font-black tracking-[-1px] text-slate-950 dark:text-white">
                         Talent
@@ -258,15 +324,27 @@ const Navbar = () => {
                 </div>
 
                 {/* MOBILE ACTIONS */}
-                <div className="mt-auto flex flex-col gap-4 pb-6 pt-10">
-
-                  {/* THEME TOGGLE */}
-                  <div className="flex justify-end">
-                    <ThemeToggle />
-                  </div>
+                <div className="mt-auto border-t border-slate-200 pt-6 dark:border-white/10">
 
                   {!isAuthenticated ? (
-                    <>
+                    <div className="flex flex-col gap-4 pb-6">
+
+                      {/* THEME TOGGLE */}
+                      <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-zinc-900">
+
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Appearance
+                          </h3>
+
+                          <p className="text-xs text-slate-500 dark:text-zinc-400">
+                            Switch between light & dark
+                          </p>
+                        </div>
+
+                        <ThemeToggle />
+                      </div>
+
                       {/* LOGIN */}
                       <Button
                         onClick={() =>
@@ -280,7 +358,7 @@ const Navbar = () => {
                         Login
                       </Button>
 
-                      {/* CTA */}
+                      {/* REGISTER */}
                       <Button
                         onClick={() =>
                           handleNavigation("/register")
@@ -291,16 +369,75 @@ const Navbar = () => {
 
                         Get Started
                       </Button>
-                    </>
+                    </div>
                   ) : (
-                    <Button
-                      onClick={() =>
-                        handleNavigation("/dashboard")
-                      }
-                      className="h-12 w-full cursor-pointer rounded-full bg-emerald-600 text-white transition-all duration-500 hover:bg-emerald-500 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                    >
-                      Dashboard
-                    </Button>
+                    <div className="space-y-4 pb-6">
+
+                      {/* PROFILE CARD */}
+                      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-zinc-900">
+
+                        <div className="flex items-center gap-3">
+
+                          {/* AVATAR */}
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white shadow-[0_6px_18px_rgba(16,185,129,0.28)]">
+                            N
+                          </div>
+
+                          {/* USER INFO */}
+                          <div>
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                              Nikhil Singh
+                            </h3>
+
+                            <p className="text-xs text-slate-500 dark:text-zinc-400">
+                              nikhil@gmail.com
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* PROFILE BUTTON */}
+                        <div className="mt-5">
+
+                          <Button
+                            onClick={() =>
+                              handleNavigation("/profile")
+                            }
+                            variant="ghost"
+                            className="h-11 w-full justify-start rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 transition-all duration-500 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
+                          >
+                            <User className="mr-3 h-4 w-4" />
+
+                            Manage Profile
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* THEME TOGGLE */}
+                      <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-zinc-900">
+
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Appearance
+                          </h3>
+
+                          <p className="text-xs text-slate-500 dark:text-zinc-400">
+                            Switch between light & dark
+                          </p>
+                        </div>
+
+                        <ThemeToggle />
+                      </div>
+
+                      {/* LOGOUT */}
+                      <Button
+                        variant="ghost"
+                        className="group h-12 w-full cursor-pointer rounded-2xl border border-red-100 bg-red-50 text-sm font-semibold text-red-600 transition-all duration-500 hover:-translate-y-[1px] hover:bg-red-100 hover:text-red-700 dark:border-red-500/10 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+                      >
+                        <LogOut className="mr-2 h-4 w-4 transition-all duration-500 group-hover:-translate-x-[2px]" />
+
+                        Logout
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
