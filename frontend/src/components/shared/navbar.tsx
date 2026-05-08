@@ -27,7 +27,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/models/sheet"
 
 import {
   DropdownMenu,
@@ -35,7 +35,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/models/dropdown-menu"
 
 import ThemeToggle from "@/components/shared/theme-toggle"
 

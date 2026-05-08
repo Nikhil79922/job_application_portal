@@ -15,13 +15,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-[#0A0A0B] text-white antialiased">
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen bg-background text-foreground antialiased transition-colors duration-500">
+
         <ThemeProvider>
           <Navbar />
 
-          <main>{children}</main>
+          <main>
+            {children}
+          </main>
         </ThemeProvider>
+
       </body>
     </html>
   )
