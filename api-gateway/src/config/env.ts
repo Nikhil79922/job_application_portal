@@ -12,5 +12,6 @@ export const env = {
     AUTH: process.env.AUTH_SERVICE!,
     USER: process.env.USER_SERVICE!,
     JOB: process.env.JOB_SERVICE!,
+    UTILS: process.env.UTILS_SERVICE!,
   },
 };

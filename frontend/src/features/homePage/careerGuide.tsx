@@ -190,15 +190,15 @@ const CareerGuide = () => {
       {/* GRID */}
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:70px_70px] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)]" />
 
-      <div className="mx-auto max-w-7xl px-4 py-20 md:px-6 lg:px-8">
+      <div className="px-4 py-20 mx-auto max-w-7xl md:px-6 lg:px-8">
 
         {/* HERO */}
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="max-w-4xl mx-auto text-center">
 
           {/* BADGE */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-500/10 dark:bg-emerald-500/10 dark:text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold border rounded-full shadow-sm border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/10 dark:bg-emerald-500/10 dark:text-emerald-400">
 
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="w-4 h-4" />
 
             AI Career Intelligence
           </div>
@@ -213,7 +213,7 @@ const CareerGuide = () => {
           </h1>
 
           {/* DESCRIPTION */}
-          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 dark:text-zinc-400">
+          <p className="max-w-2xl mx-auto text-lg leading-8 mt-7 text-slate-600 dark:text-zinc-400">
             Get AI-powered career guidance,
             discover the best opportunities
             based on your skills, and analyze
@@ -223,20 +223,20 @@ const CareerGuide = () => {
         </div>
 
         {/* MAIN GRID */}
-        <div className="mt-20 grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8 mt-20 lg:grid-cols-2">
 
           {/* CAREER GUIDANCE */}
           <div className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_20px_70px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-[4px] hover:shadow-[0_25px_80px_rgba(16,185,129,0.10)] dark:border-white/10 dark:bg-[#111111]">
 
             {/* GLOW */}
-            <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-emerald-500/10 blur-3xl transition-all duration-500 group-hover:bg-emerald-500/20" />
+            <div className="absolute top-0 right-0 transition-all duration-500 rounded-full h-44 w-44 bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/20" />
 
             <div>
 
               {/* ICON */}
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-600 shadow-sm dark:bg-emerald-500/10 dark:text-emerald-400">
+              <div className="relative flex items-center justify-center w-16 h-16 shadow-sm rounded-3xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
 
-                <BrainCircuit className="h-8 w-8" />
+                <BrainCircuit className="w-8 h-8" />
               </div>
 
               {/* CONTENT */}
@@ -257,7 +257,7 @@ const CareerGuide = () => {
               {/* FORM */}
               <div className="relative mt-8">
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900 dark:text-white">
+                <label className="block mb-3 text-sm font-semibold text-slate-900 dark:text-white">
                   Add Skills
                 </label>
 
@@ -281,7 +281,7 @@ const CareerGuide = () => {
                           onClick={() =>
                             removeSkill(skill)
                           }
-                          className="flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110"
+                          className="flex items-center justify-center transition-all duration-300 rounded-full hover:scale-110"
                         >
                           <X className="h-3.5 w-3.5 cursor-pointer" />
                         </button>
@@ -313,7 +313,7 @@ const CareerGuide = () => {
                               ? "Add more..."
                               : "React, Node.js, AWS..."
                           }
-                          className="h-9 flex-1 bg-transparent px-2 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-zinc-500"
+                          className="flex-1 px-2 text-sm font-medium bg-transparent outline-none h-9 text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-zinc-500"
                         />
                       )}
                   </div>
@@ -353,7 +353,7 @@ const CareerGuide = () => {
                   </div>
 
                   {/* LIMITS */}
-                  <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 mt-4">
 
                     {/* CHARACTER LIMIT */}
                     <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#111111]">
@@ -362,7 +362,7 @@ const CareerGuide = () => {
                         Skill Length
                       </p>
 
-                      <div className="mt-2 flex items-end gap-1">
+                      <div className="flex items-end gap-1 mt-2">
 
                         <span className="text-lg font-black text-slate-900 dark:text-white">
                           {
@@ -388,7 +388,7 @@ const CareerGuide = () => {
 
                       <div className="mt-2">
 
-                        <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
                           Ready For AI
                         </span>
                       </div>
@@ -425,14 +425,14 @@ const CareerGuide = () => {
           <div className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_20px_70px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-[4px] hover:shadow-[0_25px_80px_rgba(16,185,129,0.10)] dark:border-white/10 dark:bg-[#111111]">
 
             {/* GLOW */}
-            <div className="absolute bottom-0 left-0 h-44 w-44 rounded-full bg-emerald-500/10 blur-3xl transition-all duration-500 group-hover:bg-emerald-500/20" />
+            <div className="absolute bottom-0 left-0 transition-all duration-500 rounded-full h-44 w-44 bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/20" />
 
             <div>
 
               {/* ICON */}
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-600 shadow-sm dark:bg-emerald-500/10 dark:text-emerald-400">
+              <div className="relative flex items-center justify-center w-16 h-16 shadow-sm rounded-3xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
 
-                <FileSearch className="h-8 w-8" />
+                <FileSearch className="w-8 h-8" />
               </div>
 
               {/* CONTENT */}
@@ -455,7 +455,7 @@ const CareerGuide = () => {
               {/* UPLOAD AREA */}
               <div className="relative mt-8">
 
-                <label className="mb-3 block text-sm font-semibold text-slate-900 dark:text-white">
+                <label className="block mb-3 text-sm font-semibold text-slate-900 dark:text-white">
                   Upload Resume
                 </label>
 
@@ -464,7 +464,7 @@ const CareerGuide = () => {
                   <input
                     type="file"
                     accept=".pdf"
-                    className="absolute inset-0 cursor-pointer opacity-0"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
                     onChange={(e) => {
 
                       const file =
@@ -524,7 +524,7 @@ const CareerGuide = () => {
                   </p>
 
                   {resumeName && (
-                    <div className="mt-5 rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                    <div className="px-4 py-2 mt-5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
 
                       {resumeName}
                     </div>
@@ -565,13 +565,13 @@ const CareerGuide = () => {
             {/* HERO */}
             <div className="relative overflow-hidden rounded-[32px] border border-emerald-500/10 bg-gradient-to-br from-emerald-500/[0.08] via-white to-white p-8 dark:from-emerald-500/[0.08] dark:via-[#111111] dark:to-[#111111]">
 
-              <div className="absolute right-0 top-0 h-60 w-60 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="absolute top-0 right-0 rounded-full h-60 w-60 bg-emerald-500/10 blur-3xl" />
 
               <div className="relative">
 
                 <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/10 bg-emerald-500/[0.08] px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
 
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="w-4 h-4" />
 
                   AI Generated Analysis
                 </div>
@@ -580,7 +580,7 @@ const CareerGuide = () => {
                   Your Career Roadmap
                 </h2>
 
-                <p className="mt-6 max-w-3xl text-lg leading-9 text-slate-600 dark:text-zinc-400">
+                <p className="max-w-3xl mt-6 text-lg leading-9 text-slate-600 dark:text-zinc-400">
                   {response.summary}
                 </p>
               </div>
@@ -593,7 +593,7 @@ const CareerGuide = () => {
                 Recommended Career Roles
               </h3>
 
-              <div className="mt-6 grid gap-6 lg:grid-cols-3">
+              <div className="grid gap-6 mt-6 lg:grid-cols-3">
 
                 {response.jobOptions.map(
                   (job, index) => (
@@ -653,7 +653,7 @@ const CareerGuide = () => {
                         {category.category}
                       </h4>
 
-                      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+                      <div className="grid gap-5 mt-6 lg:grid-cols-2">
 
                         {category.skills.map(
                           (
@@ -701,7 +701,7 @@ const CareerGuide = () => {
                 {response.learningApproach.title}
               </h3>
 
-              <div className="mt-7 space-y-5">
+              <div className="space-y-5 mt-7">
 
                 {response.learningApproach.points.map(
                   (

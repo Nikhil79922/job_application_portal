@@ -6,11 +6,23 @@ import userRoutes from "./routes/user.route";
 import authRoutes from "./routes/auth.route";
 import jobRoutes from "./routes/job.route";
 import { verifyToken } from "./middlewares/auth.middleware";
+import utilsRoute from "./routes/utils.route";
+import cors from "@fastify/cors"
 
 const app = Fastify({
   logger: { level: "info" },
   bodyLimit: 10485760,
 });
+
+ app.register(cors, {
+
+  origin: [
+    "http://localhost:3000",
+  ],
+
+  credentials: true,
+})
+
 
 app.register(multipart, {
   limits: {
@@ -37,7 +49,7 @@ app.register(rateLimit, {
 
 // Auth hook (clean)
 app.addHook("onRequest", async (req, reply) => {
-  const publicPrefixes = ["/api/auth", "/api/job/public" , "/api/user/public"];
+  const publicPrefixes = ["/api/auth", "/api/job/public" , "/api/user/public" , "/api/utils/ai"];
 
   const isPublic = publicPrefixes.some(prefix =>
     req.url.startsWith(prefix)
@@ -51,6 +63,7 @@ app.addHook("onRequest", async (req, reply) => {
 app.register(authRoutes);
 app.register(userRoutes);
 app.register(jobRoutes);
+app.register(utilsRoute);
 
 app.setErrorHandler((error: any, req, reply) => {
   if (error.statusCode && error.statusCode < 500) {

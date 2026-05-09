@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { careerGuidanceprompt } from '../shared/careerGuidanceprompt.js';
 import { resumeAnalyserPrompt } from '../shared/resumeAnalyserPrompt.js';
 import { resumeAnalyserSchema } from '../dtos/resumeAnalyser.schema.js';
+import { handleAIError } from '../services/helperHandler.js';
 
 
 dotenv.config(); 
@@ -35,10 +36,10 @@ router.post('/career' , async(req,res)=>{
 
         res.status(200).json(jsonResponse)
      } catch (error: any) {
-        return res.status(500).json({
-            message:error.message,
-            data:response.text
-        })
+        return handleAIError(
+            error,
+            res
+          )
      }
 
     } catch (error: any) {
@@ -48,11 +49,10 @@ router.post('/career' , async(req,res)=>{
               message: error.issues.map((e: { message: any; }) => e.message).join(", "),
             });
           }
-
-        res.status(500).json({
-            success:false,
-            message: error.message
-        })
+          return handleAIError(
+            error,
+            res
+          )
     }
 })
 
@@ -91,10 +91,10 @@ router.post('/resume-analyser' , async(req,res)=>{
 
         res.status(200).json(jsonResponse)
      } catch (error: any) {
-        return res.status(500).json({
-            message:error.message,
-            data:response.text
-        })
+        return handleAIError(
+            error,
+            res
+          )
      }
 
     } catch (error: any) {
@@ -105,10 +105,10 @@ router.post('/resume-analyser' , async(req,res)=>{
             });
           }
 
-        res.status(500).json({
-            success:false,
-            message: error.message
-        })
+          return handleAIError(
+            error,
+            res
+          )
     }
 })
 

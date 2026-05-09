@@ -39,11 +39,17 @@ const CustomModal = ({
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={
-        onOpenChange
+    open={open}
+    onOpenChange={(
+      value
+    ) => {
+  
+      // ONLY ALLOW OPEN
+      if (value) {
+        onOpenChange(true)
       }
-    >
+    }}
+  >
 
       <DialogContent
         showCloseButton={false}
@@ -79,19 +85,7 @@ const CustomModal = ({
 
         {/* HEADER */}
         <div
-          className="
-            flex
-            items-start
-            justify-between
-
-            border-b
-            border-slate-200
-
-            px-6
-            py-5
-
-            dark:border-white/10
-          "
+          className="flex items-start justify-between px-6 py-5 border-b  border-slate-200 dark:border-white/10"
         >
 
           <div>
@@ -135,30 +129,10 @@ const CustomModal = ({
             onClick={() =>
               onOpenChange(false)
             }
-            className="
-            cursor-pointer
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-
-              rounded-lg
-
-              text-slate-500
-
-              transition-colors
-
-              hover:bg-slate-100
-              hover:text-slate-700
-
-              dark:text-zinc-400
-              dark:hover:bg-white/5
-              dark:hover:text-white
-            "
+            className="flex items-center justify-center transition-colors rounded-lg cursor-pointer  h-9 w-9 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
           >
 
-            <X className="h-4 w-4 " />
+            <X className="w-4 h-4 " />
 
           </button>
         </div>

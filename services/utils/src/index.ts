@@ -7,6 +7,7 @@ import { KafkaAdmin } from './infra/messaging/config/kafka.admin.js';
 import "./config/database.config.js";
 import { env } from './config/env.js';
 import { startUploadConsumer } from './infra/messaging/consumers/upload.consumer.js';
+import logger from './shared/middleware/logger.middleware.js';
 
 // Configuration
 cloudinary.config({
@@ -17,6 +18,7 @@ cloudinary.config({
 
 const app = express();
 
+app.use(logger);
 //Kafka consumer and Admin 
 const KA = new KafkaAdmin();
 await KA.connect();
