@@ -16,8 +16,8 @@ import { CareerGuidanceResponse, ResumeAnalyserResponse } from "@/types/utils/AI
 import ButtonLoader from "@/components/loaders/button-loader"
 import aiService from "@/services/ai.service"
 import CustomModal from "@/components/models/custom-modal"
-import CareerRoadmapModal from "@/components/career-guide/career-roadmap-modal"
-import ResumeAnalysisModal from "@/components/career-guide/resume-analysis-modal"
+import CareerRoadmapModal from "@/components/models/career-guide/career-roadmap-modal"
+import ResumeAnalysisModal from "@/components/models/career-guide/resume-analysis-modal"
 
 const MAX_SKILLS = 10
 const MAX_CHARACTERS = 20
