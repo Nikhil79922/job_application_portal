@@ -13,7 +13,10 @@ export interface CustomModalProps {
   
     children: React.ReactNode
   
-    className?: string
+    className?: string,
+    showDownload?: boolean
+
+    onDownload?: () => void
   }
 
   export interface Resume_Analyser_Models_Props {

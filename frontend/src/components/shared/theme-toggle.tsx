@@ -21,7 +21,7 @@ const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <div className="h-11 w-11 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-zinc-900" />
+      <div className="bg-white border shadow-sm h-11 w-11 rounded-2xl border-slate-200 dark:border-white/10 dark:bg-zinc-900" />
     )
   }
 

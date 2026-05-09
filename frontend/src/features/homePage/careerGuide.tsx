@@ -15,9 +15,8 @@ import { Button } from "@/components/ui/button"
 import { CareerGuidanceResponse, ResumeAnalyserResponse } from "@/types/utils/AIservice.types"
 import ButtonLoader from "@/components/loaders/button-loader"
 import aiService from "@/services/ai.service"
-import CustomModal from "@/components/models/custom-modal"
-import CareerRoadmapModal from "@/components/models/career-guide/career-roadmap-modal"
-import ResumeAnalysisModal from "@/components/models/career-guide/resume-analysis-modal"
+import CareerRoadmapModal from "@/features/ai-report/career-roadmap-model"
+import ResumeAnalysisModal from "@/features/ai-report/resume-analysis-model"
 
 const MAX_SKILLS = 10
 const MAX_CHARACTERS = 20
@@ -567,7 +566,7 @@ const CareerGuide = () => {
                 resumeLoading ||
                 !resumeFile
               }
-              className="group mt-8 h-14 w-full rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-500 hover:shadow-[0_18px_40px_rgba(16,185,129,0.32)] disabled:cursor-not-allowed disabled:opacity-70"
+              className="group mt-8 h-14 w-full rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-500 hover:shadow-[0_18px_40px_rgba(16,185,129,0.32)] cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
             >
               {resumeLoading ? (
                 <ButtonLoader text="Analysing..." />

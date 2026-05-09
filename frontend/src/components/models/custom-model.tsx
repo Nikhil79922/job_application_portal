@@ -2,23 +2,38 @@
 "use client"
 
 import { useState } from "react"
+
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+
 import {
   Check,
   Download,
+  X,
 } from "lucide-react"
+
 import {
   downloadCareerGuide,
-} from "@/lib/download-career-guide"
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "../ui/button"
-import { CustomModalProps } from "@/types/global/model.types"
+} from "@/lib/ai-report-download/download-career-guide"
+
+import {
+  VisuallyHidden,
+} from "@radix-ui/react-visually-hidden"
+
+import {
+  cn,
+} from "@/lib/utils"
+
+import {
+  Button,
+} from "../ui/button"
+
+import {
+  CustomModalProps,
+} from "@/types/global/model.types"
 
 const CustomModal = ({
   open,
@@ -27,9 +42,14 @@ const CustomModal = ({
   description,
   children,
   className,
+  showDownload,
+  onDownload,
 }: CustomModalProps) => {
-  const [downloading, setDownloading] =
-    useState(false)
+
+  const [
+    downloading,
+    setDownloading,
+  ] = useState(false)
 
   return (
     <Dialog
@@ -49,26 +69,27 @@ const CustomModal = ({
         showCloseButton={false}
         className={cn(
           `
-          overflow-hidden
+            overflow-hidden
 
-          border
-          border-slate-200
+            border
+            border-slate-200
 
-          bg-white
-          p-0
+            bg-white
+            p-0
 
-          shadow-2xl
+            shadow-2xl
 
-          sm:max-w-4xl
+            sm:max-w-4xl
 
-          dark:border-white/10
-          dark:bg-[#09090B]
-        `,
+            dark:border-white/10
+            dark:bg-[#09090B]
+          `,
           className
         )}
       >
 
         {/* ACCESSIBILITY */}
+
         <VisuallyHidden>
 
           <DialogTitle>
@@ -78,9 +99,10 @@ const CustomModal = ({
         </VisuallyHidden>
 
         {/* HEADER */}
-        <div
-          className="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-200 dark:border-white/10"
-        >
+
+        <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-200 dark:border-white/10">
+
+          {/* LEFT */}
 
           <div className="flex-1">
 
@@ -88,13 +110,13 @@ const CustomModal = ({
 
               <h2
                 className="
-      text-2xl
-      font-semibold
-      tracking-[-0.5px]
+                  text-2xl
+                  font-semibold
+                  tracking-[-0.5px]
 
-      text-slate-950
-      dark:text-white
-    "
+                  text-slate-950
+                  dark:text-white
+                "
               >
                 {title}
               </h2>
@@ -104,48 +126,108 @@ const CustomModal = ({
 
               <p
                 className="
-      mt-1.5
+                  mt-1.5
 
-      max-w-2xl
+                  max-w-2xl
 
-      text-sm
-      leading-6
+                  text-sm
+                  leading-6
 
-      text-slate-500
-      dark:text-zinc-400
-    "
+                  text-slate-500
+                  dark:text-zinc-400
+                "
               >
                 {description}
               </p>
             )}
           </div>
 
+          {/* RIGHT */}
+
           <div className="flex items-center gap-3">
 
             {/* DOWNLOAD */}
 
-            {title === "AI Career Roadmap" && (
+            {showDownload && (
 
               <Button
                 onClick={async () => {
 
-                  // @ts-ignore
-                  if (window.__careerGuideResponse) {
+                  try {
 
                     setDownloading(true)
 
-                    await downloadCareerGuide(
+                    if (onDownload) {
+                      onDownload()
+                    }
+
+                    /* CAREER GUIDE */
+
+                    // @ts-ignore
+                    if (
+                      title ===
+                      "AI Career Roadmap"
+                    ) {
+
                       // @ts-ignore
-                      window.__careerGuideResponse
-                    )
+                      if (
+                        window.__careerGuideResponse
+                      ) {
+
+                        await downloadCareerGuide(
+                          // @ts-ignore
+                          window.__careerGuideResponse
+                        )
+                      }
+                    }
+
+                    /* RESUME ANALYSIS */
+
+                    // @ts-ignore
+                    if (
+                      title ===
+                      "ATS Resume Analysis"
+                    ) {
+
+                      const {
+                        downloadResumeAnalysis,
+                      } = await import(
+                        "@/lib/ai-report-download/download-resume-analysis"
+                      )
+
+                      // @ts-ignore
+                      if (
+                        window.__resumeAnalysisResponse
+                      ) {
+
+                        await downloadResumeAnalysis(
+                          // @ts-ignore
+                          window.__resumeAnalysisResponse
+                        )
+                      }
+                    }
 
                     setTimeout(() => {
-                      setDownloading(false)
+
+                      setDownloading(
+                        false
+                      )
+
                     }, 1800)
+
+                  } catch {
+
+                    setDownloading(
+                      false
+                    )
                   }
                 }}
-                className="group h-10  cursor-pointer rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/[0.12] active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-500/[0.14]"
+                className="group h-10 cursor-pointer rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/[0.12] active:scale-[0.98] dark:text-emerald-400 dark:hover:bg-emerald-500/[0.14] cursor-pointer"
+              
               >
+
+                {/* ICON */}
+
                 <div className="relative flex items-center justify-center w-4 h-4 mr-2 overflow-hidden">
 
                   <Download
@@ -186,10 +268,10 @@ const CustomModal = ({
 
             </button>
           </div>
-
         </div>
 
         {/* BODY */}
+
         <div
           className="
             max-h-[78vh]
