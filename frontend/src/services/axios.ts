@@ -1,8 +1,14 @@
-import axios from "axios"
+import axios, {
+  AxiosError,
+} from "axios"
 
 import env from "@/config/env"
-const api = axios.create({
 
+import {
+  ApiErrorResponse,
+} from "@/types/api/response.types"
+
+const api = axios.create({
   baseURL: env.API_URL,
 
   timeout: 15000,
@@ -15,9 +21,7 @@ const api = axios.create({
   withCredentials: true,
 })
 
-/* -------------------------------- */
 /* REQUEST INTERCEPTOR */
-/* -------------------------------- */
 
 api.interceptors.request.use(
 
@@ -27,7 +31,6 @@ api.interceptors.request.use(
       localStorage.getItem("token")
 
     if (token) {
-
       config.headers.Authorization =
         `Bearer ${token}`
     }
@@ -35,40 +38,50 @@ api.interceptors.request.use(
     return config
   },
 
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) =>
+    Promise.reject(error)
 )
 
-/* -------------------------------- */
 /* RESPONSE INTERCEPTOR */
-/* -------------------------------- */
 
 api.interceptors.response.use(
 
   (response) => response,
 
-  (error) => {
+  (
+    error: AxiosError<
+      ApiErrorResponse
+    >
+  ) => {
 
-    // TIMEOUT
+    /* TIMEOUT */
+
     if (
-      error.code === "ECONNABORTED"
+      error.code ===
+      "ECONNABORTED"
     ) {
 
-      console.error(
-        "Request Timeout"
-      )
+      return Promise.reject({
+        success: false,
+
+        message:
+          "Request timeout. Please try again.",
+      } satisfies ApiErrorResponse)
     }
 
-    // NETWORK ERROR
+    /* NETWORK ERROR */
+
     if (!error.response) {
 
       return Promise.reject({
         success: false,
+
         message:
-          "Unable to connect to server",
-      })
+          "Unable to connect to server.",
+      } satisfies ApiErrorResponse)
     }
+
+    /* API ERROR */
 
     return Promise.reject(
       error.response.data

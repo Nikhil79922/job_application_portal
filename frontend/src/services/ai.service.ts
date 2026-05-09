@@ -1,43 +1,79 @@
 import api from "./axios"
 
 import {
+  ApiErrorResponse,
+  ApiSuccessResponse,
+} from "@/types/api/response.types"
+
+import {
   CareerGuidanceResponse,
+  ResumeAnalyserResponse,
 } from "@/types/utils/AIservice.types"
 
 const aiService = {
 
-  /* -------------------------------- */
-  /* CAREER GUIDE */
-  /* -------------------------------- */
-
   generateCareerGuide: async (
     skills: string[]
-  ): Promise<CareerGuidanceResponse> => {
+  ): Promise<
+    CareerGuidanceResponse
+  > => {
 
-    const response =
-      await api.post(
-        "/utils/ai/career",
-        { skills }
-      )
-console.log("Response ====>",response)
-    return response.data
+    try {
+
+      const response =
+        await api.post<
+          ApiSuccessResponse<
+            CareerGuidanceResponse
+          >
+        >(
+          "/utils/ai/career",
+          { skills }
+        )
+
+      return response.data.data
+
+    } catch (error) {
+
+      const err =
+        error as ApiErrorResponse
+
+      throw {
+        success: false,
+
+        message:
+          err.message ||
+          "Failed to generate career guide.",
+      } satisfies ApiErrorResponse
+    }
   },
-
-  /* -------------------------------- */
-  /* RESUME ANALYSER */
-  /* -------------------------------- */
 
   analyseResume: async (
     pdfBase64: string
-  ) => {
+  ): Promise<
+    ResumeAnalyserResponse
+  > => {
 
-    const response =
-      await api.post(
-        "/resume-analyser",
-        { pdfBase64 }
-      )
+    try {
+      const response =await api.post<ApiSuccessResponse<ResumeAnalyserResponse>>(
+          "/utils/ai/resume-analyser",
+          { pdfBase64 }
+        )
 
-    return response.data.data
+      return response.data.data
+
+    } catch (error) {
+
+      const err =
+        error as ApiErrorResponse
+
+      throw {
+        success: false,
+
+        message:
+          err.message ||
+          "Failed to analyse resume.",
+      } satisfies ApiErrorResponse
+    }
   },
 }
 

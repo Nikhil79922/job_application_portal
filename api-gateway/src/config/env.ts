@@ -14,4 +14,8 @@ export const env = {
     JOB: process.env.JOB_SERVICE!,
     UTILS: process.env.UTILS_SERVICE!,
   },
+  AI_SERVICE:{
+    AI_PER_MINUTE_LIMIT: process.env.AI_PER_MINUTE_LIMIT,
+    AI_PER_DAY_LIMIT: process.env.AI_PER_DAY_LIMIT
+  }
 };

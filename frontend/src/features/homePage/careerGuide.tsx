@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { KeyboardEvent, useState } from "react"
-
 import {
   ArrowRight,
   BrainCircuit,
@@ -10,58 +10,34 @@ import {
   Upload,
   X,
 } from "lucide-react"
-
 import { toast } from "sonner"
-
 import { Button } from "@/components/ui/button"
-
-import {
-  CareerGuidanceResponse,
-} from "@/types/utils/AIservice.types"
-
+import { CareerGuidanceResponse, ResumeAnalyserResponse } from "@/types/utils/AIservice.types"
 import ButtonLoader from "@/components/loaders/button-loader"
-
 import aiService from "@/services/ai.service"
 import CustomModal from "@/components/models/custom-modal"
+import CareerRoadmapModal from "@/components/career-guide/career-roadmap-modal"
+import ResumeAnalysisModal from "@/components/career-guide/resume-analysis-modal"
 
 const MAX_SKILLS = 10
 const MAX_CHARACTERS = 20
 
 const CareerGuide = () => {
-
-  // SKILLS INPUT
-  const [skillInput, setSkillInput] =
-    useState("")
-
-  // SKILLS ARRAY
-  const [skills, setSkills] = useState<
-    string[]
-  >([])
-
-  // RESUME NAME
-  const [resumeName, setResumeName] =
-    useState("")
-
-  // RESPONSE
-  const [response, setResponse] =
-    useState<CareerGuidanceResponse | null>(
-      null
-    )
-
-  // LOADING
-  const [loading, setLoading] =
-    useState(false)
-
-  const [openPreview, setOpenPreview] =
-    useState(false)
+  const [skillInput, setSkillInput] = useState("")
+  const [skills, setSkills] = useState<string[]>([])
+  const [resumeName, setResumeName] = useState("")
+  const [response, setResponse] = useState<CareerGuidanceResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [openPreview, setOpenPreview] = useState(false)
+  const [resumeResponse, setResumeResponse] = useState<ResumeAnalyserResponse | null>(null)
+  const [resumeLoading, setResumeLoading] = useState(false)
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
+  const [openResumePreview, setOpenResumePreview] = useState(false)
 
   // ADD SKILL
   const addSkill = () => {
-
     const trimmedSkill =
       skillInput.trim()
-
-    // VALIDATIONS
     if (
       !trimmedSkill ||
       skills.includes(trimmedSkill) ||
@@ -69,7 +45,6 @@ const CareerGuide = () => {
     ) {
       return
     }
-
     setSkills((prev) => [
       ...prev,
       trimmedSkill,
@@ -125,32 +100,23 @@ const CareerGuide = () => {
 
   // GENERATE CAREER GUIDE
   const generateCareerGuide = async () => {
-
     try {
-
-      // VALIDATION
       if (!skills.length) {
-
-        toast.error(
-          "Please add at least one skill"
-        )
-
+        toast.error("Please add at least one skill")
         return
       }
-
       setLoading(true)
-
-
       const data =
         await aiService.generateCareerGuide(
           skills
         )
       setResponse(data)
-
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      window.__careerGuideResponse =
+        data
       setOpenPreview(true)
-
       setSkills([])
-
       // SUCCESS TOAST
       toast.success(
         "Career guide generated successfully",
@@ -177,6 +143,79 @@ const CareerGuide = () => {
       setLoading(false)
     }
   }
+
+  const analyseResume =
+    async () => {
+
+      try {
+
+        if (!resumeFile) {
+
+          toast.error(
+            "Please upload a resume"
+          )
+
+          return
+        }
+
+        setResumeLoading(true)
+
+        const reader =
+          new FileReader()
+
+        reader.readAsDataURL(
+          resumeFile
+        )
+
+        reader.onload =
+          async () => {
+
+            try {
+
+              const base64 =
+                reader.result as string
+
+              const data =
+                await aiService.analyseResume(
+                  base64
+                )
+
+              setResumeResponse(
+                data
+              )
+
+              setOpenResumePreview(
+                true
+              )
+
+              toast.success(
+                "Resume analysed successfully"
+              )
+
+            } catch (error: any) {
+
+              toast.error(
+                error.message ||
+                "Failed to analyse resume"
+              )
+            } finally {
+
+              setResumeLoading(
+                false
+              )
+            }
+          }
+
+      } catch (error: any) {
+
+        setResumeLoading(false)
+
+        toast.error(
+          error.message ||
+          "Something went wrong"
+        )
+      }
+    }
 
   return (
     <section className="relative overflow-hidden">
@@ -473,16 +512,9 @@ const CareerGuide = () => {
                       if (!file) {
                         return
                       }
-
                       // PDF VALIDATION
-                      if (
-                        file.type !==
-                        "application/pdf"
-                      ) {
-
-                        toast.error(
-                          "Only PDF files are allowed"
-                        )
+                      if (file.type !== "application/pdf") {
+                        toast.error("Only PDF files are allowed")
 
                         return
                       }
@@ -492,17 +524,12 @@ const CareerGuide = () => {
                         5 * 1024 * 1024
 
                       if (file.size > maxSize) {
-
-                        toast.error(
-                          "Maximum file size is 5MB"
-                        )
-
+                        toast.error("Maximum file size is 5MB")
                         return
                       }
+                      setResumeName(file.name)
 
-                      setResumeName(
-                        file.name
-                      )
+                      setResumeFile(file)
 
                       toast.success(
                         "Resume uploaded successfully"
@@ -534,199 +561,44 @@ const CareerGuide = () => {
             </div>
 
             {/* BUTTON */}
-            <Button className="group mt-8 h-14 w-full rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-500 hover:shadow-[0_18px_40px_rgba(16,185,129,0.32)] cursor-pointer">
+            <Button
+              onClick={analyseResume}
+              disabled={
+                resumeLoading ||
+                !resumeFile
+              }
+              className="group mt-8 h-14 w-full rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-500 hover:shadow-[0_18px_40px_rgba(16,185,129,0.32)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {resumeLoading ? (
+                <ButtonLoader text="Analysing..." />
+              ) : (
+                <>
+                  Analyze Resume
 
-              Analyze Resume
-
-              <ArrowRight className="ml-2 h-4 w-4 transition-all duration-500 group-hover:translate-x-[3px]" />
+                  <ArrowRight className="ml-2 h-4 w-4 transition-all duration-500 group-hover:translate-x-[3px]" />
+                </>
+              )}
             </Button>
           </div>
         </div>
 
       </div>
       {/* CAREER RESPONSE MODAL */}
-      <CustomModal
-        open={openPreview}
-        onOpenChange={
-          setOpenPreview
-        }
-        title="AI Career Roadmap"
-        description="
-  Personalized AI-generated career analysis,
-  roadmap guidance, role recommendations,
-  and future skill growth opportunities.
-  "
-      >
+      <CareerRoadmapModal
+  open={openPreview}
+  onOpenChange={
+    setOpenPreview
+  }
+  response={response}
+/>
 
-        {response && (
-
-          <div className="space-y-10">
-
-            {/* HERO */}
-            <div className="relative overflow-hidden rounded-[32px] border border-emerald-500/10 bg-gradient-to-br from-emerald-500/[0.08] via-white to-white p-8 dark:from-emerald-500/[0.08] dark:via-[#111111] dark:to-[#111111]">
-
-              <div className="absolute top-0 right-0 rounded-full h-60 w-60 bg-emerald-500/10 blur-3xl" />
-
-              <div className="relative">
-
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/10 bg-emerald-500/[0.08] px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-
-                  <Sparkles className="w-4 h-4" />
-
-                  AI Generated Analysis
-                </div>
-
-                <h2 className="mt-6 text-5xl font-black tracking-[-2px] text-slate-950 dark:text-white">
-                  Your Career Roadmap
-                </h2>
-
-                <p className="max-w-3xl mt-6 text-lg leading-9 text-slate-600 dark:text-zinc-400">
-                  {response.summary}
-                </p>
-              </div>
-            </div>
-
-            {/* JOB OPTIONS */}
-            <div>
-
-              <h3 className="text-3xl font-black tracking-[-1px] text-slate-950 dark:text-white">
-                Recommended Career Roles
-              </h3>
-
-              <div className="grid gap-6 mt-6 lg:grid-cols-3">
-
-                {response.jobOptions.map(
-                  (job, index) => (
-
-                    <div
-                      key={index}
-                      className="group rounded-[30px] border border-slate-200 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.05)] transition-all duration-500 hover:-translate-y-[4px] hover:shadow-[0_25px_80px_rgba(16,185,129,0.10)] dark:border-white/10 dark:bg-[#111111]"
-                    >
-
-                      <div className="inline-flex rounded-full bg-emerald-500/[0.08] px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-
-                        Recommended Role
-                      </div>
-
-                      <h4 className="mt-5 text-2xl font-black text-slate-950 dark:text-white">
-                        {job.title}
-                      </h4>
-
-                      <p className="mt-5 text-sm leading-8 text-slate-600 dark:text-zinc-400">
-                        {job.responsibilities}
-                      </p>
-
-                      <div className="mt-6 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.05] p-5">
-
-                        <p className="text-xs font-bold uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">
-                          Why This Role Fits
-                        </p>
-
-                        <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-zinc-300">
-                          {job.why}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* SKILLS */}
-            <div>
-
-              <h3 className="text-3xl font-black tracking-[-1px] text-slate-950 dark:text-white">
-                Skills To Learn
-              </h3>
-
-              <div className="mt-6 space-y-6">
-
-                {response.skillsToLearn.map(
-                  (category, index) => (
-
-                    <div
-                      key={index}
-                      className="rounded-[30px] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-[#111111]"
-                    >
-
-                      <h4 className="text-2xl font-black text-slate-950 dark:text-white">
-                        {category.category}
-                      </h4>
-
-                      <div className="grid gap-5 mt-6 lg:grid-cols-2">
-
-                        {category.skills.map(
-                          (
-                            skill,
-                            idx
-                          ) => (
-
-                            <div
-                              key={idx}
-                              className="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-white/[0.03]"
-                            >
-
-                              <h5 className="text-xl font-black text-slate-950 dark:text-white">
-                                {skill.title}
-                              </h5>
-
-                              <p className="mt-4 text-sm leading-8 text-slate-600 dark:text-zinc-400">
-                                {skill.why}
-                              </p>
-
-                              <div className="mt-6 rounded-2xl bg-white p-5 dark:bg-[#111111]">
-
-                                <p className="text-xs font-bold uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">
-                                  How To Learn
-                                </p>
-
-                                <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-zinc-300">
-                                  {skill.how}
-                                </p>
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* LEARNING APPROACH */}
-            <div className="rounded-[32px] border border-emerald-500/10 bg-emerald-500/[0.05] p-8">
-
-              <h3 className="text-3xl font-black text-slate-950 dark:text-white">
-                {response.learningApproach.title}
-              </h3>
-
-              <div className="space-y-5 mt-7">
-
-                {response.learningApproach.points.map(
-                  (
-                    point,
-                    index
-                  ) => (
-
-                    <div
-                      key={index}
-                      className="flex items-start gap-4"
-                    >
-
-                      <div className="mt-2 h-2.5 w-2.5 rounded-full bg-emerald-500" />
-
-                      <p className="text-sm leading-8 text-slate-700 dark:text-zinc-300">
-                        {point}
-                      </p>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </CustomModal>
+<ResumeAnalysisModal
+  open={openResumePreview}
+  onOpenChange={
+    setOpenResumePreview
+  }
+  response={resumeResponse}
+/>
     </section>
 
   )
