@@ -14,19 +14,12 @@ import {
   FaGithub,
   FaLinkedin,
 } from "react-icons/fa"
+import AppBackground from "@/components/shared/app-background"
 
 const AboutPage = () => {
   return (
-    <section className="relative overflow-hidden">
-
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 -z-20 bg-white dark:bg-[#09090B]" />
-
-      {/* GRADIENT LIGHT */}
-      <div className="absolute left-1/2 top-0 -z-10 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-500/5" />
-
-      {/* GRID */}
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:70px_70px] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)]" />
+    <AppBackground>
+    <section className="relative ">
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 md:px-6 lg:px-8">
 
@@ -255,6 +248,7 @@ const AboutPage = () => {
         </div>
       </div>
     </section>
+    </AppBackground>
   )
 }
 

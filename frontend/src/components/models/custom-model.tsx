@@ -257,16 +257,18 @@ const CustomModal = ({
 
             {/* CLOSE */}
 
-            <button
-              onClick={() =>
-                onOpenChange(false)
-              }
-              className="flex items-center justify-center w-10 h-10 transition-all duration-300 border cursor-pointer rounded-xl border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
-            >
+            <Button
+  type="button"
+  variant="outline"
+  size="icon"
+  onClick={() =>
+    onOpenChange(false)
+  }
+  className="h-10 w-10 rounded-xl border-slate-200 text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-slate-700 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+>
 
-              <X className="w-4 h-4" />
-
-            </button>
+  <X className="h-4 w-4" />
+</Button>
           </div>
         </div>
 

@@ -125,11 +125,10 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group relative flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-500 ease-out ${
-                  active
-                    ? "bg-emerald-100 text-emerald-700 shadow-sm dark:bg-emerald-500/10 dark:text-emerald-400"
-                    : "text-slate-700 hover:bg-emerald-50/80 hover:text-emerald-600 dark:text-zinc-400 dark:hover:bg-white/[0.05] dark:hover:text-white"
-                }`}
+                className={`group relative flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-500 ease-out ${active
+                  ? "bg-emerald-100 text-emerald-700 shadow-sm dark:bg-emerald-500/10 dark:text-emerald-400"
+                  : "text-slate-700 hover:bg-emerald-50/80 hover:text-emerald-600 dark:text-zinc-400 dark:hover:bg-white/[0.05] dark:hover:text-white"
+                  }`}
               >
 
                 {/* HOVER BACKGROUND */}
@@ -184,7 +183,11 @@ const Navbar = () => {
             <DropdownMenu>
 
               <DropdownMenuTrigger asChild>
-                <button className="group flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 shadow-sm transition-all duration-500 hover:-translate-y-[1px] hover:border-emerald-200 hover:shadow-[0_10px_30px_rgba(16,185,129,0.08)] dark:border-white/10 dark:bg-zinc-900 dark:hover:border-emerald-500/20 dark:hover:bg-zinc-800">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="group h-auto rounded-full border-slate-200 bg-white py-1.5 pl-1.5 pr-3 shadow-sm transition-all duration-500 hover:-translate-y-[1px] hover:border-emerald-200 hover:bg-white hover:shadow-[0_10px_30px_rgba(16,185,129,0.08)] dark:border-white/10 dark:bg-zinc-900 dark:hover:border-emerald-500/20 dark:hover:bg-zinc-800"
+                >
 
                   {/* AVATAR */}
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white shadow-[0_6px_18px_rgba(16,185,129,0.28)]">
@@ -199,7 +202,7 @@ const Navbar = () => {
                   </div>
 
                   <ChevronDown className="h-4 w-4 text-slate-500 transition-all duration-500 group-data-[state=open]:rotate-180 dark:text-zinc-400" />
-                </button>
+                </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
@@ -251,9 +254,18 @@ const Navbar = () => {
         <div className="lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition-all duration-500 hover:scale-[1.03] hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800">
-                <Menu className="transition-all duration-500 group-hover:scale-110" size={22} />
-              </button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="group h-11 w-11 rounded-xl border-slate-200 bg-white text-slate-900 shadow-sm transition-all duration-500 hover:scale-[1.03] hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800"
+              >
+
+                <Menu
+                  size={22}
+                  className="transition-all duration-500 group-hover:scale-110"
+                />
+              </Button>
             </SheetTrigger>
 
             <SheetContent
@@ -304,21 +316,23 @@ const Navbar = () => {
                       pathname === item.href
 
                     return (
-                      <button
+                      <Button
                         key={item.name}
+                        type="button"
+                        variant="ghost"
                         onClick={() =>
                           handleNavigation(item.href)
                         }
-                        className={`group flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-4 text-left text-base font-semibold transition-all duration-500 ${
-                          active
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                        className={`group flex h-auto w-full items-center justify-start gap-3 rounded-2xl px-4 py-4 text-left text-base font-semibold transition-all duration-500 ${active
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
                             : "text-slate-700 hover:bg-emerald-50/80 hover:text-emerald-600 dark:text-zinc-400 dark:hover:bg-white/[0.05] dark:hover:text-white"
-                        }`}
+                          }`}
                       >
+
                         <Icon className="h-[18px] w-[18px] opacity-90 transition-all duration-500 group-hover:scale-110" />
 
                         {item.name}
-                      </button>
+                      </Button>
                     )
                   })}
                 </div>
