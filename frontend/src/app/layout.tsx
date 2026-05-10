@@ -5,6 +5,7 @@ import Navbar from "@/components/shared/navbar"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 
 import { Toaster } from "sonner"
+import FuturisticFooter from "@/components/shared/footer"
 
 export const metadata: Metadata = {
   title: "Talent Forge",
@@ -27,6 +28,8 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+
+          <FuturisticFooter />
 
           <Toaster
             richColors
