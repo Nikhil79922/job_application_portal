@@ -11,7 +11,7 @@ import {
   
   import {
     CareerGuidanceResponse,
-  } from "@/types/utils/AIservice.types"
+  } from "../types/ai-career.types"
   
   export const downloadCareerGuide = async (
     data: CareerGuidanceResponse
@@ -26,29 +26,22 @@ import {
           children: [
   
             /* TITLE */
-  
             new Paragraph({
               text: "AI Career Guidance Report",
-  
               heading:
                 HeadingLevel.TITLE,
-  
               alignment:
                 AlignmentType.CENTER,
-  
               spacing: {
                 after: 400,
               },
             }),
   
             /* SUMMARY */
-  
             new Paragraph({
               text: "Professional Summary",
-  
               heading:
                 HeadingLevel.HEADING_1,
-  
               spacing: {
                 before: 300,
                 after: 180,
@@ -62,7 +55,6 @@ import {
                   size: 24,
                 }),
               ],
-  
               spacing: {
                 after: 280,
               },
@@ -73,10 +65,8 @@ import {
             new Paragraph({
               text:
                 "Recommended Career Roles",
-  
               heading:
                 HeadingLevel.HEADING_1,
-  
               spacing: {
                 before: 300,
                 after: 180,

@@ -12,11 +12,13 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { CareerGuidanceResponse, ResumeAnalyserResponse } from "@/types/utils/AIservice.types"
+import { CareerGuidanceResponse } from "../../ai-pages/career-guide/types/ai-career.types"
+import { ResumeAnalyserResponse } from "../../ai-pages/resumer-analyser/types/resume-analysis.types"
 import ButtonLoader from "@/components/loaders/button-loader"
-import aiService from "@/services/ai.service"
-import CareerRoadmapModal from "@/features/ai-report/career-roadmap-model"
-import ResumeAnalysisModal from "@/features/ai-report/resume-analysis-model"
+import aiCareerGuideService from "../../ai-pages/career-guide/services/ai-career.service"
+import aiResumeAnalyserService from "../../ai-pages/resumer-analyser/services/resume-analysis.service"
+import CareerRoadmapModal from "@/features/ai-pages/career-guide/components/career-roadmap-model"
+import ResumeAnalysisModal from "@/features/ai-pages/resumer-analyser/components/resume-analysis-model"
 
 const MAX_SKILLS = 10
 const MAX_CHARACTERS = 20
@@ -106,7 +108,7 @@ const CareerGuide = () => {
       }
       setLoading(true)
       const data =
-        await aiService.generateCareerGuide(
+        await aiCareerGuideService.generateCareerGuide(
           skills
         )
       setResponse(data)
@@ -145,60 +147,31 @@ const CareerGuide = () => {
 
   const analyseResume =
     async () => {
-
       try {
-
         if (!resumeFile) {
-
-          toast.error(
-            "Please upload a resume"
-          )
-
+          toast.error("Please upload a resume")
           return
         }
-
         setResumeLoading(true)
-
         const reader =
           new FileReader()
-
-        reader.readAsDataURL(
-          resumeFile
-        )
-
+        reader.readAsDataURL(resumeFile)
         reader.onload =
           async () => {
-
             try {
-
               const base64 =
                 reader.result as string
-
               const data =
-                await aiService.analyseResume(
-                  base64
-                )
-
-              setResumeResponse(
-                data
-              )
-
-              setOpenResumePreview(
-                true
-              )
-
-              toast.success(
-                "Resume analysed successfully"
-              )
-
+                await aiResumeAnalyserService.analyseResume(base64)
+              setResumeResponse(data)
+              setOpenResumePreview(true)
+              toast.success("Resume analysed successfully")
             } catch (error: any) {
-
               toast.error(
                 error.message ||
                 "Failed to analyse resume"
               )
             } finally {
-
               setResumeLoading(
                 false
               )

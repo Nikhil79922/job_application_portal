@@ -17,7 +17,7 @@ import {
 
 import {
   downloadCareerGuide,
-} from "@/lib/ai-report-download/download-career-guide"
+} from "@/features/ai-pages/career-guide/utils/download-career-guide"
 
 import {
   VisuallyHidden,
@@ -192,7 +192,7 @@ const CustomModal = ({
                       const {
                         downloadResumeAnalysis,
                       } = await import(
-                        "@/lib/ai-report-download/download-resume-analysis"
+                        "@/features/ai-pages/resumer-analyser/utils/download-resume-analysis"
                       )
 
                       // @ts-ignore

@@ -14,7 +14,7 @@ import {
 
 import {
   ResumeAnalyserResponse,
-} from "@/types/utils/AIservice.types"
+} from "../types/resume-analysis.types"
 
 export const downloadResumeAnalysis =
   async (

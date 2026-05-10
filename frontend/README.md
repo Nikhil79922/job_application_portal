@@ -37,68 +37,110 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 
 ## Dir structure to follow 
-src/
+frontend
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
 │
-├── app/                    # Next.js App Router
-│   ├── (auth)/
-│   ├── (dashboard)/
-│   ├── jobs/
-│   ├── companies/
-│   ├── api/
-│   ├── layout.tsx
-│   └── page.tsx
+├── src
+│   │
+│   ├── app
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   │
+│   ├── components
+│   │   │
+│   │   ├── ui
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   └── dialog.tsx
+│   │   │
+│   │   ├── layout
+│   │   │   └── navbar.tsx
+│   │   │
+│   │   ├── shared
+│   │   │   ├── theme-toggle.tsx
+│   │   │   └── button-loader.tsx
+│   │   │
+│   │   ├── modals
+│   │   │   ├── custom-modal.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   └── sheet.tsx
+│   │   │
+│   │   └── providers
+│   │       └── theme-provider.tsx
+│   │
+│   ├── features
+│   │   │
+│   │   ├── home
+│   │   │   ├── components
+│   │   │   │   ├── hero.tsx
+│   │   │   │   └── career-guide.tsx
+│   │   │
+│   │   ├── ai-career
+│   │   │   ├── components
+│   │   │   │   └── career-roadmap-modal.tsx
+│   │   │   │
+│   │   │   ├── services
+│   │   │   │   └── ai-career.service.ts
+│   │   │   │
+│   │   │   ├── types
+│   │   │   │   └── ai-career.types.ts
+│   │   │   │
+│   │   │   └── utils
+│   │   │       └── download-career-guide.ts
+│   │   │
+│   │   └── resume-analysis
+│   │       ├── components
+│   │       │   └── resume-analysis-modal.tsx
+│   │       │
+│   │       ├── services
+│   │       │   └── resume-analysis.service.ts
+│   │       │
+│   │       ├── types
+│   │       │   └── resume-analysis.types.ts
+│   │       │
+│   │       └── utils
+│   │           └── download-resume-analysis.ts
+│   │
+│   ├── services
+│   │   └── axios.ts
+│   │
+│   ├── config
+│   │   └── env.ts
+│   │
+│   ├── lib
+│   │   └── utils.ts
+│   │
+│   ├── hooks
+│   │
+│   ├── constants
+│   │
+│   ├── stores
+│   │
+│   ├── schemas
+│   │
+│   └── types
+│       ├── api
+│       │   └── response.types.ts
+│       │
+│       └── global
+│           └── window.d.ts
 │
-├── components/
-│   ├── ui/                 # shadcn generated components
-│   ├── shared/             # reusable global components
-│   ├── forms/
-│   ├── cards/
-│   ├── tables/
-│   ├── modals/
-│   └── loaders/
-│
-├── features/               # feature/domain based modules
-│   ├── auth/
-│   ├── jobs/
-│   ├── company/
-│   ├── applicants/
-│   └── admin/
-│
-├── services/               # API calls
-│   ├── axios.ts
-│   ├── auth.service.ts
-│   ├── jobs.service.ts
-│   └── users.service.ts
-│
-├── store/                  # Zustand/Redux
-│   ├── auth.store.ts
-│   └── jobs.store.ts
-│
-├── hooks/
-│   ├── useAuth.ts
-│   ├── useDebounce.ts
-│   └── usePagination.ts
-│
-├── lib/
-│   ├── utils.ts
-│   ├── validators.ts
-│   ├── constants.ts
-│   └── permissions.ts
-│
-├── types/
-│   ├── auth.types.ts
-│   ├── jobs.types.ts
-│   └── global.types.ts
-│
-├── config/
-│   ├── env.ts
-│   └── site.ts
-│
-├── providers/
-│   ├── QueryProvider.tsx
-│   └── ThemeProvider.tsx
-│
-├── styles/
-│   └── globals.css
-│
-└── middleware.ts
+├── .gitignore
+├── AGENTS.md
+├── CLAUDE.md
+├── README.md
+├── components.json
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+└── tsconfig.json
