@@ -7,6 +7,7 @@ import env from "@/config/env"
 import {
   ApiErrorResponse,
 } from "@/types/api/response.types"
+import { useAuthStore } from "@/stores/auth.store"
 
 const api = axios.create({
   baseURL: env.API_URL,
@@ -28,9 +29,12 @@ api.interceptors.request.use(
   (config) => {
 
     const token =
-      localStorage.getItem("token")
+      useAuthStore
+        .getState()
+        .accessToken
 
     if (token) {
+
       config.headers.Authorization =
         `Bearer ${token}`
     }

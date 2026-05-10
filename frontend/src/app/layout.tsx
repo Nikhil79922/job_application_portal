@@ -1,15 +1,21 @@
 import type { Metadata } from "next"
+
 import "./globals.css"
 
 import Navbar from "@/components/shared/navbar"
+
+import FuturisticFooter from "@/components/shared/footer"
+
 import { ThemeProvider } from "@/components/providers/theme-provider"
 
+import QueryProvider from "@/components/providers/query-provider"
+
 import { Toaster } from "sonner"
-import FuturisticFooter from "@/components/shared/footer"
 
 export const metadata: Metadata = {
   title: "Talent Forge",
-  description: "Connecting Talent With Opportunity",
+  description:
+    "Connecting Talent With Opportunity",
 }
 
 export default function RootLayout({
@@ -17,29 +23,39 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
+
       <body className="min-h-screen bg-background text-foreground antialiased">
 
-        <ThemeProvider>
+        <QueryProvider>
 
-          <Navbar />
+          <ThemeProvider>
 
-          <main>
-            {children}
-          </main>
+            <Navbar />
 
-          <FuturisticFooter />
+            <main>
+              {children}
+            </main>
 
-          <Toaster
-            richColors
-            position='top-center'
-            closeButton
-            duration={3000}
-            theme="system"
-          />
+            <FuturisticFooter />
 
-        </ThemeProvider>
+            <Toaster
+              richColors
+              position="top-center"
+              closeButton
+              duration={3000}
+              theme="system"
+            />
+
+          </ThemeProvider>
+
+        </QueryProvider>
+
       </body>
     </html>
   )

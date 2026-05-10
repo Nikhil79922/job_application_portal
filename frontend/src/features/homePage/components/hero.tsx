@@ -21,7 +21,7 @@ const Hero = () => {
 
 <section className="relative">
 
-  <div className="mx-auto grid min-h-[92vh] max-w-7xl items-center gap-16 px-4 py-20 md:px-6 lg:grid-cols-2 lg:px-8">
+  <div className="mx-auto grid min-h-[92vh] max-w-7xl items-center gap-16 px-4 py-17 md:px-6 lg:grid-cols-2 lg:px-8">
 
     {/* LEFT CONTENT */}
     <div className="relative z-10">
