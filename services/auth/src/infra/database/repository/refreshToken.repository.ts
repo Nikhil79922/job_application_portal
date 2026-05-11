@@ -44,7 +44,16 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
 
   async find(
     conditions: Record<string, any>,
-    selectFields: string[] = ["user_id"]
+    selectFields: string[] = [ "token_id",
+      "user_id",
+      "token_hash",
+      "device",
+      "device_type",
+      "revoked",
+      "user_agent",
+      "expires_at",
+      "created_at"
+    ]
   ) {
     const keys = Object.keys(conditions);
 

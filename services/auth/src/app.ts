@@ -13,10 +13,30 @@ await initApp()
 
 const app = express();
 
-app.use(cors({
-    origin: "http://10.29.86.240:51600",
-    credentials: true
-  }));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://192.0.0.2:3000",
+]
+
+app.use(
+  cors({
+    origin: (
+      origin,
+      callback
+    ) => {
+      if (!origin ||allowedOrigins.includes(origin)) {
+        callback(
+          null,
+          true
+        )} else {
+        callback(
+          new Error(
+            "Not allowed by CORS"
+          ) )
+      }},
+    credentials: true,
+  })
+)
 
 app.use(logger);
 app.use(express.json());

@@ -7,7 +7,7 @@ export class JwtTokenService implements ITokenService {
 
     async generateAccessToken(payload: any) {
         return jwt.sign(payload, env.JWT_SECRET!, {
-            expiresIn: "15d"  // only till the development phase
+            expiresIn: "15m"  // only till the development phase
         });
     }
 

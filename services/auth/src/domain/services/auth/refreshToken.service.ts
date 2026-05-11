@@ -24,7 +24,7 @@ export class authRefreshToken {
     const tokenRow = await this.refreshRepo.find({
       token_hash: tokenHash,
     });
-  
+  console.log(deviceInfo.device , tokenRow)
     AuthEntity.validateRefreshToken(tokenRow);
     AuthEntity.validateDeviceMatch(tokenRow.device, deviceInfo.device);
   

@@ -23,8 +23,10 @@ export const useLogin = () => {
 
   const router = useRouter()
 
-  const { setAuth } =
-    useAuthStore()
+  const setAuth =
+    useAuthStore(
+      (state) => state.setAuth
+    )
 
   return useMutation<
     LoginResponse,

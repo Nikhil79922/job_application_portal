@@ -27,6 +27,7 @@ export const verifyToken = TryCatch(async (req: AuthenticatedRequest, res: Respo
         throw new AppError("User not found ", 401);
     }
     userDetails.skills= userDetails.skills  || [];
+    delete userDetails.password;
     req.user = userDetails as unknown as Users
     next();
 })

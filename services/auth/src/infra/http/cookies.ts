@@ -7,6 +7,7 @@ export function setRefreshCookie(res: Response, token: string) {
     secure: env.NODE_ENV === "production",
     sameSite: "lax" ,
     maxAge: 15 * 24 * 60 * 60 * 1000,
+    path: "/",
   });
 }
 

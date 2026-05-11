@@ -37,6 +37,7 @@ async function axiosCall(config: AxiosConfig & { meta?: any }) {
       return {
         status: response.status,
         data: response.data,
+        headers: response.headers,
         meta: {
           ...meta,
           url: config.url,

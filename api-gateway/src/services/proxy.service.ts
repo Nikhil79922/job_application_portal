@@ -36,6 +36,11 @@ export const proxyRequest = async (req: any, target: string, breaker: any) => {
     if (req.headers.cookie) {
       headers.cookie = req.headers.cookie;
     }
+
+    if (req.headers["user-agent"]) {
+      headers["user-agent"] =
+        req.headers["user-agent"]
+    }
     const response = await breaker.fire({
       method: req.method,
       url: `${target}${req.url}`,
@@ -52,6 +57,7 @@ export const proxyRequest = async (req: any, target: string, breaker: any) => {
     return {
       status: response.status,
       data: response.data,
+      headers: response.headers,
     };
 
   } catch (error: any) {

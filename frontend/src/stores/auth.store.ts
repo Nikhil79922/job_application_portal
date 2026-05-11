@@ -1,12 +1,17 @@
-import { AuthState } from "@/types/global/auth/store.type"
 import { create } from "zustand"
 
 import { persist } from "zustand/middleware"
 
+import {
+  AuthState,
+} from "@/types/global/auth/store.type"
+
 export const useAuthStore =
   create<AuthState>()(
     persist(
+
       (set) => ({
+
         user: null,
 
         accessToken: null,
@@ -33,6 +38,14 @@ export const useAuthStore =
 
       {
         name: "auth-storage",
+
+        partialize: (state) => ({
+
+          user: state.user,
+
+          isAuthenticated:
+            state.isAuthenticated,
+        }),
       }
     )
   )
