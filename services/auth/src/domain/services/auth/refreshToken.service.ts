@@ -29,6 +29,8 @@ export class authRefreshToken {
     AuthEntity.validateDeviceMatch(tokenRow.device, deviceInfo.device);
   
     const user = await this.userRepo.findById(tokenRow.user_id);
+
+    console.log(user)
     AuthEntity.ensureUserExists(user);
   
     const accessToken = await this.tokenService.generateAccessToken({

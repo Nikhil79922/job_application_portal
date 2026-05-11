@@ -28,7 +28,7 @@ export class PostgresUserRepository implements IUserRepository {
     }
     async findById(userId: number) {
         const result = await pool.query(
-            `SELECT * FROM users WHERE email = $1 LIMIT 1`,
+            `SELECT * FROM users WHERE user_id = $1 LIMIT 1`,
             [userId]
         );
          return result.rows[0] ?? null;

@@ -84,7 +84,7 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
         `;
 
     const result = await pool.query(query, values);
-    return result.rows;
+    return result.rows[0];
   }
 
   async update(
