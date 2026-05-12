@@ -47,7 +47,7 @@ export const useLogin = () => {
         response.message
       )
 
-      router.push("/dashboard")
+      router.push("/")
     },
 
     onError: (error) => {

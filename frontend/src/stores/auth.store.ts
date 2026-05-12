@@ -18,6 +18,15 @@ export const useAuthStore =
 
         isAuthenticated: false,
 
+        hasHydrated: false,
+
+        setHasHydrated: (
+          state
+        ) =>
+          set({
+            hasHydrated: state,
+          }),
+
         setAuth: (
           user,
           accessToken
@@ -26,6 +35,7 @@ export const useAuthStore =
             user,
             accessToken,
             isAuthenticated: true,
+            hasTriedRestore: false,
           }),
 
         logout: () =>
@@ -33,7 +43,16 @@ export const useAuthStore =
             user: null,
             accessToken: null,
             isAuthenticated: false,
+            hasTriedRestore: true,
           }),
+
+        hasTriedRestore: false,
+
+        setHasTriedRestore:
+          (state) =>
+            set({
+              hasTriedRestore: state,
+            }),
       }),
 
       {
@@ -46,6 +65,14 @@ export const useAuthStore =
           isAuthenticated:
             state.isAuthenticated,
         }),
+
+        onRehydrateStorage:
+          () => (state) => {
+
+            state?.setHasHydrated(
+              true
+            )
+          },
       }
     )
   )

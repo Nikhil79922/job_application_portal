@@ -24,13 +24,10 @@ export class authRefreshToken {
     const tokenRow = await this.refreshRepo.find({
       token_hash: tokenHash,
     });
-  console.log(deviceInfo.device , tokenRow)
     AuthEntity.validateRefreshToken(tokenRow);
     AuthEntity.validateDeviceMatch(tokenRow.device, deviceInfo.device);
   
     const user = await this.userRepo.findById(tokenRow.user_id);
-
-    console.log(user)
     AuthEntity.ensureUserExists(user);
   
     const accessToken = await this.tokenService.generateAccessToken({

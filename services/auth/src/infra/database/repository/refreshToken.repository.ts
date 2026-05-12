@@ -44,7 +44,7 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
 
   async find(
     conditions: Record<string, any>,
-    selectFields: string[] = [ "token_id",
+    selectFields: string[] = ["token_id",
       "user_id",
       "token_hash",
       "device",
@@ -169,20 +169,16 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
 
   }
 
-  async revokeOne(tokenHash: string) {
-    if (!tokenHash) {
-      throw new AppError("Refresh Token Required", 400);
-    }
+  async revokeOne(tokenHash: string) {  
     const query = `
-    UPDATE refresh_tokens
-    SET revoked = true
- WHERE token_hash = $1
-      AND revoked = false
-      AND expires_at > NOW()
-  `;
-
+      DELETE FROM refresh_tokens
+      WHERE token_hash = $1
+        AND revoked = false
+        AND expires_at > NOW()
+    `;
+  
     const result = await pool.query(query, [tokenHash]);
-
+  
     if (result.rowCount === 0) {
       throw new AppError("Invalid or expired refresh token", 400);
     }
@@ -202,12 +198,12 @@ export class RefreshTokenTable implements IRefreshTokenRepository {
       )
       RETURNING *;
     `;
-  
+
     const result = await pool.query(query, [userId]);
-  
+
     if (result.rowCount === 0) {
       throw new AppError("No active session found", 400);
-    }else{
+    } else {
       return true;
     }
   }

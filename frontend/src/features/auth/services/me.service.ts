@@ -11,19 +11,25 @@ interface MeResponse
   extends ApiSuccessResponse<MeUser> {
   }
 
-const meService = {
+  const meService = {
 
-  getMe: async (): Promise<
-    MeResponse
-  > => {
-
-    const response =
-      await api.get<MeResponse>(
-        "/user/me"
-      )
-
-    return response.data
-  },
-}
+    getMe: async (
+      accessToken: string
+    ): Promise<MeResponse> => {
+  
+      const response =
+        await api.get<MeResponse>(
+          "/user/me",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          }
+        )
+  
+      return response.data
+    },
+  }
 
 export default meService

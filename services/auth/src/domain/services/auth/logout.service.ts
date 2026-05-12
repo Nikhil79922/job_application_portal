@@ -18,9 +18,6 @@ export class authLogout{
           return; // silent logout
         }
     
-        await this.refreshRepo.update(
-          { token_hash: tokenHash },
-          { revoked: true }
-        );
+        await this.refreshRepo.revokeOne(tokenHash);
       }
 }

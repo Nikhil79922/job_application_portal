@@ -2,8 +2,11 @@
 
 import {
   useEffect,
-  useState,
 } from "react"
+
+import {
+  useQuery,
+} from "@tanstack/react-query"
 
 import { toast } from "sonner"
 
@@ -17,70 +20,113 @@ import {
 
 export const useRestoreSession = () => {
 
-  const [isRestoring, setIsRestoring] =useState(true)
+  const hasHydrated =
+    useAuthStore(
+      (state) =>
+        state.hasHydrated
+    )
 
   const accessToken =
     useAuthStore(
-      (state) => state.accessToken
+      (state) =>
+        state.accessToken
     )
 
   const setAuth =
     useAuthStore(
-      (state) => state.setAuth
+      (state) =>
+        state.setAuth
     )
 
   const logout =
     useAuthStore(
-      (state) => state.logout
+      (state) =>
+        state.logout
     )
+
+  const query = useQuery({
+
+    queryKey: [
+      "restore-session",
+    ],
+
+    enabled:
+      hasHydrated &&
+      !accessToken,
+
+    retry: false,
+
+    staleTime: Infinity,
+
+    queryFn: async () => {
+
+      /* REFRESH TOKEN */
+
+      const refreshResponse =
+        await refreshService.refresh()
+
+      const newAccessToken =
+        refreshResponse
+          .data
+          .accessToken
+
+      /* FETCH USER */
+
+      const meResponse =
+        await meService.getMe(
+          newAccessToken
+        )
+
+      return {
+        user:
+          meResponse.data,
+
+        accessToken:
+          newAccessToken,
+      }
+    },
+  })
+
+  /* RESTORE AUTH */
 
   useEffect(() => {
 
-    const restoreSession =
-      async () => {
-        try {
-          if (accessToken) {
-            setIsRestoring(false)
-            return
-          }
+    if (!query.data) {
+      return
+    }
 
-          const refreshResponse =
-            await refreshService.refresh()
-
-          const newAccessToken =
-            refreshResponse
-              .data
-              .accessToken
-
-          const meResponse =
-            await meService.getMe()
-
-          setAuth(
-            meResponse.data,
-            newAccessToken
-          )
-
-        } catch {
-
-          logout()
-
-          toast.error(
-            "Session expired. Please login again."
-          )
-
-        } finally {
-
-          setIsRestoring(false)
-        }
-      }
-
-    restoreSession()
+    setAuth(
+      query.data.user,
+      query.data.accessToken
+    )
 
   }, [
-    accessToken,
+    query.data,
     setAuth,
+  ])
+
+  /* HANDLE FAILURE */
+
+  useEffect(() => {
+
+    if (!query.error) {
+      return
+    }
+
+    logout()
+
+    toast.error(
+      "Session expired. Please login again."
+    )
+
+  }, [
+    query.error,
     logout,
   ])
 
-  return isRestoring
+  return {
+    isRestoring:
+      query.isLoading,
+      hasHydrated,
+  }
 }
