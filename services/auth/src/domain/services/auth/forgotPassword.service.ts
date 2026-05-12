@@ -34,7 +34,7 @@ export class authForgotPassword{
           900
         );
     
-        const resetLink = `${env.Frontend_Url}/reset/${resetToken}`;
+        const resetLink = `${env.Frontend_Url}/reset-password/${resetToken}`;
     
         await this.messageBroker.publish("send-mail", {
           to: email,

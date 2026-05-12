@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation"
 
 import { toast } from "sonner"
 
-import { useMutation } from "@tanstack/react-query"
+import {
+  useMutation,
+} from "@tanstack/react-query"
 
 import logoutService from "../services/logout.service"
 
@@ -18,11 +20,19 @@ import type {
 
 export const useLogout = () => {
 
-  const router = useRouter()
+  const router =
+    useRouter()
 
   const logout =
     useAuthStore(
-      (state) => state.logout
+      (state) =>
+        state.logout
+    )
+
+  const setHasTriedRestore =
+    useAuthStore(
+      (state) =>
+        state.setHasTriedRestore
     )
 
   return useMutation({
@@ -30,9 +40,17 @@ export const useLogout = () => {
     mutationFn:
       logoutService.logout,
 
-    onSuccess: (response) => {
+    onSuccess: (
+      response
+    ) => {
+
+      /* CLEAR AUTH */
 
       logout()
+
+      /* RESET RESTORE STATE */
+
+      setHasTriedRestore(false)
 
       toast.success(
         response.message

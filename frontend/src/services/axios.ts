@@ -138,50 +138,52 @@ api.interceptors.response.use(
 
     if (
       error.response.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !originalRequest.url?.includes(
+        "/auth/refreshToken"
+      )
     ) {
-
+    
       originalRequest._retry = true
-
+    
       /* ALREADY REFRESHING */
-
+    
       if (isRefreshing) {
-
+    
         return new Promise(
           (
             resolve,
             reject
           ) => {
-
+    
             failedQueue.push({
               resolve,
               reject,
             })
           }
         ).then((token) => {
-
+    
           originalRequest.headers.Authorization =
             `Bearer ${token}`
-
+    
           return api(
             originalRequest
           )
         })
       }
-
+    
       isRefreshing = true
-
+    
       try {
+    
         const refreshResponse =
           await refreshService.refresh()
-
+    
         const newAccessToken =
           refreshResponse
             .data
             .accessToken
-
-        /* UPDATE STORE */
-
+    
         useAuthStore
           .getState()
           .setAuth(
@@ -190,36 +192,36 @@ api.interceptors.response.use(
               .user!,
             newAccessToken
           )
-
+    
         processQueue(
           null,
           newAccessToken
         )
-
+    
         originalRequest.headers.Authorization =
           `Bearer ${newAccessToken}`
-
+    
         return api(
           originalRequest
         )
-
+    
       } catch (refreshError) {
-
+    
         processQueue(
           refreshError,
           null
         )
-
+    
         useAuthStore
           .getState()
           .logout()
-
+    
         return Promise.reject(
           refreshError
         )
-
+    
       } finally {
-
+    
         isRefreshing = false
       }
     }

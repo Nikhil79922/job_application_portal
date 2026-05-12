@@ -7,6 +7,7 @@ import {
 import {
   useRestoreSession,
 } from "@/features/auth/hooks/use-restore-session"
+
 import FuturisticLoader from "../loaders/page-loader"
 
 interface Props {
@@ -28,6 +29,7 @@ export default function AuthProvider({
     return null
   }
 
+  /* SHOW LOADER DURING RESTORE */
 
   if (isRestoring) {
     return <FuturisticLoader />

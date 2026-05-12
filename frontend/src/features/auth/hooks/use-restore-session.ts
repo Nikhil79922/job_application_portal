@@ -26,6 +26,18 @@ export const useRestoreSession = () => {
         state.hasHydrated
     )
 
+  const hasTriedRestore =
+    useAuthStore(
+      (state) =>
+        state.hasTriedRestore
+    )
+
+  const setHasTriedRestore =
+    useAuthStore(
+      (state) =>
+        state.setHasTriedRestore
+    )
+
   const accessToken =
     useAuthStore(
       (state) =>
@@ -52,13 +64,18 @@ export const useRestoreSession = () => {
 
     enabled:
       hasHydrated &&
-      !accessToken,
+      !accessToken &&
+      !hasTriedRestore,
 
     retry: false,
 
     staleTime: Infinity,
 
     queryFn: async () => {
+
+      /* PREVENT INFINITE RETRIES */
+
+      setHasTriedRestore(true)
 
       /* REFRESH TOKEN */
 
@@ -78,6 +95,7 @@ export const useRestoreSession = () => {
         )
 
       return {
+
         user:
           meResponse.data,
 
@@ -100,9 +118,14 @@ export const useRestoreSession = () => {
       query.data.accessToken
     )
 
+    /* ALLOW FUTURE RESTORES */
+
+    setHasTriedRestore(false)
+
   }, [
     query.data,
     setAuth,
+    setHasTriedRestore,
   ])
 
   /* HANDLE FAILURE */
@@ -125,8 +148,11 @@ export const useRestoreSession = () => {
   ])
 
   return {
+
     isRestoring:
-      query.isLoading,
-      hasHydrated,
+      query.fetchStatus ===
+      "fetching",
+
+    hasHydrated,
   }
 }
