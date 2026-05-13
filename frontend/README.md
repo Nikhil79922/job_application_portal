@@ -144,3 +144,41 @@ frontend
 ├── package.json
 ├── postcss.config.mjs
 └── tsconfig.json
+
+
+
+
+
+profile
+├── components
+│   ├── modals
+│   │   ├── update-profile-modal.tsx
+│   │   ├── upload-avatar-modal.tsx
+│   │   └── upload-resume-modal.tsx
+│   │
+│   ├── profile-page.tsx
+│   ├── profile-hero.tsx
+│   ├── profile-actions.tsx
+│   ├── profile-status.tsx
+│   ├── profile-about.tsx
+│   ├── profile-skills.tsx
+│   └── profile-resume.tsx
+│
+├── hooks
+│   ├── use-profile.ts
+│   ├── use-update-profile.ts
+│   ├── use-upload-avatar.ts
+│   └── use-upload-resume.ts
+│
+├── services
+│   ├── profile.service.ts
+│   ├── update-profile.service.ts
+│   ├── upload-avatar.service.ts
+│   └── upload-resume.service.ts
+│
+├── schemas
+│   ├── update-profile.schema.ts
+│   ├── upload-avatar.schema.ts
+│   └── upload-resume.schema.ts
+│
+└── types

@@ -35,13 +35,15 @@ export default function ProfilePage() {
         return null
     }
 
+    const isRecruiter =
+        data.role ===
+        "recruiter"
+
     return (
 
         <AppBackground>
 
             <section className="relative min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
-
-                {/* PAGE CONTAINER */}
 
                 <div className="mx-auto max-w-7xl space-y-8">
 
@@ -51,60 +53,83 @@ export default function ProfilePage() {
                         user={data}
                     />
 
-                    {/* SECTION 1 */}
+                    {/* RECRUITER LAYOUT */}
 
-                    <div className="grid gap-8 xl:grid-cols-2">
+                    {isRecruiter ? (
 
-                        {/* ABOUT */}
+                        <>
+                            {/* TOP */}
 
-                        <div className="h-full">
+                            <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
 
-                            <ProfileAbout
-                                user={data}
-                            />
-                        </div>
+                                {/* ABOUT */}
 
-                        {/* STATUS */}
+                                <div>
 
-                        <div className="h-full xl:sticky xl:top-24">
+                                    <ProfileAbout
+                                        user={data}
+                                    />
+                                </div>
+
+                                {/* ACTIONS */}
+
+                                <div className="xl:sticky xl:top-24">
+
+                                    <ProfileActions
+                                        user={data}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* STATUS */}
 
                             <ProfileStatus
                                 user={data}
                             />
-                        </div>
-                    </div>
+                        </>
 
-                    {/* SECTION 2 */}
+                    ) : (
 
-                    <div className="grid gap-8 xl:grid-cols-2">
+                        <>
+                            {/* JOBSEEKER SECTION 1 */}
 
-                        {/* SKILLS */}
+                            <div className="grid gap-8 xl:grid-cols-2">
 
-                        <div className="h-full">
+                                <ProfileAbout
+                                    user={data}
+                                />
 
-                            <ProfileSkills
+                                <div className="xl:sticky xl:top-24">
+
+                                    <ProfileStatus
+                                        user={data}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* JOBSEEKER SECTION 2 */}
+
+                            <div className="grid gap-8 xl:grid-cols-2">
+
+                                <ProfileSkills
+                                    user={data}
+                                />
+
+                                <div className="xl:sticky xl:top-24">
+
+                                    <ProfileActions
+                                        user={data}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* RESUME */}
+
+                            <ProfileResume
                                 user={data}
                             />
-                        </div>
-
-                        {/* ACTIONS */}
-
-                        <div className="h-full xl:sticky xl:top-24">
-
-                            <ProfileActions
-                                user={data}
-                            />
-                        </div>
-                    </div>
-
-                    {/* SECTION 3 */}
-
-                    <div>
-
-                        <ProfileResume
-                            user={data}
-                        />
-                    </div>
+                        </>
+                    )}
                 </div>
             </section>
         </AppBackground>
