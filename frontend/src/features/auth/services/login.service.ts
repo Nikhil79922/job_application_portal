@@ -1,5 +1,9 @@
 import api from "@/services/axios"
 
+import {
+  ApiError,
+} from "@/services/axios"
+
 import type {
   LoginPayload,
   LoginResponse,
@@ -11,13 +15,34 @@ const authService = {
     payload: LoginPayload
   ): Promise<LoginResponse> => {
 
-    const response =
-      await api.post<LoginResponse>(
-        "/auth/login",
-        payload
-      )
+    try {
 
-    return response.data
+      const response =
+        await api.post<LoginResponse>(
+          "/auth/login",
+          payload
+        )
+
+      return response.data
+
+    } catch (error) {
+
+      /* CENTRALIZED API ERROR */
+
+      if (
+        error instanceof ApiError
+      ) {
+        throw error
+      }
+
+      /* FALLBACK UNKNOWN ERROR */
+
+      throw new ApiError({
+        status: 500,
+        message:
+          "Login failed. Please try again.",
+      })
+    }
   },
 }
 

@@ -48,7 +48,28 @@ export default function LoginPage() {
   const onSubmit = async (
     data: LoginDTO
   ) => {
-    await mutateAsync(data)
+  
+    try {
+  
+      await mutateAsync(data)
+  
+    } catch (error) {
+  
+      if (
+        error instanceof Error
+      ) {
+  
+        toast.error(
+          error.message
+        )
+  
+        return
+      }
+  
+      toast.error(
+        "Something went wrong."
+      )
+    }
   }
 
   return (
