@@ -1,14 +1,13 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter }
+from "next/navigation"
 
-import { toast } from "sonner"
+import { useMutation }
+from "@tanstack/react-query"
 
-import {
-  useMutation,
-} from "@tanstack/react-query"
-
-import logoutService from "../services/logout.service"
+import logoutService
+from "../services/logout.service"
 
 import {
   useAuthStore,
@@ -18,55 +17,61 @@ import type {
   ApiErrorResponse,
 } from "@/types/api/response.types"
 
-export const useLogout = () => {
+import { toast }
+from "sonner"
 
-  const router =
-    useRouter()
+export const useLogout =
+  () => {
 
-  const logout =
-    useAuthStore(
-      (state) =>
-        state.logout
-    )
+    const router =
+      useRouter()
 
-  const setHasTriedRestore =
-    useAuthStore(
-      (state) =>
-        state.setHasTriedRestore
-    )
-
-  return useMutation({
-
-    mutationFn:
-      logoutService.logout,
-
-    onSuccess: (
-      response
-    ) => {
-
-      /* CLEAR AUTH */
-
-      logout()
-
-      /* RESET RESTORE STATE */
-
-      setHasTriedRestore(false)
-
-      toast.success(
-        response.message
+    const logout =
+      useAuthStore(
+        (state) =>
+          state.logout
       )
 
-      router.push("/")
-    },
-
-    onError: (
-      error:
-        ApiErrorResponse
-    ) => {
-
-      toast.error(
-        error.message
+    const setHasTriedRestore =
+      useAuthStore(
+        (state) =>
+          state.setHasTriedRestore
       )
-    },
-  })
-}
+
+    return useMutation({
+
+      mutationFn:
+        logoutService.logout,
+
+      retry: false,
+
+      onSuccess: () => {
+
+        /* CLEAR AUTH */
+
+        logout()
+
+        /* RESET RESTORE STATE */
+
+        setHasTriedRestore(
+          false
+        )
+
+        /* REDIRECT */
+
+        router.replace(
+          "/login?logout=true"
+        )
+      },
+
+      onError: (
+        error:
+          ApiErrorResponse
+      ) => {
+
+        toast.error(
+          error.message
+        )
+      },
+    })
+  }

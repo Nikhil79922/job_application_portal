@@ -8,8 +8,6 @@ import {
   useQuery,
 } from "@tanstack/react-query"
 
-import { toast } from "sonner"
-
 import refreshService from "../services/refresh.service"
 
 import meService from "../../account/services/me.service"
@@ -18,141 +16,150 @@ import {
   useAuthStore,
 } from "@/stores/auth.store"
 
-export const useRestoreSession = () => {
+export const useRestoreSession =
+  () => {
 
-  const hasHydrated =
-    useAuthStore(
-      (state) =>
-        state.hasHydrated
-    )
+    const hasHydrated =
+      useAuthStore(
+        (state) =>
+          state.hasHydrated
+      )
 
-  const hasTriedRestore =
-    useAuthStore(
-      (state) =>
-        state.hasTriedRestore
-    )
+    const hasTriedRestore =
+      useAuthStore(
+        (state) =>
+          state.hasTriedRestore
+      )
 
-  const setHasTriedRestore =
-    useAuthStore(
-      (state) =>
-        state.setHasTriedRestore
-    )
+    const setHasTriedRestore =
+      useAuthStore(
+        (state) =>
+          state.setHasTriedRestore
+      )
 
-  const accessToken =
-    useAuthStore(
-      (state) =>
-        state.accessToken
-    )
+    const accessToken =
+      useAuthStore(
+        (state) =>
+          state.accessToken
+      )
 
-  const setAuth =
-    useAuthStore(
-      (state) =>
-        state.setAuth
-    )
+    const setAuth =
+      useAuthStore(
+        (state) =>
+          state.setAuth
+      )
 
-  const logout =
-    useAuthStore(
-      (state) =>
-        state.logout
-    )
+    const logout =
+      useAuthStore(
+        (state) =>
+          state.logout
+      )
 
-  const query = useQuery({
+    const query =
+      useQuery({
 
-    queryKey: [
-      "restore-session",
-    ],
+        queryKey: [
+          "restore-session",
+        ],
 
-    enabled:
-      hasHydrated &&
-      !accessToken &&
-      !hasTriedRestore,
+        enabled:
+          hasHydrated &&
+          !accessToken &&
+          !hasTriedRestore,
 
-    retry: false,
+        retry: false,
 
-    staleTime: Infinity,
+        staleTime:
+          Infinity,
 
-    queryFn: async () => {
+        queryFn:
+          async () => {
 
-      /* PREVENT INFINITE RETRIES */
+            /* PREVENT LOOP */
 
-      setHasTriedRestore(true)
+            setHasTriedRestore(
+              true
+            )
 
-      /* REFRESH TOKEN */
+            /* REFRESH TOKEN */
 
-      const refreshResponse =
-        await refreshService.refresh()
+            const refreshResponse =
+              await refreshService
+                .refresh()
 
-      const newAccessToken =
-        refreshResponse
-          .data
-          .accessToken
+            const newAccessToken =
+              refreshResponse
+                .data
+                .accessToken
 
-      /* FETCH USER */
+            /* FETCH USER */
 
-      const meResponse =
-        await meService.getMe(
-          newAccessToken
-        )
+            const meResponse =
+              await meService
+                .getMe(
+                  newAccessToken
+                )
 
-      return {
+            return {
 
-        user:
-          meResponse.data,
+              user:
+                meResponse
+                  .data,
 
-        accessToken:
-          newAccessToken,
+              accessToken:
+                newAccessToken,
+            }
+          },
+      })
+
+    /* RESTORE AUTH */
+
+    useEffect(() => {
+
+      if (
+        !query.data
+      ) {
+        return
       }
-    },
-  })
 
-  /* RESTORE AUTH */
+      setAuth(
+        query.data.user,
+        query.data.accessToken
+      )
 
-  useEffect(() => {
+      setHasTriedRestore(
+        false
+      )
 
-    if (!query.data) {
-      return
+    }, [
+      query.data,
+      setAuth,
+      setHasTriedRestore,
+    ])
+
+    /* HANDLE FAILURE */
+
+    useEffect(() => {
+
+      if (
+        !query.error
+      ) {
+        return
+      }
+
+      logout()
+
+    }, [
+      query.error,
+      logout,
+    ])
+
+    return {
+
+      isRestoring:
+        query.fetchStatus ===
+        "fetching",
+
+      hasHydrated,
     }
-
-    setAuth(
-      query.data.user,
-      query.data.accessToken
-    )
-
-    /* ALLOW FUTURE RESTORES */
-
-    setHasTriedRestore(false)
-
-  }, [
-    query.data,
-    setAuth,
-    setHasTriedRestore,
-  ])
-
-  /* HANDLE FAILURE */
-
-  useEffect(() => {
-
-    if (!query.error) {
-      return
-    }
-
-    logout()
-
-    toast.error(
-      "Session expired. Please login again."
-    )
-
-  }, [
-    query.error,
-    logout,
-  ])
-
-  return {
-
-    isRestoring:
-      query.fetchStatus ===
-      "fetching",
-
-    hasHydrated,
   }
-}

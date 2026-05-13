@@ -20,9 +20,7 @@ export const useAuthStore =
 
         hasHydrated: false,
 
-        setHasHydrated: (
-          state
-        ) =>
+        setHasHydrated: (state) =>
           set({
             hasHydrated: state,
           }),
