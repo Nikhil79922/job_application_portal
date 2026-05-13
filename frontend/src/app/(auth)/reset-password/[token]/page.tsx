@@ -1,3 +1,4 @@
+import PublicGuard from "@/components/guards/public-guard"
 import ResetPasswordPage from "@/features/auth/components/resetPasswordPage"
 
 interface Props {
@@ -11,9 +12,10 @@ export default function Page({
 }: Props) {
 
   return (
-
+    <PublicGuard>
     <ResetPasswordPage
       token={params.token}
     />
+    </PublicGuard>
   )
 }

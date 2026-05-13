@@ -5,7 +5,7 @@ import {
   useMutation,
 } from "@tanstack/react-query"
 import registerService from "../services/register.service"
-import meService from "../services/me.service"
+import meService from "../../account/services/me.service"
 import {
   useAuthStore,
 } from "@/stores/auth.store"

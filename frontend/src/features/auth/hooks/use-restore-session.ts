@@ -12,7 +12,7 @@ import { toast } from "sonner"
 
 import refreshService from "../services/refresh.service"
 
-import meService from "../services/me.service"
+import meService from "../../account/services/me.service"
 
 import {
   useAuthStore,
