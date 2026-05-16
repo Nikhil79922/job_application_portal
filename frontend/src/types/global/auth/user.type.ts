@@ -9,4 +9,9 @@ export interface User {
   resume_public_id: string | null
   subscription: string | null
   sessions: string | null,
+  profile_pic: string | null
+profile_pic_upload_status:
+  | "pending"
+  | "success"
+  | "fail"
 }

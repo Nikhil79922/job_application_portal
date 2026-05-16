@@ -77,7 +77,6 @@ export const updateProfilePic = TryCatch(
     }
 
     const ip = getClientIP(req);
-
     //  Rate limit
     if(req.file){
       await rateLimit.checkUploadLimit(String(userData.user_id), ip);

@@ -19,7 +19,7 @@ export const verifyToken = async (req: any) => {
     req.headers.authDetails = decoded;
   } catch {
     const err: any = new Error("Invalid or expired token");
-    err.statusCode = 403;
+    err.statusCode = 401;
     throw err;
   }
 };

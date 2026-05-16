@@ -47,7 +47,7 @@ export default function ProfileResume({
             case "success":
                 return {
                     icon:
-                        <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
 
                     badge:
                         "Verified",
@@ -62,7 +62,7 @@ export default function ProfileResume({
             case "pending":
                 return {
                     icon:
-                        <Clock3 className="h-5 w-5 text-yellow-500" />,
+                        <Clock3 className="h-4 w-4 text-yellow-500" />,
 
                     badge:
                         "Pending",
@@ -77,7 +77,7 @@ export default function ProfileResume({
             case "fail":
                 return {
                     icon:
-                        <XCircle className="h-5 w-5 text-red-500" />,
+                        <XCircle className="h-4 w-4 text-red-500" />,
 
                     badge:
                         "Rejected",
@@ -105,7 +105,7 @@ export default function ProfileResume({
 
     return (
 
-        <div className="space-y-6">
+        <div className="space-y-5">
 
             {/* HEADER */}
 
@@ -124,7 +124,7 @@ export default function ProfileResume({
 
             {/* CARD */}
 
-            <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/90">
+            <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/90 sm:p-6">
 
                 {/* BG */}
 
@@ -132,27 +132,35 @@ export default function ProfileResume({
 
                 <div className="relative z-10">
 
-                    {/* TOP */}
+                    {/* TOP SECTION */}
 
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
 
-                        <div className="flex items-start gap-4">
+                        {/* LEFT */}
+
+                        <div className="flex items-start gap-4 min-w-0">
+
+                            {/* ICON */}
 
                             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
 
                                 <FileText className="h-6 w-6" />
                             </div>
 
-                            <div>
+                            {/* CONTENT */}
 
-                                <div className="flex flex-wrap items-center gap-3">
+                            <div className="min-w-0 flex-1">
 
-                                    <h3 className="text-xl font-black tracking-[-1px] text-slate-950 dark:text-white">
+                                {/* TITLE */}
+
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+
+                                    <h3 className="text-2xl font-black tracking-[-1px] text-slate-950 dark:text-white">
 
                                         Professional Resume
                                     </h3>
 
-                                    <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${status.badgeClass}`}>
+                                    <div className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${status.badgeClass}`}>
 
                                         {status.icon}
 
@@ -160,7 +168,9 @@ export default function ProfileResume({
                                     </div>
                                 </div>
 
-                                <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-zinc-400">
+                                {/* DESCRIPTION */}
+
+                                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 dark:text-zinc-400">
 
                                     Your resume is used for recruiter visibility, AI analysis, and intelligent job recommendations.
                                 </p>
@@ -169,7 +179,9 @@ export default function ProfileResume({
 
                         {/* ACTIONS */}
 
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row xl:flex-col">
+
+                            {/* VIEW */}
 
                             {user.resume && (
 
@@ -177,9 +189,10 @@ export default function ProfileResume({
                                     href={user.resume}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="w-full sm:w-auto"
                                 >
 
-                                    <Button className="h-11 rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
+                                    <Button className="h-12 w-full rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200">
 
                                         <Download className="mr-2 h-4 w-4" />
 
@@ -188,7 +201,9 @@ export default function ProfileResume({
                                 </a>
                             )}
 
-                            <Button className="h-11 rounded-2xl bg-violet-500 px-5 text-sm font-semibold text-white hover:bg-violet-600">
+                            {/* UPLOAD */}
+
+                            <Button className="h-12 w-full rounded-2xl bg-violet-500 px-5 text-sm font-semibold text-white hover:bg-violet-600 sm:w-auto">
 
                                 <UploadCloud className="mr-2 h-4 w-4" />
 
@@ -205,7 +220,7 @@ export default function ProfileResume({
 
                     {shouldShowUploadCTA && (
 
-                        <div className="mt-8 rounded-[28px] border border-yellow-200 bg-yellow-50/80 p-5 dark:border-yellow-500/10 dark:bg-yellow-500/10">
+                        <div className="mt-6 rounded-[24px] border border-yellow-200 bg-yellow-50/80 p-5 dark:border-yellow-500/10 dark:bg-yellow-500/10">
 
                             <div className="flex items-start gap-4">
 
@@ -232,20 +247,20 @@ export default function ProfileResume({
 
                     {/* INFO GRID */}
 
-                    <div className="mt-8 grid gap-5 md:grid-cols-2">
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
 
                         {/* STATUS */}
 
-                        <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
 
                             <div className="flex items-center gap-4">
 
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
 
                                     <ShieldCheck className="h-5 w-5" />
                                 </div>
 
-                                <div>
+                                <div className="min-w-0">
 
                                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-zinc-500">
 
@@ -262,16 +277,16 @@ export default function ProfileResume({
 
                         {/* TYPE */}
 
-                        <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+                        <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
 
                             <div className="flex items-center gap-4">
 
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
 
                                     <FileText className="h-5 w-5" />
                                 </div>
 
-                                <div>
+                                <div className="min-w-0">
 
                                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-zinc-500">
 
@@ -287,18 +302,18 @@ export default function ProfileResume({
                         </div>
                     </div>
 
-                    {/* EMPTY STATE */}
+                    {/* EMPTY */}
 
                     {!user.resume && (
 
-                        <div className="mt-8 rounded-[30px] border border-dashed border-slate-300 bg-slate-50/80 p-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                        <div className="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center dark:border-white/10 dark:bg-white/[0.03] sm:p-10">
 
                             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
 
                                 <FileText className="h-7 w-7" />
                             </div>
 
-                            <h4 className="mt-5 text-xl font-black tracking-[-1px] text-slate-950 dark:text-white">
+                            <h4 className="mt-5 text-2xl font-black tracking-[-1px] text-slate-950 dark:text-white">
 
                                 No Resume Uploaded
                             </h4>

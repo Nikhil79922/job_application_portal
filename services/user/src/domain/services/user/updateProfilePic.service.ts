@@ -16,10 +16,11 @@ export class updateProfilePic {
   )
   {
 
-    if (data.checkUpload) {
+    if (data.checkUpload === true ) {
+      console.log("check worked")
       const userData = await this.userRepo.findById(userDetails.user_id);
 
-      if (userData.profile_pic_upload_status === "success") {
+      if (userData.profile_pic_upload_status === "success" && userData.profile_pic) {
         const resData = updateProfilePicResponseDTO.parse(userData);
         return {
           message: "User profile pic updated successfully",
@@ -32,7 +33,7 @@ export class updateProfilePic {
       }
 
       if (userData.profile_pic_upload_status === "pending") {
-        throw new AppError("Upload not completed yet", 409);
+        throw new AppError("Upload not completed yet", 202);
       }
     }
 
@@ -51,31 +52,48 @@ export class updateProfilePic {
       throw new AppError("File too large", 400);
     }
 
+        // mark pending
+        await this.userRepo.update(userDetails.user_id, {
+          profile_pic_upload_status: "pending",
+        });
+
     // convert to base64
     const base64File = data.file.buffer.toString("base64");
 
     // Kafka publish
-    this.messageBroker
-      .publish(
+    try{
+
+      await this.messageBroker.publish(
         "upload-content",
         {
-          entityId: userDetails.user_id,
-          entityType: "user",
-          uploadType: "profile_pic",
-          file: base64File,
-          mimeType: data.file.mimetype,
-          public_id: userDetails.profile_pic_public_id || null,
+          entityId:userDetails.user_id,
+          entityType:"user",
+          uploadType:"profile_pic",
+          file:base64File,
+          mimeType:data.file.mimetype,
+          public_id:userDetails.profile_pic_public_id || null,
         },
-        String(userDetails.user_id)
+        String(userDetails.user_id))
+    }catch(err){
+      await this.userRepo.update(
+        userDetails.user_id,
+        {
+          profile_pic_upload_status:
+            "fail",
+        }
       )
-      .catch((err) => {
-        console.error("Kafka publish failed", err);
-      });
-
-    // mark pending
-    await this.userRepo.update(userDetails.user_id, {
-      profile_pic_upload_status: "pending",
-    });
+  
+      console.error(
+        "Kafka publish failed",
+        err
+      )
+  
+      throw new AppError(
+        "Unable to process image upload",
+        500
+      )
+    }
+  
 
     return {
       message: "Image uploading process initiated",

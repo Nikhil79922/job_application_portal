@@ -14,13 +14,22 @@ const app = Fastify({
   bodyLimit: 10485760,
 });
 
- app.register(cors, {
+app.register(cors, {
 
   origin: [
     "http://localhost:3000",
   ],
 
   credentials: true,
+
+  methods: [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+  ],
 })
 
 

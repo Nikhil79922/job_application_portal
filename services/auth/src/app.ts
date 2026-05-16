@@ -7,6 +7,7 @@ import authRouter from "./api/routes/auth.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 import logger from "./shared/middleware/logger.middleware.js";
 import { initApp } from "./composition-root/index.js";
+import { env } from "./config/env.js";
 
 // IMPORTANT: this ensures container initializes
 await initApp()
@@ -14,7 +15,7 @@ await initApp()
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:3000",
+  env.Frontend_Url,
   "http://192.0.0.2:3000",
 ]
 

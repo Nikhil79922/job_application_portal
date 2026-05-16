@@ -22,11 +22,16 @@ export const proxyRequest = async (req: any, target: string, breaker: any) => {
     const isMultipart = contentType.includes("multipart/form-data");
 
     if (isMultipart) {
-      data = req.raw;
-      headers["content-type"] = contentType;
+      data = req.raw
+      headers = {
+        ...req.headers,
+      }
     } else {
-      data = req.body;
-      headers["content-type"] = "application/json";
+      data = req.body
+      headers = {
+        "content-type":
+          "application/json",
+      }
     }
 
     if (req.headers.authorization) {
@@ -41,18 +46,41 @@ export const proxyRequest = async (req: any, target: string, breaker: any) => {
       headers["user-agent"] =
         req.headers["user-agent"]
     }
-    const response = await breaker.fire({
-      method: req.method,
-      url: `${target}${req.url}`,
+    const response=await breaker.fire({
+ 
+      method:req.method,
+
+      url:`${target}${req.url}`,
+
       data,
-      meta: {
-        startTime: Date.now(),
-        logger: req.log,
-      },
+
       headers,
+
       httpAgent,
       httpsAgent,
-    });
+
+      maxBodyLength:
+        Infinity,
+
+      maxContentLength:
+        Infinity,
+
+      responseType:
+        "json",
+
+      transitional:{
+        forcedJSONParsing:
+          false,
+      },
+
+      meta:{
+        startTime:
+          Date.now(),
+
+        logger:
+          req.log,
+      },
+    })
 
     return {
       status: response.status,
