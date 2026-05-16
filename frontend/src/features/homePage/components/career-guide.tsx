@@ -289,7 +289,7 @@ const CareerGuide = () => {
                             className="h-5 w-5 rounded-full p-0 transition-all duration-300 hover:scale-110 hover:bg-transparent"
                           >
 
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-3.5 w-3.5 shrink-0" />
                           </Button>
                         </div>
                       ))}

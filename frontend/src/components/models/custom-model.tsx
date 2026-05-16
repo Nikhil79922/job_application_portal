@@ -267,7 +267,7 @@ const CustomModal = ({
   className="h-10 w-10 rounded-xl border-slate-200 text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-slate-700 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
 >
 
-  <X className="h-4 w-4" />
+  <X className="h-4 w-4 shrink-0" />
 </Button>
           </div>
         </div>

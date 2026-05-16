@@ -276,7 +276,7 @@ export default function ProfileHero({
                 onClick={() => setIsPreviewOpen(false)}
                 className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-zinc-900 text-white shadow-lg transition hover:bg-white/10"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 shrink-0" />
               </Button>
 
               {/* Full image in circle */}

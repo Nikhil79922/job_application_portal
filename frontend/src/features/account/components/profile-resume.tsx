@@ -168,7 +168,7 @@ function ResumePreviewModal({
               onClick={onClose}
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 shrink-0" />
             </Button>
           </div>
         </div>
