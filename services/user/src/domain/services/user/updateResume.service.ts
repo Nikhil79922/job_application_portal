@@ -3,6 +3,7 @@ import AppError from "../../../shared/errors/AppError.js";
 import { Users } from "../../../shared/types/user.type.js";
 import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 import { IMessageBroker } from "../../interfaces/infraInterfaces/message-broker.interface.js";
+import sendResponse from "../../../shared/constants/successRes.js";
 
 export class updateResumeFile {
   constructor(
@@ -18,7 +19,7 @@ export class updateResumeFile {
       const userData = await this.userRepo.findById(userDetails.user_id);
 
       // FIXED (resume status)
-      if (userData.resume_upload_status === "success") {
+      if (userData.resume_upload_status === "success" && userData.resume) {
         const resData = updateResumeResponseDTO.parse(userData);
         return {
           message: "User Resume updated successfully",
@@ -31,7 +32,7 @@ export class updateResumeFile {
       }
 
       if (userData.resume_upload_status === "pending") {
-        throw new AppError("Upload not completed yet", 409);
+        throw new AppError("Upload not completed yet", 202);
       }
     }
 
@@ -49,11 +50,18 @@ export class updateResumeFile {
       throw new AppError("File too large", 400);
     }
 
+        // mark pending
+        await this.userRepo.update(userDetails.user_id, {
+          resume_upload_status: "pending",
+        });
+
     // Convert to base64
     const base64File = data.file.buffer.toString("base64");
 
     // Kafka publish
-    this.messageBroker
+    try{
+
+      await this.messageBroker
       .publish(
         "upload-content",
         {
@@ -64,16 +72,25 @@ export class updateResumeFile {
           mimeType: data.file.mimetype,
           public_id: userDetails.resume_public_id || null,
         },
-        String(userDetails.user_id)
+        String(userDetails.user_id))
+      }catch(err){
+      await this.userRepo.update(
+        userDetails.user_id,
+        {
+          resume_upload_status:"fail",
+        }
       )
-      .catch((err) => {
-        console.error("Kafka publish failed", err);
-      });
-
-    // mark pending
-    await this.userRepo.update(userDetails.user_id, {
-      resume_upload_status: "pending",
-    });
+  
+      console.error(
+        "Kafka publish failed",
+        err
+      )
+  
+      throw new AppError(
+        "Unable to process image upload",
+        500
+      )
+    }
 
     return {
       message: "Resume uploading process initiated",

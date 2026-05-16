@@ -23,26 +23,17 @@ export const updateResumeSchema = z
       })
       .optional(),
 
-    checkUpload: z.coerce.boolean(),
+      checkUpload:z
+      .enum([
+        "true",
+        "false",
+      ])
+      .transform(
+        value=>
+          value==="true"
+      ),
   })
   .strict()
-  .superRefine((data, ctx) => {
-    if (data.checkUpload && data.file) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "File should NOT be provided when checkUpload is true",
-        path: ["file"],
-      });
-    }
-
-    if (!data.checkUpload && !data.file) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "File is required when checkUpload is false",
-        path: ["file"],
-      });
-    }
-  });
 
 export type updateResumeDTO = z.infer<typeof updateResumeSchema>;
 

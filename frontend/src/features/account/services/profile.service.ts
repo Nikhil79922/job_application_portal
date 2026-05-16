@@ -1,14 +1,20 @@
-import meService from "./me.service"
+import api from "@/services/axios"
+
+import type {
+  ProfileResponse,
+} from "../types/profile.types"
 
 const profileService = {
 
-  getProfile: async (
-    accessToken: string
-  ) => {
+  getProfile: async (): Promise<
+    ProfileResponse
+  > => {
 
     const response =
-      await meService.getMe(
-        accessToken
+      await api.get<
+        ProfileResponse
+      >(
+        "/user/me"
       )
 
     return response.data

@@ -13,10 +13,6 @@ import {
   useAuthStore,
 } from "@/stores/auth.store"
 
-import {
-  useRestoreSession,
-} from "@/features/auth/hooks/use-restore-session"
-
 import FuturisticLoader from "../loaders/page-loader"
 
 interface Props {
@@ -42,21 +38,11 @@ export default function PublicGuard({
         state.hasHydrated
     )
 
-  /* RESTORE SESSION */
-
-  const {
-    isRestoring,
-  } = useRestoreSession()
-
   /* REDIRECT AUTHENTICATED USER */
 
   useEffect(() => {
 
-    if (
-      !hasHydrated ||
-      isRestoring
-    ) {
-
+    if (!hasHydrated) {
       return
     }
 
@@ -68,16 +54,12 @@ export default function PublicGuard({
   }, [
     hasHydrated,
     isAuthenticated,
-    isRestoring,
     router,
   ])
 
-  /* WAIT FOR HYDRATION + RESTORE */
+  /* WAIT FOR HYDRATION */
 
-  if (
-    !hasHydrated ||
-    isRestoring
-  ) {
+  if (!hasHydrated) {
 
     return (
       <FuturisticLoader />

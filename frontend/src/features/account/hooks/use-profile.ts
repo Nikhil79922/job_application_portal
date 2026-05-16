@@ -4,36 +4,34 @@ import {
   useQuery,
 } from "@tanstack/react-query"
 
-import {
-  useAuthStore,
-} from "@/stores/auth.store"
-
 import profileService from "../services/profile.service"
 
-export const useProfile =
-  () => {
+export const useProfile = () => {
 
-    const accessToken =
-      useAuthStore(
-        (state) =>
-          state.accessToken
-      )
+  return useQuery({
 
-    return useQuery({
+    queryKey: [
+      "profile",
+    ],
 
-      queryKey: [
-        "my-profile",
-      ],
+    queryFn:
+      async () => {
 
-      enabled:
-        !!accessToken,
+        const response =
+          await profileService
+            .getProfile()
 
-      queryFn: async () => {
-
-        return profileService
-          .getProfile(
-            accessToken!
-          )
+        return response.data
       },
-    })
-  }
+
+    staleTime: 0,
+
+    gcTime: 0,
+
+    retry: false,
+
+    refetchOnMount: true,
+
+    refetchOnWindowFocus: false,
+  })
+}

@@ -6,27 +6,46 @@ import {
     Wrench,
 } from "lucide-react"
 
+import {
+    useAuthStore,
+} from "@/stores/auth.store"
+
 import type {
     MeUser,
 } from "../types/me.types"
 
-interface Props {
-    user: MeUser
+interface Props{
+    user:MeUser
 }
 
 export default function ProfileSkills({
-    user,
-}: Props) {
+    user:initialUser,
+}:Props){
 
-    const isJobseeker =
-        user.role ===
+    /* LIVE USER */
+
+    const liveUser=
+        useAuthStore(
+            (state)=>state.user
+        )
+
+    const user=
+        liveUser||
+        initialUser
+
+    const isJobseeker=
+        user.role===
         "jobseeker"
 
-    if (!isJobseeker) {
+    if(!isJobseeker){
         return null
     }
 
-    return (
+    const skills=
+        user.skills||
+        []
+
+    return(
 
         <div className="space-y-6">
 
@@ -86,7 +105,7 @@ export default function ProfileSkills({
 
                             <Sparkles className="h-4 w-4" />
 
-                            {user.skills.length} Skills
+                            {skills.length} Skills
                         </div>
                     </div>
 
@@ -94,54 +113,57 @@ export default function ProfileSkills({
 
                     <div className="mt-8 flex flex-wrap gap-4">
 
-                        {user.skills.length > 0 ? (
+                        {
+                            skills.length>0
+                                ?(
 
-                            user.skills.map((skill) => (
+                                    skills.map((skill)=>(
+                                        
+                                        <div
+                                            key={skill}
+                                            className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.03]"
+                                        >
 
-                                <div
-                                    key={skill}
-                                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.03]"
-                                >
+                                            {/* HOVER BG */}
 
-                                    {/* HOVER BG */}
+                                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.08] to-emerald-500/[0.06] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.08] to-emerald-500/[0.06] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                                            <div className="relative z-10 flex items-center gap-3">
 
-                                    <div className="relative z-10 flex items-center gap-3">
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
 
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
+                                                    <Wrench className="h-4 w-4" />
+                                                </div>
 
-                                            <Wrench className="h-4 w-4" />
+                                                <span className="text-sm font-bold tracking-wide text-slate-800 dark:text-zinc-200">
+
+                                                    {skill}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )
+                                :(
+
+                                    <div className="w-full rounded-[28px] border border-dashed border-slate-300 bg-slate-50/80 p-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
+
+                                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
+
+                                            <BrainCircuit className="h-7 w-7" />
                                         </div>
 
-                                        <span className="text-sm font-bold tracking-wide text-slate-800 dark:text-zinc-200">
+                                        <h4 className="mt-5 text-lg font-black tracking-[-0.5px] text-slate-950 dark:text-white">
 
-                                            {skill}
-                                        </span>
+                                            No Skills Added Yet
+                                        </h4>
+
+                                        <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-500 dark:text-zinc-400">
+
+                                            Add your professional and technical skills to improve recruiter visibility and AI-based recommendations.
+                                        </p>
                                     </div>
-                                </div>
-                            ))
-
-                        ) : (
-
-                            <div className="w-full rounded-[28px] border border-dashed border-slate-300 bg-slate-50/80 p-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
-
-                                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-100 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
-
-                                    <BrainCircuit className="h-7 w-7" />
-                                </div>
-
-                                <h4 className="mt-5 text-lg font-black tracking-[-0.5px] text-slate-950 dark:text-white">
-
-                                    No Skills Added Yet
-                                </h4>
-
-                                <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-500 dark:text-zinc-400">
-
-                                    Add your professional and technical skills to improve recruiter visibility and AI-based recommendations.
-                                </p>
-                            </div>
-                        )}
+                                )
+                        }
                     </div>
                 </div>
             </div>

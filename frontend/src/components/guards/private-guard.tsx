@@ -16,10 +16,6 @@ import {
 
 import FuturisticLoader from "../loaders/page-loader"
 
-import {
-  useRestoreSession,
-} from "@/features/auth/hooks/use-restore-session"
-
 interface Props {
   children: ReactNode
 }
@@ -46,21 +42,11 @@ export default function PrivateGuard({
         state.hasHydrated
     )
 
-  /* RESTORE SESSION */
-
-  const {
-    isRestoring,
-  } = useRestoreSession()
-
-  /* REDIRECT */
+  /* REDIRECT UNAUTHENTICATED USER */
 
   useEffect(() => {
 
-    if (
-      !hasHydrated ||
-      isRestoring
-    ) {
-
+    if (!hasHydrated) {
       return
     }
 
@@ -74,17 +60,13 @@ export default function PrivateGuard({
   }, [
     hasHydrated,
     isAuthenticated,
-    isRestoring,
     pathname,
     router,
   ])
 
-  /* LOADING */
+  /* WAIT FOR HYDRATION */
 
-  if (
-    !hasHydrated ||
-    isRestoring
-  ) {
+  if (!hasHydrated) {
 
     return (
       <FuturisticLoader />

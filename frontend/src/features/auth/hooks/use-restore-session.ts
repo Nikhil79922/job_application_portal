@@ -16,150 +16,162 @@ import {
   useAuthStore,
 } from "@/stores/auth.store"
 
-export const useRestoreSession =
-  () => {
+export const useRestoreSession = () => {
 
-    const hasHydrated =
-      useAuthStore(
-        (state) =>
-          state.hasHydrated
-      )
+  const hasHydrated =
+    useAuthStore(
+      (state) =>
+        state.hasHydrated
+    )
 
-    const hasTriedRestore =
-      useAuthStore(
-        (state) =>
-          state.hasTriedRestore
-      )
+  const hasTriedRestore =
+    useAuthStore(
+      (state) =>
+        state.hasTriedRestore
+    )
 
-    const setHasTriedRestore =
-      useAuthStore(
-        (state) =>
-          state.setHasTriedRestore
-      )
+  const setHasTriedRestore =
+    useAuthStore(
+      (state) =>
+        state.setHasTriedRestore
+    )
 
-    const accessToken =
-      useAuthStore(
-        (state) =>
-          state.accessToken
-      )
+  const accessToken =
+    useAuthStore(
+      (state) =>
+        state.accessToken
+    )
 
-    const setAuth =
-      useAuthStore(
-        (state) =>
-          state.setAuth
-      )
+  const setAuth =
+    useAuthStore(
+      (state) =>
+        state.setAuth
+    )
 
-    const logout =
-      useAuthStore(
-        (state) =>
-          state.logout
-      )
+  const logout =
+    useAuthStore(
+      (state) =>
+        state.logout
+    )
 
-    const query =
-      useQuery({
+  const query =
+    useQuery({
 
-        queryKey: [
-          "restore-session",
-        ],
+      queryKey: [
+        "restore-session",
+      ],
 
-        enabled:
-          hasHydrated &&
-          !accessToken &&
-          !hasTriedRestore,
+      enabled:
+        hasHydrated &&
+        !accessToken &&
+        !hasTriedRestore,
 
-        retry: false,
+      retry: false,
 
-        staleTime:
-          Infinity,
+      staleTime:
+        Infinity,
 
-        queryFn:
-          async () => {
+      queryFn:
+        async () => {
 
-            /* PREVENT LOOP */
+          /* PREVENT LOOP */
 
-            setHasTriedRestore(
-              true
-            )
+          setHasTriedRestore(
+            true
+          )
 
-            /* REFRESH TOKEN */
+          /* REFRESH TOKEN */
 
-            const refreshResponse =
-              await refreshService
-                .refresh()
+          const refreshResponse =
+            await refreshService
+              .refresh()
 
-            const newAccessToken =
-              refreshResponse
-                .data
-                .accessToken
+          const newAccessToken =
+            refreshResponse
+              .data
+              .accessToken
 
-            /* FETCH USER */
+          /* FETCH USER */
 
-            const meResponse =
-              await meService
-                .getMe(
-                  newAccessToken
-                )
+          const meResponse =
+            await meService
+              .getMe(
+                newAccessToken
+              )
 
-            return {
+          return {
 
-              user:
-                meResponse
-                  .data,
+            user:
+              meResponse
+                .data,
 
-              accessToken:
-                newAccessToken,
-            }
-          },
-      })
+            accessToken:
+              newAccessToken,
+          }
+        },
+    })
 
-    /* RESTORE AUTH */
+  /* RESTORE AUTH */
 
-    useEffect(() => {
+  useEffect(() => {
 
-      if (
-        !query.data
-      ) {
-        return
-      }
-
-      setAuth(
-        query.data.user,
-        query.data.accessToken
-      )
-
-      setHasTriedRestore(
-        false
-      )
-
-    }, [
-      query.data,
-      setAuth,
-      setHasTriedRestore,
-    ])
-
-    /* HANDLE FAILURE */
-
-    useEffect(() => {
-
-      if (
-        !query.error
-      ) {
-        return
-      }
-
-      logout()
-
-    }, [
-      query.error,
-      logout,
-    ])
-
-    return {
-
-      isRestoring:
-        query.fetchStatus ===
-        "fetching",
-
-      hasHydrated,
+    if (
+      !query.data
+    ) {
+      return
     }
+
+    setAuth(
+      query.data.user,
+      query.data.accessToken
+    )
+
+    setHasTriedRestore(
+      false
+    )
+
+  }, [
+    query.data,
+    setAuth,
+    setHasTriedRestore,
+  ])
+
+  /* HANDLE FAILURE */
+
+  useEffect(() => {
+
+    if (
+      !query.error
+    ) {
+      return
+    }
+
+    const authState =
+      useAuthStore
+        .getState()
+
+    /* USER ALREADY LOGGED OUT */
+
+    if (
+      !authState
+        .isAuthenticated
+    ) {
+      return
+    }
+
+    logout()
+
+  }, [
+    query.error,
+    logout,
+  ])
+
+  return {
+
+    isRestoring:
+      query.fetchStatus ===
+      "fetching",
+
+    hasHydrated,
   }
+}

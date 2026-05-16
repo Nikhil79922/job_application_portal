@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import {
@@ -12,21 +12,40 @@ import {
   Sparkles,
   User2,
   X,
+  Check,
+  Move,
   ZoomIn,
 } from "lucide-react"
 
 import { useUpdateProfileImage } from "../hooks/use-profileImage"
 import type { MeUser } from "../types/me.types"
+import { EditProfileModal } from "@/features/account/models/edit-profile-model"
+import { useAuthStore } from "@/stores/auth.store"
 import { Button } from "@/components/ui/button"
-import { CropModal } from "@/components/models/crop-model"
+import { CropModal } from "../models/crop-model"
 
 interface Props {
   user: MeUser
 }
 
-// ─── Profile Hero ──────────────────────────────────────────────────────────────
+interface CropRegion {
+  x: number
+  y: number
+  size: number
+}
 
-export default function ProfileHero({ user }: Props) {
+// ─── Profile Hero ──────────────────────────────────────────────────────────────
+export default function ProfileHero({
+  user:initialUser,
+}:Props){
+
+  const liveUser=
+    useAuthStore(
+      (state)=>state.user
+    )
+
+  const user=liveUser||initialUser
+
   const { updateImage, isUploading, isProcessing, imageSrc } =
     useUpdateProfileImage()
 
@@ -68,11 +87,12 @@ export default function ProfileHero({ user }: Props) {
   const displaySrc = croppedSrc ?? imageSrc
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const completionItems = [
     !!user.profile_pic,
     !!user.phone_number,
-    !!user.skills.length,
+    !!user.skills?.length,
     user.role === "recruiter" ? true : !!user.bio,
     user.role === "recruiter" ? true : !!user.resume,
   ]
@@ -207,7 +227,9 @@ export default function ProfileHero({ user }: Props) {
               </div>
 
               <div className="mt-5 grid gap-3">
-                <Button className="h-11 rounded-2xl bg-emerald-500 text-sm font-semibold text-white hover:bg-emerald-600">
+                <Button
+                  onClick={() => setIsEditOpen(true)}
+                  className="h-11 rounded-2xl bg-emerald-500 text-sm font-semibold text-white hover:bg-emerald-600">
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Profile
                 </Button>
@@ -251,16 +273,11 @@ export default function ProfileHero({ user }: Props) {
             >
               {/* Close */}
               <Button
-  type="button"
-  size="icon"
-  onClick={()=>
-    setIsPreviewOpen(false)
-  }
-  className="absolute -right-3 -top-3 z-10 rounded-full border border-white/10 bg-zinc-900 text-white shadow-xl hover:bg-zinc-800"
->
-
-  <X className="!h-5 !w-5" />
-</Button>
+                onClick={() => setIsPreviewOpen(false)}
+                className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-zinc-900 text-white shadow-lg transition hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
 
               {/* Full image in circle */}
               <div className="relative h-72 w-72 overflow-hidden rounded-full border-4 border-emerald-500/40 shadow-2xl sm:h-96 sm:w-96">
@@ -302,6 +319,14 @@ export default function ProfileHero({ user }: Props) {
           />,
           document.body
         )}
-    </>
+
+      {/* EDIT PROFILE MODAL */}
+      {isEditOpen && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
+    </> 
   )
 }
