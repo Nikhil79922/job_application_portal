@@ -60,11 +60,6 @@ const navLinks = [
     icon: SearchCheck,
   },
   {
-    name: "Companies",
-    href: "/companies",
-    icon: Building2,
-  },
-  {
     name: "About",
     href: "/about",
     icon: CircleHelp,

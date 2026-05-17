@@ -1,303 +1,124 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import AppBackground from "@/components/shared/app-background"
-
 import FuturisticLoader from "@/components/loaders/page-loader"
-
-import {
-  useProfile,
-} from "../hooks/use-profile"
+import { useAuthStore } from "@/stores/auth.store"
+import { useProfile } from "../hooks/use-profile"
 
 import ProfileHero from "./profile-hero"
-
-import ProfileStatus from "./profile-status"
-
 import ProfileAbout from "./profile-about"
-
 import ProfileSkills from "./profile-skills"
-
 import ProfileResume from "./profile-resume"
+import { RecruiterWorkspace } from "./recruiter/recruiter-workspace"
+import { RecruiterSidebar } from "./recruiter/recruiter-sidebar"
+import { JobseekerSidebar } from "./joobseeker/jobseeker-sidebar"
+
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
+  const { data: initialData, isLoading } = useProfile()
 
-  const {
-    data,
-    isLoading,
-  } = useProfile()
+  // Live store subscription — sidebar + hero re-render on edit
+  const storeUser = useAuthStore((state) => state.user)
+  const data      = storeUser ?? initialData
 
-  /*
-    WAIT FOR COMPLETE PROFILE
-    PREVENT PARTIAL INITIAL RENDER
-  */
-
-  if (
-    isLoading ||
-    !data ||
-    !data.skills
-  ) {
-
-    return (
-      <FuturisticLoader />
-    )
+  if (isLoading || !data || !data.skills) {
+    return <FuturisticLoader />
   }
 
-  const isRecruiter =
-    data.role ===
-    "recruiter"
+  const isRecruiter = data.role === "recruiter"
 
-  /* PROFILE COMPLETION */
+  // ── Completion checks ────────────────────────────────────────────────────────
 
-  const checks = [
-
-    !!data.name,
-
-    !!data.email,
-
-    !!data.phone_number,
-
-    !!data.profile_pic,
-
-    data.profile_pic_upload_status ===
-      "success",
-
-    isRecruiter
-      ? true
-      : !!data.bio,
-
-    isRecruiter
-      ? true
-      : !!data.resume,
-
-    isRecruiter
-      ? true
-      : data.resume_upload_status ===
-          "success",
-
-    isRecruiter
-      ? true
-      : Array.isArray(
-          data.skills
-        ) &&
-        data.skills.length > 0,
+  const jobseekerChecks = [
+    { done: !!data.name,                                            label: "Full name added",          sublabel: "Displayed on your profile" },
+    { done: !!data.email,                                           label: "Email verified",            sublabel: "Required for applications" },
+    { done: !!data.phone_number,                                    label: "Phone number added",        sublabel: "Enables recruiter contact" },
+    { done: !!data.profile_pic,                                     label: "Profile photo uploaded",    sublabel: "Increases visibility 3×" },
+    { done: data.profile_pic_upload_status === "success",           label: "Photo verified",            sublabel: "AI processing complete" },
+    { done: !!data.bio,                                             label: "Bio / summary written",     sublabel: "Shown to recruiters" },
+    { done: !!data.resume,                                          label: "Resume uploaded",           sublabel: "Required for applications" },
+    { done: data.resume_upload_status === "success",                label: "Resume ATS verified",       sublabel: "AI parsing complete" },
+    { done: Array.isArray(data.skills) && data.skills.length > 0,  label: "Skills added",             sublabel: "Used for job matching" },
   ]
 
-  const completed =
-    checks.filter(Boolean)
-      .length
+  const recruiterChecks = [
+    { done: !!data.name,         label: "Full name added",       sublabel: "Visible to candidates" },
+    { done: !!data.email,        label: "Email verified",         sublabel: "Candidate contact" },
+    { done: !!data.phone_number, label: "Phone number added",     sublabel: "Direct candidate line" },
+    { done: !!data.profile_pic,  label: "Profile photo uploaded", sublabel: "Builds trust with candidates" },
+    { done: !!data.bio,          label: "Company bio written",    sublabel: "Sets context for applicants" },
+  ]
 
-  const completion =
-    Math.round(
-      (
-        completed /
-        checks.length
-      ) * 100
-    )
+  const checks     = isRecruiter ? recruiterChecks : jobseekerChecks
+  const completed  = checks.filter((c) => c.done).length
+  const completion = Math.round((completed / checks.length) * 100)
 
   return (
-
     <AppBackground>
-
       <section className="relative min-h-screen overflow-hidden">
 
-        {/* BACKGROUND */}
-
+        {/* Background glows */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-
           <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-emerald-500/10 blur-3xl" />
-
           <div className="absolute right-[-180px] top-[10%] h-[420px] w-[420px] rounded-full bg-cyan-500/10 blur-3xl" />
-
           <div className="absolute bottom-[-180px] left-[30%] h-[320px] w-[320px] rounded-full bg-violet-500/10 blur-3xl" />
         </div>
 
-        {/* GRID */}
-
+        {/* Subtle grid */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
-              `
-              linear-gradient(to right, currentColor 1px, transparent 1px),
-              linear-gradient(to bottom, currentColor 1px, transparent 1px)
-              `,
-            backgroundSize:
-              "72px 72px",
+              "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
           }}
         />
 
-        {/* HERO */}
-
+        {/* Hero — full width */}
         <div className="relative z-10 w-full px-4 pt-8 sm:px-6 lg:px-8">
-
-          <ProfileHero
-            user={data}
-          />
+          <ProfileHero user={data as any} />
         </div>
 
-        {/* CONTENT */}
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-8 pt-10 sm:px-6 lg:px-8">
-
-          {/* MAIN GRID */}
-
+        {/* Main content grid */}
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="grid items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
 
-            {/* SIDEBAR */}
-
-            <aside className="space-y-5 xl:sticky xl:top-8 xl:h-fit">
-
-              {/* ANALYTICS */}
-
-              <div className="rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/90">
-
-                {/* LABEL */}
-
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-700 dark:border-cyan-500/10 dark:bg-cyan-500/10 dark:text-cyan-400">
-
-                  Profile Analytics
-                </div>
-
-                {/* TITLE */}
-
-                <h2 className="mt-4 text-2xl font-black tracking-[-2px] text-slate-950 dark:text-white">
-
-                  Visibility & Trust
-                </h2>
-
-                {/* DESC */}
-
-                <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-zinc-400">
-
-                  Your visibility is determined by profile completion and account credibility.
-                </p>
-
-                {/* COMPLETION */}
-
-                <div className="mt-6 h-full rounded-[24px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
-
-                  <div className="flex items-end justify-between">
-
-                    <div>
-
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-zinc-500">
-
-                        Completion
-                      </p>
-
-                      <h3 className="mt-2 text-5xl font-black tracking-[-4px] text-slate-950 dark:text-white">
-
-                        {completion}%
-                      </h3>
-                    </div>
-
-                    <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-500/10 dark:bg-emerald-500/10 dark:text-emerald-400">
-
-                      Active
-                    </div>
-                  </div>
-
-                  {/* PROGRESS */}
-
-                  <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500"
-                      style={{
-                        width:
-                          `${completion}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* ROLE */}
-
-                <div className="mt-5 h-full rounded-[24px] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/[0.03]">
-
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-zinc-500">
-
-                    Account Role
-                  </p>
-
-                  <h3 className="mt-3 text-3xl font-black capitalize tracking-[-2px] text-slate-950 dark:text-white">
-
-                    {data.role}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-zinc-400">
-
-                    {
-                      isRecruiter
-                        ? "Recruiter account optimized for candidate sourcing and hiring."
-                        : "Professional candidate profile optimized for recruiter discovery."
-                    }
-                  </p>
-                </div>
-              </div>
-
-              {/* STATUS */}
-
-              <ProfileStatus
-                user={data}
-              />
+            {/* ── SIDEBAR ─────────────────────────────────────────────────── */}
+            <aside className="xl:sticky xl:top-8 xl:h-fit">
+              {isRecruiter ? (
+                <RecruiterSidebar
+                  user={data as any}
+                  checks={recruiterChecks}
+                  completion={completion}
+                />
+              ) : (
+                <JobseekerSidebar
+                  user={data as any}
+                  checks={jobseekerChecks}
+                  completion={completion}
+                />
+              )}
             </aside>
 
-            {/* WORKSPACE */}
+            {/* ── MAIN WORKSPACE ──────────────────────────────────────────── */}
+            <main className="space-y-6">
+              {/* About — both roles */}
+              <ProfileAbout user={data as any} />
 
-            <main className="space-y-5">
-
-              {/* ABOUT */}
-
-              <ProfileAbout
-                user={data}
-              />
-
-              {/* JOBSEEKER */}
-
+              {/* Jobseeker-only */}
               {!isRecruiter && (
-
                 <>
-                  {/* SKILLS */}
-
-                  <ProfileSkills
-                    user={data}
-                  />
-
-                  {/* RESUME */}
-
-                  <ProfileResume
-                    user={data}
-                  />
+                  <ProfileSkills user={data as any} />
+                  <ProfileResume user={data as any} />
                 </>
               )}
 
-              {/* RECRUITER */}
-
+              {/* Recruiter-only workspace */}
               {isRecruiter && (
-
-                <div className="rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/90">
-
-                  {/* LABEL */}
-
-                  <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-violet-700 dark:border-violet-500/10 dark:bg-violet-500/10 dark:text-violet-400">
-
-                    Recruiter Workspace
-                  </div>
-
-                  {/* TITLE */}
-
-                  <h2 className="mt-4 text-4xl font-black tracking-[-3px] text-slate-950 dark:text-white">
-
-                    Hiring Presence
-                  </h2>
-
-                  {/* DESC */}
-
-                  <p className="mt-3 max-w-3xl text-sm leading-8 text-slate-500 dark:text-zinc-400">
-
-                    Build a trusted recruiter identity to improve candidate trust, visibility, and hiring engagement.
-                  </p>
-                </div>
+                <RecruiterWorkspace user={data as any} />
               )}
             </main>
           </div>

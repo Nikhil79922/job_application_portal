@@ -42,7 +42,7 @@ export default function RegisterPage() {
 
     const {
         mutateAsync:
-            registerUser,
+        registerUser,
 
         isPending,
     } = useRegister()
@@ -56,8 +56,11 @@ export default function RegisterPage() {
 
         setValue,
 
+        trigger,
+
         formState: {
             errors,
+            isValid,
         },
     } = useForm<RegisterSchema>({
 
@@ -65,6 +68,17 @@ export default function RegisterPage() {
             zodResolver(
                 registerSchema
             ),
+
+        /* REALTIME VALIDATION */
+
+        mode:
+            "onChange",
+
+        reValidateMode:
+            "onChange",
+
+        criteriaMode:
+            "all",
 
         defaultValues: {
             role:
@@ -213,11 +227,10 @@ export default function RegisterPage() {
                                                         | "recruiter"
                                                     )
                                                 }
-                                                className={`h-12 rounded-xl px-4 text-sm font-semibold transition-all duration-300 ${
-                                                    role === item.value
+                                                className={`h-12 rounded-xl px-4 text-sm font-semibold transition-all duration-300 ${role === item.value
                                                         ? "bg-emerald-500 text-white shadow-lg hover:bg-emerald-500 hover:text-white"
                                                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/[0.04] dark:hover:text-white"
-                                                }`}
+                                                    }`}
                                             >
 
                                                 {item.label}
@@ -598,12 +611,13 @@ export default function RegisterPage() {
                                 )}
 
                                 {/* BUTTON */}
-
                                 <Button
                                     type="submit"
-                                    disabled={isPending}
-                                    className="group h-14 w-full rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-white shadow-[0_15px_40px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-600"
-                                >
+                                    disabled={
+                                        isPending ||
+                                        !isValid
+                                    }
+                                    className="group h-14 w-full rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-white shadow-[0_15px_40px_rgba(16,185,129,0.25)] transition-all duration-500 hover:-translate-y-[2px] hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">
 
                                     {isPending
                                         ? "Creating Account..."

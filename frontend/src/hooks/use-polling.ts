@@ -2,13 +2,19 @@
 
 import {
   useCallback,
+  useEffect,
   useRef,
 } from "react"
 
 interface UsePollingOptions {
-  pollingFn: () => Promise<void>
+
+  pollingFn:
+    () => Promise<void>
+
   interval?: number
+
   enabled?: boolean
+
   maxAttempts?: number
 }
 
@@ -16,26 +22,49 @@ export const usePolling = ({
   pollingFn,
   interval = 3000,
   enabled = true,
-  maxAttempts = 10,
+  maxAttempts = Infinity,
 }: UsePollingOptions) => {
 
   const intervalRef =
-    useRef<NodeJS.Timeout | null>(null)
+    useRef<NodeJS.Timeout | null>(
+      null
+    )
 
   const attemptsRef =
     useRef(0)
+
+  /* STABLE POLLING FN */
+
+  const pollingFnRef =
+    useRef(pollingFn)
+
+  useEffect(() => {
+
+    pollingFnRef.current =
+      pollingFn
+
+  }, [
+    pollingFn,
+  ])
 
   /* STOP */
 
   const stopPolling =
     useCallback(() => {
-      if (intervalRef.current) {
+
+      if (
+        intervalRef.current
+      ) {
+
         clearInterval(
           intervalRef.current
         )
+
         intervalRef.current =
           null
       }
+
+      attemptsRef.current = 0
 
     }, [])
 
@@ -43,47 +72,65 @@ export const usePolling = ({
 
   const startPolling =
     useCallback(() => {
+
       if (!enabled) {
         return
       }
-      /* PREVENT DUPLICATES */
-      stopPolling()
 
-      /* RESET ATTEMPTS */
+      /* PREVENT DUPLICATE */
 
-      attemptsRef.current = 0
+      if (
+        intervalRef.current
+      ) {
+        return
+      }
 
       intervalRef.current =
-        setInterval(async () => {
+        setInterval(
+          async () => {
 
-          /* MAX ATTEMPTS */
+            if (
+              attemptsRef.current >=
+              maxAttempts
+            ) {
 
-          if (
-            attemptsRef.current >=
-            maxAttempts
-          ) {
+              stopPolling()
 
-            stopPolling()
+              return
+            }
 
-            return
-          }
+            attemptsRef.current += 1
 
-          attemptsRef.current += 1
+            await pollingFnRef.current()
 
-          await pollingFn()
-
-        }, interval)
+          },
+          interval
+        )
 
     }, [
       enabled,
       interval,
-      pollingFn,
-      stopPolling,
       maxAttempts,
+      stopPolling,
     ])
 
+  /* CLEANUP */
+
+  useEffect(() => {
+
+    return () => {
+
+      stopPolling()
+    }
+
+  }, [
+    stopPolling,
+  ])
+
   return {
+
     startPolling,
+
     stopPolling,
   }
 }

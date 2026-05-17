@@ -1,59 +1,182 @@
-import { z } from "zod"
-
-export const registerSchema = z
-    .object({
-        name: z
+import {
+    z,
+  } from "zod"
+  
+  export const registerSchema =
+    z
+  
+      .object({
+  
+        /* NAME */
+  
+        name:
+          z
             .string()
+  
             .trim()
-            .min(2, "Name must be at least 2 characters"),
-
-        email: z
+  
+            .min(
+              2,
+              "Full name must be at least 2 characters long"
+            )
+  
+            .max(
+              50,
+              "Full name cannot exceed 50 characters"
+            )
+  
+            .regex(
+              /^[a-zA-Z\s]+$/,
+              "Full name can only contain letters and spaces"
+            ),
+  
+        /* EMAIL */
+  
+        email:
+          z
             .string()
+  
             .trim()
-            .email("Invalid email address"),
-
-        phoneNumber: z
+  
+            .min(
+              1,
+              "Email address is required"
+            )
+  
+            .email(
+              "Please enter a valid email address"
+            )
+  
+            .max(
+              100,
+              "Email address is too long"
+            ),
+  
+        /* PHONE */
+  
+        phoneNumber:
+          z
             .string()
+  
             .trim()
-            .regex(/^[0-9]{10,15}$/, "Invalid phone number"),
-
-        password: z
+  
+            .min(
+              1,
+              "Phone number is required"
+            )
+            .regex(
+              /^[0-9]{10}$/,
+              "Phone number must contain 10 digits"
+            ),
+  
+        /* PASSWORD */
+  
+        password:
+          z
             .string()
+  
             .trim()
-            .min(8, "Password must be at least 8 characters")
-            .regex(/[A-Z]/, "One uppercase letter required")
-            .regex(/[a-z]/, "One lowercase letter required")
-            .regex(/[0-9]/, "One number required")
-            .regex(/[^A-Za-z0-9]/, "One special character required"),
-
+  
+            .min(
+              8,
+              "Password must be at least 8 characters long"
+            )
+  
+            .max(
+              100,
+              "Password is too long"
+            )
+  
+            .regex(
+              /[A-Z]/,
+              "Password must include at least one uppercase letter"
+            )
+  
+            .regex(
+              /[a-z]/,
+              "Password must include at least one lowercase letter"
+            )
+  
+            .regex(
+              /[0-9]/,
+              "Password must include at least one number"
+            )
+  
+            .regex(
+              /[^A-Za-z0-9]/,
+              "Password must include at least one special character"
+            ),
+  
+        /* CONFIRM PASSWORD */
+  
         confirmPassword:
-            z.string(),
-
-        role: z.enum([
-            "jobseeker",
-            "recruiter",
-        ]),
-
-        bio: z.string().optional(),
-
-        file: z.any().optional(),
-    })
-
-    .refine(
-        (data) =>
-            data.password ===
-            data.confirmPassword,
-        {
-            path: [
-                "confirmPassword",
+          z
+            .string()
+  
+            .trim()
+  
+            .min(
+              1,
+              "Please confirm your password"
+            ),
+  
+        /* ROLE */
+  
+        role:
+          z.enum(
+            [
+              "jobseeker",
+              "recruiter",
             ],
-
-            message:
-                "Passwords do not match",
+            {
+              message:
+                "Please select an account type",
+            }
+          ),
+  
+        /* BIO */
+  
+        bio:
+          z
+            .string()
+  
+            .trim()
+  
+            .max(
+              300,
+              "Bio cannot exceed 300 characters"
+            )
+  
+            .optional(),
+  
+        /* FILE */
+  
+        file:
+          z
+            .any()
+  
+            .optional(),
+      })
+  
+      /* PASSWORD MATCH */
+  
+      .refine(
+  
+        (data) =>
+          data.password ===
+          data.confirmPassword,
+  
+        {
+          path: [
+            "confirmPassword",
+          ],
+  
+          message:
+            "Passwords do not match",
         }
-    )
-
-    export type RegisterSchema =
+      )
+  
+  export type RegisterSchema =
     z.infer<
-        typeof registerSchema
+      typeof registerSchema
     >
