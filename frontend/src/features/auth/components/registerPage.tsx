@@ -476,139 +476,171 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
 
-                                {/* JOBSEEKER */}
+                              {/* PROFESSIONAL DETAILS */}
 
-                                {role === "jobseeker" && (
+<div className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/[0.02]">
 
-                                    <div className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+<div className="space-y-4">
 
-                                        <div className="space-y-4">
+  {/* BIO */}
 
-                                            {/* BIO */}
+  <div>
 
-                                            <div>
+    <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-zinc-300">
 
-                                                <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-zinc-300">
+      <Sparkles className="h-4 w-4 text-emerald-500" />
 
-                                                    Professional Bio
+      {role === "recruiter"
+        ? "Company / Hiring Bio"
+        : "Professional Bio"}
 
-                                                    <span className="ml-1 text-red-500">
+      {role === "jobseeker" && (
 
-                                                        *
-                                                    </span>
-                                                </label>
+        <span className="text-red-500">
 
-                                                <textarea
-                                                    rows={3}
-                                                    placeholder="Tell recruiters about yourself..."
-                                                    {...register("bio")}
-                                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-emerald-300 dark:border-white/10 dark:bg-[#09090B] dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-emerald-500/30"
-                                                />
-                                            </div>
+          *
+        </span>
+      )}
+    </label>
 
-                                            {/* RESUME */}
+    <textarea
+      rows={3}
 
-                                            <div>
+      placeholder={
+        role === "recruiter"
+          ? "Tell candidates about your company, hiring culture, and recruitment goals..."
+          : "Tell recruiters about yourself, your skills, and your experience..."
+      }
 
-                                                <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-zinc-300">
+      {...register("bio")}
 
-                                                    Upload Resume
+      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-emerald-300 dark:border-white/10 dark:bg-[#09090B] dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-emerald-500/30"
+    />
 
-                                                    <span className="ml-1 text-red-500">
+    {errors.bio && (
 
-                                                        *
-                                                    </span>
-                                                </label>
+      <p className="mt-1.5 text-xs font-medium text-red-500">
 
-                                                {!uploadedFile ? (
+        {errors.bio.message}
+      </p>
+    )}
 
-                                                    <label className="flex cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 transition-all duration-300 hover:border-emerald-300 dark:border-white/10 dark:bg-[#09090B] dark:hover:border-emerald-500/30">
+    <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-zinc-400">
 
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+      {role === "recruiter"
+        ? "Optional — add hiring culture, company vision, or recruiter details to improve candidate trust."
+        : "Introduce yourself professionally to improve recruiter engagement and profile visibility."}
+    </p>
+  </div>
 
-                                                            <FileText className="h-5 w-5" />
-                                                        </div>
+  {/* RESUME */}
 
-                                                        <div>
+  {role === "jobseeker" && (
 
-                                                            <h3 className="text-sm font-bold text-slate-950 dark:text-white">
+    <div>
 
-                                                                Upload Resume
-                                                            </h3>
+      <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-zinc-300">
 
-                                                            <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
+        Upload Resume
 
-                                                                PDF, DOC, DOCX supported
-                                                            </p>
-                                                        </div>
+        <span className="ml-1 text-red-500">
 
-                                                        <input
-                                                            type="file"
-                                                            className="hidden"
-                                                            accept=".pdf,.doc,.docx"
-                                                            onChange={(e) => {
+          *
+        </span>
+      </label>
 
-                                                                setValue(
-                                                                    "file",
-                                                                    e.target.files?.[0]
-                                                                )
-                                                            }}
-                                                        />
-                                                    </label>
+      {!uploadedFile ? (
 
-                                                ) : (
+        <label className="flex cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 transition-all duration-300 hover:border-emerald-300 dark:border-white/10 dark:bg-[#09090B] dark:hover:border-emerald-500/30">
 
-                                                    <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 dark:border-emerald-500/20 dark:bg-emerald-500/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
 
-                                                        <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5" />
+          </div>
 
-                                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+          <div>
 
-                                                                <FileText className="h-5 w-5" />
-                                                            </div>
+            <h3 className="text-sm font-bold text-slate-950 dark:text-white">
 
-                                                            <div>
+              Upload Resume
+            </h3>
 
-                                                                <h3 className="max-w-[180px] truncate text-sm font-bold text-slate-950 dark:text-white">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
 
-                                                                    {uploadedFile.name}
-                                                                </h3>
+              PDF, DOC, DOCX supported
+            </p>
+          </div>
 
-                                                                <p className="text-xs text-slate-500 dark:text-zinc-400">
+          <input
+            type="file"
+            className="hidden"
+            accept=".pdf,.doc,.docx"
+            onChange={(e) => {
 
-                                                                    {(
-                                                                        uploadedFile.size /
-                                                                        1024 /
-                                                                        1024
-                                                                    ).toFixed(2)}{" "}
-                                                                    MB
-                                                                </p>
-                                                            </div>
-                                                        </div>
+              setValue(
+                "file",
+                e.target.files?.[0]
+              )
 
-                                                        <label className="cursor-pointer text-xs font-semibold text-emerald-600 transition-colors duration-300 hover:text-emerald-500 dark:text-emerald-400">
+              trigger("file")
+            }}
+          />
+        </label>
 
-                                                            Replace
+      ) : (
 
-                                                            <input
-                                                                type="file"
-                                                                className="hidden"
-                                                                accept=".pdf,.doc,.docx"
-                                                                onChange={(e) => {
+        <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3 dark:border-emerald-500/20 dark:bg-emerald-500/[0.06]">
 
-                                                                    setValue(
-                                                                        "file",
-                                                                        e.target.files?.[0]
-                                                                    )
-                                                                }}
-                                                            />
-                                                        </label>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+
+              <FileText className="h-5 w-5" />
+            </div>
+
+            <div>
+
+              <h3 className="max-w-[180px] truncate text-sm font-bold text-slate-950 dark:text-white">
+
+                {uploadedFile.name}
+              </h3>
+
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+
+                {(
+                  uploadedFile.size /
+                  1024 /
+                  1024
+                ).toFixed(2)} MB
+              </p>
+            </div>
+          </div>
+
+          <label className="cursor-pointer text-xs font-semibold text-emerald-600 transition-colors duration-300 hover:text-emerald-500 dark:text-emerald-400">
+
+            Replace
+
+            <input
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => {
+
+                setValue(
+                  "file",
+                  e.target.files?.[0]
+                )
+
+                trigger("file")
+              }}
+            />
+          </label>
+        </div>
+      )}
+    </div>
+  )}
+</div>
+</div>
 
                                 {/* BUTTON */}
                                 <Button

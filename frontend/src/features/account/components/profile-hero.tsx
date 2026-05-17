@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import {
@@ -12,8 +12,6 @@ import {
   Sparkles,
   User2,
   X,
-  Check,
-  Move,
   ZoomIn,
 } from "lucide-react"
 
@@ -26,17 +24,13 @@ import { CropModal } from "../models/crop-model"
 
 interface Props {
   user: MeUser
-}
-
-interface CropRegion {
-  x: number
-  y: number
-  size: number
+  completion : number
 }
 
 // ─── Profile Hero ──────────────────────────────────────────────────────────────
 export default function ProfileHero({
   user:initialUser,
+  completion:complete
 }:Props){
 
   const liveUser=
@@ -88,16 +82,6 @@ export default function ProfileHero({
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
-
-  const completionItems = [
-    !!user.profile_pic,
-    !!user.phone_number,
-    !!user.skills?.length,
-    user.role === "recruiter" ? true : !!user.bio,
-    user.role === "recruiter" ? true : !!user.resume,
-  ]
-  const completed = completionItems.filter(Boolean).length
-  const completion = Math.round((completed / completionItems.length) * 100)
 
   return (
     <>
@@ -211,7 +195,7 @@ export default function ProfileHero({
                     Completion
                   </p>
                   <h2 className="mt-1 text-[38px] font-black leading-none tracking-[-3px] text-slate-950 dark:text-white">
-                    {completion}%
+                    {complete}%
                   </h2>
                 </div>
                 <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-500/10 dark:bg-emerald-500/10 dark:text-emerald-400">
@@ -222,7 +206,7 @@ export default function ProfileHero({
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-500"
-                  style={{ width: `${completion}%` }}
+                  style={{ width: `${complete}%` }}
                 />
               </div>
 

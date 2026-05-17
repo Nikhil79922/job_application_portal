@@ -79,7 +79,7 @@ export default function ProfilePage() {
 
         {/* Hero — full width */}
         <div className="relative z-10 w-full px-4 pt-8 sm:px-6 lg:px-8">
-          <ProfileHero user={data as any} />
+          <ProfileHero user={data as any} completion={completion} />
         </div>
 
         {/* Main content grid */}

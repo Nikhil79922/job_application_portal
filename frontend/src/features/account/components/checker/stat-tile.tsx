@@ -22,7 +22,7 @@ export function StatTile({
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">{label}</p>
-          <p className="mt-0.5 text-lg font-black leading-none tracking-[-0.5px] text-slate-950 dark:text-white">{value}</p>
+          <p className="mt-0.5 text-sm font-black leading-none tracking-[-0.5px] text-slate-950 dark:text-white">{value}</p>
         </div>
       </div>
     )

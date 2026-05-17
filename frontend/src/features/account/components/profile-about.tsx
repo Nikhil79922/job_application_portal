@@ -16,30 +16,34 @@ import type {
   MeUser,
 } from "../types/me.types"
 
-interface Props{
-  user:MeUser
+interface Props {
+  user: MeUser
 }
 
 export default function ProfileAbout({
-  user:initialUser,
-}:Props){
+  user: initialUser,
+}: Props) {
 
   /* LIVE USER */
 
-  const liveUser=
+  const liveUser =
     useAuthStore(
-      (state)=>state.user
+      (state) => state.user
     )
 
-  const user=
-    liveUser||
+  const user =
+    liveUser ||
     initialUser
 
-  const isJobseeker=
-    user.role===
-    "jobseeker"
+  const showBio =
+    [
+      "jobseeker",
+      "recruiter",
+    ].includes(
+      user.role
+    )
 
-  return(
+  return (
 
     <div className="space-y-6">
 
@@ -142,7 +146,7 @@ export default function ProfileAbout({
                   <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
 
                     {
-                      user.phone_number||
+                      user.phone_number ||
                       "Not added"
                     }
                   </p>
@@ -197,7 +201,7 @@ export default function ProfileAbout({
                   <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
 
                     {
-                      user.subscription||
+                      user.subscription ||
                       "Free Plan"
                     }
                   </p>
@@ -209,38 +213,91 @@ export default function ProfileAbout({
           {/* BIO */}
 
           {
-            isJobseeker&&(
+            showBio && (
 
-              <div className="mt-8 rounded-[28px] border border-slate-200 bg-slate-50/80 p-6 dark:border-white/10 dark:bg-white/[0.03]">
+              <div className="mt-8 overflow-hidden rounded-[30px] border border-slate-200 bg-slate-50/80 dark:border-white/10 dark:bg-white/[0.03]">
 
-                <div className="flex items-center gap-3">
+                {/* HEADER */}
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                <div className="relative overflow-hidden border-b border-slate-200 px-6 py-5 dark:border-white/10">
 
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
+                  <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
 
-                  <div>
+                  <div className="relative z-10 flex items-start gap-4">
 
-                    <h4 className="text-lg font-black tracking-[-0.5px] text-slate-950 dark:text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
 
-                      Professional Bio
-                    </h4>
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
 
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
+                    <div>
 
-                      Your public professional introduction.
-                    </p>
+                      <h4 className="text-xl font-black tracking-[-0.7px] text-slate-950 dark:text-white">
+
+                        {
+                          user.role ===
+                          "recruiter"
+                            ? "Company / Hiring Bio"
+                            : "Professional Bio"
+                        }
+                      </h4>
+
+                      <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-zinc-400">
+
+                        {
+                          user.role ===
+                          "recruiter"
+
+                            ? "Introduce your company culture, recruitment vision, and hiring goals."
+
+                            : "Your public professional introduction visible to recruiters and employers."
+                        }
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-slate-600 dark:text-zinc-300">
+                {/* CONTENT */}
+
+                <div className="p-6">
 
                   {
-                    user.bio||
-                    "No bio added yet."
+                    user.bio ? (
+
+                      <p className="whitespace-pre-wrap text-sm leading-8 text-slate-700 dark:text-zinc-300">
+
+                        {user.bio}
+                      </p>
+
+                    ) : (
+
+                      <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white/60 px-6 py-10 text-center dark:border-white/10 dark:bg-black/20">
+
+                        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+
+                          <Sparkles className="h-7 w-7" />
+                        </div>
+
+                        <h3 className="mt-5 text-lg font-black tracking-[-0.5px] text-slate-950 dark:text-white">
+
+                          No Bio Added Yet
+                        </h3>
+
+                        <p className="mt-2 max-w-xl text-sm leading-7 text-slate-500 dark:text-zinc-400">
+
+                          {
+                            user.role ===
+                            "recruiter"
+
+                              ? "Add a hiring or company bio to improve employer branding and candidate trust."
+
+                              : "Add a professional summary to improve recruiter engagement and profile visibility."
+                          }
+                        </p>
+                      </div>
+                    )
                   }
-                </p>
+                </div>
               </div>
             )
           }

@@ -5,9 +5,6 @@ import { useAuthStore } from "@/stores/auth.store";
 import { CheckItem } from "../checker/check-items";
 import { StatTile } from "../checker/stat-tile";
 
-
-
-
 export function RecruiterSidebar({
     user,
     checks,
@@ -141,38 +138,7 @@ export function RecruiterSidebar({
           </div>
         </div>
   
-        {/* ── Contact info card ─────────────────────────────────────────────── */}
-        {(user.email || user.phone_number) && (
-          <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/90">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400">
-                <Globe className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-black tracking-[-0.4px] text-slate-950 dark:text-white">
-                  Contact Info
-                </h3>
-                <p className="text-[11px] text-slate-400 dark:text-zinc-500">
-                  Visible to shortlisted candidates
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-3">
-              {user.email && (
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
-                  <Mail className="h-4 w-4 shrink-0 text-slate-400 dark:text-zinc-500" />
-                  <p className="truncate text-sm font-semibold text-slate-800 dark:text-zinc-200">{user.email}</p>
-                </div>
-              )}
-              {user.phone_number && (
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
-                  <Phone className="h-4 w-4 shrink-0 text-slate-400 dark:text-zinc-500" />
-                  <p className="text-sm font-semibold text-slate-800 dark:text-zinc-200">{user.phone_number}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+    
   
         <ProfileStatus user={user as any} />
       </div>
