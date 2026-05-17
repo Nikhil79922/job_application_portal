@@ -55,7 +55,7 @@ import {
 const baseNavLinks = [
   { name: "Home",      href: "/",         icon: Home        },
   { name: "Find Jobs", href: "/jobs",      icon: SearchCheck },
-  { name: "Companies", href: "/companies", icon: Building2   },
+  // { name: "Companies", href: "/companies", icon: Building2   },
   { name: "About",     href: "/about",     icon: CircleHelp  },
 ]
 

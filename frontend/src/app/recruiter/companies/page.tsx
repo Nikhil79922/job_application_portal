@@ -1,11 +1,16 @@
-import React from 'react'
+"use client"
 
-const companiesPage = () => {
+import RoleGuard from "@/components/guards/role-guard"
+import CompaniesPageView from "@/features/recruiter/companies/components/companies-page-view"
+
+export default function CompaniesPage() {
   return (
-    <div>
-      Companies
-    </div>
+    <RoleGuard
+      allowedRoles={[
+        "recruiter",
+      ]}
+    >
+      <CompaniesPageView />
+    </RoleGuard>
   )
 }
-
-export default companiesPage
