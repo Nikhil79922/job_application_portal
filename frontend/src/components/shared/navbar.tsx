@@ -21,11 +21,13 @@ import {
   LogIn,
   LogOut,
   Menu,
-  Search,
   SearchCheck,
   User,
   UserPlus,
   X,
+  LayoutDashboard,
+  Users,
+  Briefcase,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,6 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/models/dropdown-menu"
 
@@ -48,144 +51,105 @@ import {
   useLogout,
 } from "@/features/auth/hooks/use-logout"
 
-const navLinks = [
-  {
-    name: "Home",
-    href: "/",
-    icon: Home,
-  },
-  {
-    name: "Find Jobs",
-    href: "/jobs",
-    icon: SearchCheck,
-  },
-  {
-    name: "About",
-    href: "/about",
-    icon: CircleHelp,
-  },
+// ─── Base nav (visible to everyone) ───────────────────────────────────────────
+const baseNavLinks = [
+  { name: "Home",      href: "/",         icon: Home        },
+  { name: "Find Jobs", href: "/jobs",      icon: SearchCheck },
+  { name: "Companies", href: "/companies", icon: Building2   },
+  { name: "About",     href: "/about",     icon: CircleHelp  },
+]
+
+// ─── Recruiter dropdown quick-links (desktop) ─────────────────────────────────
+const recruiterDropdownLinks = [
+  { name: "My Companies", href: "/recruiter/companies",  icon: Building2       },
+  { name: "My Jobs",      href: "/recruiter/jobs",       icon: Briefcase       },
+  { name: "Applicants",   href: "/recruiter/applicants", icon: Users           },
 ]
 
 const Navbar = () => {
+  const pathname = usePathname()
+  const router   = useRouter()
 
-  const pathname =
-    usePathname()
+  const [open, setOpen] = useState(false)
 
-  const router =
-    useRouter()
+  const { user, isAuthenticated } = useAuthStore()
+  const { mutate: logoutUser }    = useLogout()
 
-  const [open, setOpen] =
-    useState(false)
+  // ─── Role detection ─────────────────────────────────────────────────────────
+  const isRecruiter = user?.role === "recruiter"
 
-  const {
-    user,
-    isAuthenticated,
-  } = useAuthStore()
+  // // Merge nav links based on role
+  // const navLinks = isRecruiter
+  //   ? [...baseNavLinks, ...recruiterNavLinks]
+  //   : baseNavLinks
 
-  const {
-    mutate: logoutUser,
-  } = useLogout()
-
-  const handleNavigation = (
-    href: string
-  ) => {
-
+  const handleNavigation = (href: string) => {
     setOpen(false)
-
-    setTimeout(() => {
-
-      router.push(href)
-
-    }, 220)
+    setTimeout(() => router.push(href), 220)
   }
 
   const handleLogout = () => {
-
     logoutUser()
-
     setOpen(false)
   }
 
   return (
-
     <>
+      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/92 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur-2xl transition-all duration-500 dark:border-white/10 dark:bg-[#09090B]/85 dark:shadow-none">
 
         <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8">
 
           {/* LOGO */}
-          <Link
-            href="/"
-            className="group flex items-center gap-4"
-          >
-
+          <Link href="/" className="group flex items-center gap-4">
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 ease-out group-hover:-translate-y-[2px] group-hover:scale-[1.03] group-hover:border-emerald-200 group-hover:shadow-[0_12px_30px_rgba(16,185,129,0.12)] dark:border-white/10 dark:bg-zinc-900 dark:group-hover:border-emerald-500/20 dark:group-hover:shadow-[0_10px_30px_rgba(16,185,129,0.08)]">
-
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/[0.03] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
               <div className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
-
               <BriefcaseBusiness className="h-5 w-5 text-slate-950 transition-all duration-500 group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400" />
             </div>
-
             <div className="leading-none">
-
               <h1 className="text-[28px] font-black tracking-[-1.5px] text-slate-950 dark:text-white">
-
-                Talent
-
-                <span className="ml-1 text-emerald-600">
-                  Forge
-                </span>
+                Talent<span className="ml-1 text-emerald-600">Forge</span>
               </h1>
-
               <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-zinc-500">
                 Future Of Hiring
               </p>
             </div>
           </Link>
 
-          {/* DESKTOP NAV */}
-          <nav className="hidden items-center gap-2 lg:flex">
+          {/* ── DESKTOP NAV ──────────────────────────────────────────────────── */}
+          <nav className="hidden items-center gap-1 lg:flex">
 
-            {navLinks.map((item) => {
-
-              const Icon = item.icon
-
-              const active =
-                pathname === item.href
-
+            {/* Base links */}
+            {baseNavLinks.map((item) => {
+              const Icon   = item.icon
+              const active = pathname === item.href
               return (
-
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group relative flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-500 ${active
+                  className={`group relative flex items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-500 ${
+                    active
                       ? "bg-emerald-100 text-emerald-700 shadow-sm dark:bg-emerald-500/10 dark:text-emerald-400"
                       : "text-slate-700 hover:bg-emerald-50/80 hover:text-emerald-600 dark:text-zinc-400 dark:hover:bg-white/[0.05] dark:hover:text-white"
-                    }`}
+                  }`}
                 >
-
                   <Icon className="relative z-10 h-[18px] w-[18px]" />
-
-                  <span className="relative z-10">
-                    {item.name}
-                  </span>
+                  <span className="relative z-10">{item.name}</span>
                 </Link>
               )
             })}
+
+         
           </nav>
 
-          {/* DESKTOP ACTIONS */}
+          {/* ── DESKTOP ACTIONS ───────────────────────────────────────────────── */}
           <div className="hidden items-center gap-3 lg:flex">
-
             <ThemeToggle />
 
             {!isAuthenticated ? (
-
               <>
                 <Link href="/login">
-
                   <Button
                     variant="ghost"
                     className="h-11 rounded-full border border-slate-200 bg-slate-50 px-6 text-sm font-semibold dark:border-white/10 dark:bg-zinc-900"
@@ -194,73 +158,112 @@ const Navbar = () => {
                     Login
                   </Button>
                 </Link>
-
                 <Link href="/register">
-
                   <Button className="h-11 rounded-full bg-emerald-600 px-6 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] hover:bg-emerald-500">
-
                     <UserPlus className="mr-2 h-4 w-4" />
-
                     Get Started
-
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               </>
-
             ) : (
-
               <DropdownMenu>
-
                 <DropdownMenuTrigger asChild>
-
                   <Button
                     type="button"
                     variant="outline"
                     className="group h-auto rounded-full border-slate-200 bg-white py-1.5 pl-1.5 pr-3 shadow-sm dark:border-white/10 dark:bg-zinc-900"
                   >
-
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
-
+                    {/* Avatar */}
+                    <div className={`relative flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white ${isRecruiter ? "bg-violet-600" : "bg-emerald-600"}`}>
                       {user?.name?.charAt(0)}
+                      {/* Online dot */}
+                      <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full border-2 border-white dark:border-zinc-900">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      </span>
                     </div>
 
                     <div className="hidden text-left sm:block">
-
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                      <p className="text-sm font-semibold leading-none text-slate-900 dark:text-white">
                         {user?.name}
                       </p>
+                      {/* Role pill */}
+                      {isRecruiter && (
+                        <span className="mt-1 inline-block rounded-full bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+                          Recruiter
+                        </span>
+                      )}
                     </div>
 
-                    <ChevronDown className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
+                    <ChevronDown className="h-4 w-4 text-slate-500 transition-transform duration-300 group-data-[state=open]:rotate-180 dark:text-zinc-400" />
                   </Button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
                   align="end"
-                  className="mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-[#111111]"
+                  className="mt-3 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-[#111111]"
                 >
+                  {/* User meta header */}
+                  <div className="mb-1 rounded-xl bg-slate-50 p-3 dark:bg-white/[0.03]">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white ${isRecruiter ? "bg-violet-600" : "bg-emerald-600"}`}>
+                        {user?.name?.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{user?.name}</p>
+                        <p className="truncate text-[11px] text-slate-500 dark:text-zinc-500">{user?.email}</p>
+                      </div>
+                      {isRecruiter && (
+                        <span className="ml-auto shrink-0 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-400">
+                          Recruiter
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                  <DropdownMenuItem className="cursor-pointer rounded-xl px-3 py-3"
-                    onClick={() =>
-                      handleNavigation("/profile")
-                    }
+                  <DropdownMenuItem
+                    className="cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold"
+                    onClick={() => handleNavigation("/profile")}
                   >
-
                     <User className="mr-3 h-4 w-4" />
-
                     Manage Profile
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  {/* ── Recruiter section ── */}
+                  {isRecruiter && (
+                    <>
+                      <DropdownMenuSeparator className="my-1" />
+                      <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-zinc-600">
+                        Recruiter Tools
+                      </DropdownMenuLabel>
 
+                      {recruiterDropdownLinks.map((item) => {
+                        const Icon   = item.icon
+                        const active = pathname.startsWith(item.href)
+                        return (
+                          <DropdownMenuItem
+                            key={item.name}
+                            onClick={() => handleNavigation(item.href)}
+                            className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
+                              active
+                                ? "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400"
+                                : "text-slate-700 dark:text-zinc-300"
+                            }`}
+                          >
+                            <Icon className="mr-3 h-4 w-4 shrink-0" />
+                            {item.name}
+                          </DropdownMenuItem>
+                        )
+                      })}
+                    </>
+                  )}
+
+                  <DropdownMenuSeparator className="my-1" />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="cursor-pointer rounded-xl px-3 py-3 text-red-500"
+                    className="cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 focus:text-red-500"
                   >
-
                     <LogOut className="mr-3 h-4 w-4" />
-
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -268,148 +271,147 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* MOBILE ACTIONS */}
+          {/* ── MOBILE TOGGLE ─────────────────────────────────────────────────── */}
           <div className="flex items-center gap-3 lg:hidden">
-
             <ThemeToggle />
-
             <Button
               size="icon"
               variant="outline"
               onClick={() => setOpen(!open)}
               className="h-11 w-11 rounded-2xl border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900"
             >
-
-              {open ? (
-                <X className="h-5 w-5 shrink-0" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              {open ? <X className="h-5 w-5 shrink-0" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
       </header>
 
-      {/* MOBILE MENU */}
-      <div className={`fixed inset-0 z-40 transition-all duration-500 lg:hidden ${open
-          ? "pointer-events-auto visible"
-          : "pointer-events-none invisible"
-        }`}>
+      {/* ── MOBILE MENU ──────────────────────────────────────────────────────── */}
+      <div className={`fixed inset-0 z-40 transition-all duration-500 lg:hidden ${open ? "pointer-events-auto visible" : "pointer-events-none invisible"}`}>
 
-        {/* OVERLAY */}
+        {/* Overlay */}
         <div
           onClick={() => setOpen(false)}
-          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-500 ${open
-              ? "opacity-100"
-              : "opacity-0"
-            }`}
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-500 ${open ? "opacity-100" : "opacity-0"}`}
         />
 
-        {/* DRAWER */}
-        <div className={`absolute right-0 top-0 flex h-full w-[85%] max-w-sm flex-col border-l border-white/10 bg-white/95 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-all duration-500 dark:bg-[#09090B]/95 ${open
-            ? "translate-x-0"
-            : "translate-x-full"
-          }`}>
+        {/* Drawer */}
+        <div className={`absolute right-0 top-0 flex h-full w-[85%] max-w-sm flex-col overflow-y-auto border-l border-white/10 bg-white/95 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-all duration-500 dark:bg-[#09090B]/95 ${open ? "translate-x-0" : "translate-x-full"}`}>
 
-          {/* NAVIGATION */}
-          <div className="mt-24 flex flex-col gap-3">
+          {/* NAVIGATION ───────────────────────────────── */}
+          <div className="mt-24 flex flex-col gap-2">
 
-            {navLinks.map((item) => {
+            {/* Section label: General */}
+            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-600">
+              General
+            </p>
 
-              const Icon = item.icon
-
-              const active =
-                pathname === item.href
-
+            {baseNavLinks.map((item) => {
+              const Icon   = item.icon
+              const active = pathname === item.href
               return (
-
                 <button
                   key={item.name}
-                  onClick={() =>
-                    handleNavigation(item.href)
-                  }
-                  className={`flex items-center gap-4 rounded-2xl px-5 py-4 text-left text-sm font-semibold transition-all duration-300 ${active
-                      ? "bg-emerald-500 text-white"
+                  onClick={() => handleNavigation(item.href)}
+                  className={`flex items-center gap-4 rounded-2xl px-5 py-3.5 text-left text-sm font-semibold transition-all duration-300 ${
+                    active
+                      ? "bg-emerald-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.25)]"
                       : "bg-slate-100 text-slate-800 hover:bg-emerald-50 hover:text-emerald-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
-                    }`}
+                  }`}
                 >
-
                   <Icon className="h-5 w-5" />
-
                   {item.name}
                 </button>
               )
             })}
+
+            {/* Recruiter section ─────────────────────── */}
+            {isRecruiter && (
+              <>
+                <div className="my-2 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-500 dark:text-violet-400">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-60" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-500" />
+                    </span>
+                    Recruiter
+                  </span>
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                </div>
+
+                {recruiterDropdownLinks.map((item) => {
+                  const Icon   = item.icon
+                  const active = pathname.startsWith(item.href)
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => handleNavigation(item.href)}
+                      className={`flex items-center gap-4 rounded-2xl px-5 py-3.5 text-left text-sm font-semibold transition-all duration-300 ${
+                        active
+                          ? "bg-violet-500 text-white shadow-[0_8px_20px_rgba(139,92,246,0.25)]"
+                          : "bg-slate-100 text-slate-800 hover:bg-violet-50 hover:text-violet-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-violet-500/10 dark:hover:text-violet-400"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {item.name}
+                    </button>
+                  )
+                })}
+              </>
+            )}
           </div>
 
-          {/* AUTH */}
-          <div className="mt-auto flex flex-col gap-3">
-
+          {/* AUTH ────────────────────────────────────── */}
+          <div className="mt-auto flex flex-col gap-3 pt-6">
             {!isAuthenticated ? (
-
               <>
                 <Button
-                  onClick={() =>
-                    handleNavigation("/login")
-                  }
+                  onClick={() => handleNavigation("/login")}
                   variant="outline"
                   className="h-12 rounded-2xl border-border/60 bg-background/60 text-sm font-semibold backdrop-blur-xl"
                 >
-
                   <LogIn className="mr-2 h-4 w-4" />
-
                   Login
                 </Button>
-
                 <Button
-                  onClick={() =>
-                    handleNavigation("/register")
-                  }
+                  onClick={() => handleNavigation("/register")}
                   className="h-12 rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-300 hover:bg-emerald-500"
                 >
-
                   <UserPlus className="mr-2 h-4 w-4" />
-
                   Get Started
                 </Button>
               </>
-
             ) : (
-
               <>
                 {/* USER CARD */}
-
-                <div className="rounded-[28px] border border-border/60 bg-card/70 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
-
-                  <div className="flex items-center gap-4">
-
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-lg font-bold text-white shadow-[0_10px_25px_rgba(16,185,129,0.28)]">
-
+                <div className="rounded-[24px] border border-border/60 bg-card/70 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold text-white shadow-[0_8px_20px_rgba(0,0,0,0.15)] ${isRecruiter ? "bg-violet-600" : "bg-emerald-600"}`}>
                       {user?.name?.charAt(0)}
+                      <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white dark:border-zinc-900">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      </span>
                     </div>
-
                     <div className="min-w-0 flex-1">
-
-                      <h3 className="truncate text-sm font-semibold text-foreground">
-                        {user?.name}
-                      </h3>
-
-                      <p className="truncate text-xs text-muted-foreground">
-                        {user?.email}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="truncate text-sm font-bold text-foreground">{user?.name}</h3>
+                        {isRecruiter && (
+                          <span className="shrink-0 rounded-full bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+                            Recruiter
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                     </div>
                   </div>
 
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      handleNavigation("/profile")
-                    }
+                    onClick={() => handleNavigation("/profile")}
                     className="mt-4 h-11 w-full rounded-2xl border-border/60 bg-background/60 text-sm font-semibold backdrop-blur-xl transition-all duration-300 hover:bg-background"
                   >
-
                     <User className="mr-2 h-4 w-4" />
-
                     Manage Profile
                   </Button>
                 </div>
@@ -419,9 +421,7 @@ const Navbar = () => {
                   variant="destructive"
                   className="h-12 rounded-2xl text-sm font-semibold"
                 >
-
                   <LogOut className="mr-2 h-4 w-4" />
-
                   Logout
                 </Button>
               </>
