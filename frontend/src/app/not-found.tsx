@@ -5,7 +5,6 @@ import Link from "next/link"
 import {
   ArrowLeft,
   Compass,
-  Search,
   Sparkles,
 } from "lucide-react"
 
