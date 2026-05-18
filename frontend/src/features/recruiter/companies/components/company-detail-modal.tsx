@@ -1,272 +1,573 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client"
 
-import Image from "next/image"
-import {
-  Building2, Calendar, ExternalLink, Globe,
-  MapPin, Briefcase, Users, X, Sparkles,
-  TrendingUp, DollarSign, Loader2, AlertCircle,
-} from "lucide-react"
+import { useEffect, useState } from "react"
+
+import Link from "next/link"
+
 import { createPortal } from "react-dom"
-import { useEffect } from "react"
-import { useCompanyDetail } from "../hooks/use-company-detail"
-import { formatDate, formatWebsiteDisplay, getCompanyInitials } from "../utils/company.utils"
+
+import type {
+  Company,
+  CompanyJob,
+} from "../types/company.types"
+
+import {
+  useCompanyDetail,
+} from "../hooks/use-company-detail"
+
+import { Button } from "@/components/ui/button"
 
 interface Props {
-  open: boolean
   companyId: number | null
   onClose: () => void
 }
 
-export default function CompanyDetailModal({ open, companyId, onClose }: Props) {
-  // Pass companyId directly — enabled: !!companyId handles the null case inside the hook.
-  // Do NOT gate with `open` here; we want the query to fire the moment companyId is set,
-  // which happens at the same time open becomes true.
-  const { company, isLoading, isError } = useCompanyDetail({ companyId })
+function StatusBadge({
+  status,
+}: {
+  status: Company["logo_upload_status"]
+}) {
 
-  // Lock body scroll
-  useEffect(() => {
-    if (open) document.body.style.overflow = "hidden"
-    else document.body.style.overflow = ""
-    return () => { document.body.style.overflow = "" }
-  }, [open])
+  const map = {
 
-  // Close on Escape
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
-    if (open) document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [open, onClose])
+    success: {
+      bg: "border border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+      label: "Logo Active",
+    },
 
-  if (!open) return null
+    pending: {
+      bg: "border border-yellow-500/20 bg-yellow-500/10 text-yellow-400",
+      label: "Uploading...",
+    },
 
-  const jobs = company?.jobs ?? []
+    fail: {
+      bg: "border border-red-500/20 bg-red-500/10 text-red-400",
+      label: "Upload Failed",
+    },
+  }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/60 backdrop-blur-md sm:items-center sm:p-4"
-      onClick={onClose}
+  const {
+    bg,
+    label,
+  } = map[status]
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${bg}`}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[32px] border border-white/10 shadow-[0_-20px_80px_rgba(0,0,0,0.6)] sm:rounded-[32px]"
-        style={{ background: "linear-gradient(145deg, #141414 0%, #0d0d0d 60%, #111810 100%)" }}
-      >
-        {/* Grid texture */}
+      {label}
+    </span>
+  )
+}
+
+function WorkLocationBadge({
+  type,
+}: {
+  type: CompanyJob["work_location"]
+}) {
+
+  const map: Record<
+    CompanyJob["work_location"],
+    string
+  > = {
+
+    "On-site":
+      "border border-slate-300 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-300",
+
+    Remote:
+      "border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+
+    Hybrid:
+      "border border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  }
+
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${map[type]}`}
+    >
+      {type}
+    </span>
+  )
+}
+
+function JobTypeBadge({
+  type,
+}: {
+  type: CompanyJob["job_type"]
+}) {
+
+  return (
+    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+      {type}
+    </span>
+  )
+}
+
+function JobCard({
+  job,
+}: {
+  job: CompanyJob
+}) {
+
+  const [
+    expanded,
+    setExpanded,
+  ] = useState(false)
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-emerald-500/20">
+
+      <div className="flex items-start justify-between gap-4">
+
+        <div>
+
+          <h4 className="text-base font-bold text-slate-900 dark:text-white">
+            {job.title}
+          </h4>
+
+          <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+            {job.role}
+          </p>
+        </div>
+
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.1) 1px,transparent 1px)",
-            backgroundSize: "32px 32px",
-          }}
+          className={`h-3 w-3 rounded-full ${job.is_active
+              ? "bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.7)]"
+              : "bg-zinc-400"
+            }`}
         />
-        {/* Glows */}
-        <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+      </div>
 
-        {/* ── STICKY HEADER ── */}
-        <div className="relative z-10 shrink-0 border-b border-white/[0.06] px-6 py-5">
-          <div className="flex items-center gap-4">
-            {/* Logo */}
-            <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
-              {company?.logo ? (
-                <Image src={company.logo} alt={company.name} fill className="object-cover" />
-              ) : (
-                <span className="text-lg font-black text-zinc-400">
-                  {company ? getCompanyInitials(company.name) : "…"}
-                </span>
-              )}
-            </div>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
 
-            <div className="min-w-0 flex-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400">
-                <Sparkles className="h-3 w-3" />
-                Recruiter Workspace
-              </div>
-              <h2 className="mt-1 truncate text-2xl font-black tracking-[-1px] text-white">
-                {isLoading
-                  ? <span className="inline-block h-6 w-48 animate-pulse rounded-lg bg-white/10" />
-                  : company?.name ?? "—"
-                }
-              </h2>
-            </div>
+        <WorkLocationBadge
+          type={job.work_location}
+        />
 
-            {/* Close — plain button, NOT shadcn Button */}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-zinc-400 transition-all hover:bg-white/[0.10] hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
+        <JobTypeBadge
+          type={job.job_type}
+        />
+
+        <span className="text-xs text-slate-500 dark:text-zinc-500">
+          {job.location}
+        </span>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between">
+
+        <div className="flex gap-6">
+
+          <div>
+
+            <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400 dark:text-zinc-500">
+              Salary
+            </p>
+
+            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+              ${job.salary.toLocaleString()}
+
+              <span className="ml-1 text-xs font-normal text-slate-400">
+                /yr
+              </span>
+            </p>
+          </div>
+
+          <div>
+
+            <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400 dark:text-zinc-500">
+              Openings
+            </p>
+
+            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+              {job.openings}
+            </p>
           </div>
         </div>
 
-        {/* ── SCROLLABLE BODY ── */}
-        <div className="relative z-10 flex-1 overflow-y-auto">
-
-          {/* Loading */}
-          {isLoading && (
-            <div className="flex flex-col items-center justify-center gap-4 py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-              <p className="text-sm font-medium text-zinc-500">Loading company details…</p>
-            </div>
-          )}
-
-          {/* Error */}
-          {isError && !isLoading && (
-            <div className="flex flex-col items-center justify-center gap-4 py-20">
-              <AlertCircle className="h-8 w-8 text-red-500" />
-              <p className="text-sm font-medium text-zinc-400">Failed to load company details.</p>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-white/[0.10]"
-              >
-                Close
-              </button>
-            </div>
-          )}
-
-          {/* Content */}
-          {!isLoading && !isError && company && (
-            <>
-              {/* COMPANY INFO */}
-              <div className="px-6 py-6">
-                <p className="text-sm leading-7 text-zinc-400">{company.description}</p>
-
-                {/* META PILLS */}
-                <div className="mt-5 flex flex-wrap gap-2.5">
-                  <a
-                    href={company.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-400"
-                  >
-                    <Globe className="h-3.5 w-3.5 text-emerald-500" />
-                    {formatWebsiteDisplay(company.website)}
-                    <ExternalLink className="h-3 w-3 opacity-50" />
-                  </a>
-
-                  <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-zinc-300">
-                    <Calendar className="h-3.5 w-3.5 text-cyan-500" />
-                    {formatDate(company.created_at)}
-                  </div>
-
-                  <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-zinc-300">
-                    <Users className="h-3.5 w-3.5 text-violet-400" />
-                    Recruiter ID: {company.recruiter_id}
-                  </div>
-                </div>
-
-                {/* STATS */}
-                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <Briefcase className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Open Jobs</span>
-                    </div>
-                    <p className="mt-2 text-3xl font-black tracking-[-2px] text-white">{jobs.length}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <TrendingUp className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Openings</span>
-                    </div>
-                    <p className="mt-2 text-3xl font-black tracking-[-2px] text-white">
-                      {jobs.reduce((acc, j) => acc + (j.openings || 0), 0)}
-                    </p>
-                  </div>
-
-                  <div className="col-span-2 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:col-span-1">
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <DollarSign className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Avg. Salary</span>
-                    </div>
-                    <p className="mt-2 text-3xl font-black tracking-[-2px] text-white">
-                      {jobs.length > 0
-                        ? `₹${Math.round(jobs.reduce((acc, j) => acc + Number(j.salary || 0), 0) / jobs.length).toLocaleString()}`
-                        : "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* JOBS */}
-              <div className="border-t border-white/[0.06] px-6 py-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black tracking-[-0.8px] text-white">Open Positions</h3>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-zinc-400">
-                    {jobs.length} {jobs.length === 1 ? "role" : "roles"}
-                  </div>
-                </div>
-
-                {/* Empty */}
-                {!jobs.length && (
-                  <div className="mt-5 rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-10 text-center">
-                    <Building2 className="mx-auto h-10 w-10 text-zinc-700" />
-                    <h4 className="mt-4 text-base font-black text-white">No Positions Yet</h4>
-                    <p className="mt-1.5 text-sm text-zinc-500">This company doesn't have any active job listings.</p>
-                  </div>
-                )}
-
-                {/* Job cards */}
-                {jobs.length > 0 && (
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {jobs.map((job) => (
-                      <div
-                        key={job.job_id}
-                        className="group relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-white/[0.03] p-5 transition-all hover:border-emerald-500/20 hover:bg-white/[0.05]"
-                      >
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                        <div className="relative">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <h4 className="truncate text-base font-black tracking-[-0.4px] text-white">{job.title}</h4>
-                              <p className="mt-0.5 text-sm font-semibold text-emerald-400">{job.role}</p>
-                            </div>
-                            <div className="shrink-0 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                              {job.job_type}
-                            </div>
-                          </div>
-
-                          <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-500">{job.description}</p>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <div className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs font-semibold text-zinc-400">
-                              <MapPin className="h-3 w-3 text-cyan-500" />
-                              {job.location}
-                            </div>
-                            <div className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs font-semibold text-zinc-400">
-                              <Briefcase className="h-3 w-3 text-violet-400" />
-                              {job.work_location}
-                            </div>
-                          </div>
-
-                          <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
-                            <p className="text-base font-black tracking-[-0.5px] text-white">
-                              ₹{Number(job.salary).toLocaleString()}
-                              <span className="ml-1 text-xs font-medium text-zinc-500">/yr</span>
-                            </p>
-                            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-xs font-bold text-zinc-400">
-                              {job.openings} {job.openings === 1 ? "opening" : "openings"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+        <button
+          onClick={() =>
+            setExpanded(
+              (v) => !v
+            )
+          }
+          className="text-xs cursor-pointer font-semibold text-emerald-600 transition-colors duration-300 hover:text-emerald-500 dark:text-emerald-400"
+        >
+          {
+            expanded
+              ? "Hide Details ↑"
+              : "View Details ↓"
+          }
+        </button>
       </div>
-    </div>,
-    document.body,
+
+      {
+        expanded && (
+
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
+
+            {job.description}
+          </div>
+        )
+      }
+    </div>
   )
 }
+
+export default function CompanyDetailModal({
+  companyId,
+  onClose,
+}: Props) {
+
+  const {
+    company,
+    isLoading,
+    isError,
+  } = useCompanyDetail({
+    companyId,
+  })
+
+  const [
+    mounted,
+    setMounted,
+  ] = useState(false)
+
+  useEffect(() => {
+
+    setMounted(true)
+
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+
+  if (
+    companyId === null ||
+    companyId === undefined
+  ) {
+    return null
+  }
+
+  return createPortal(
+
+    <div
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+      onClick={(e) =>
+        e.target === e.currentTarget &&
+        onClose()
+      }
+    >
+
+      <div className="hide-scrollbar relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[32px] border border-slate-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111111]">
+
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-5 backdrop-blur-sm dark:border-white/10 dark:bg-[#111111]/90">
+
+          <div>
+
+            <h2 className="text-lg font-black tracking-[-0.04em] text-slate-950 dark:text-white">
+              Company Details
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
+              Explore company workspace and openings
+            </p>
+          </div>
+
+          <Button
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-500 transition-transform duration-300 hover:rotate-90 hover:bg-slate-200 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-400 dark:hover:bg-white/[0.08]"
+          >
+            ✕
+          </Button>
+        </div>
+
+        <div className="space-y-8 p-6">
+
+{
+  company &&
+  !isLoading && (
+
+    <>
+      {/* COMPANY HEADER */}
+
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+
+        {
+          company.logo &&
+          company.logo_upload_status === "success" ? (
+
+            <img
+              src={company.logo}
+              alt={company.name}
+              className="h-24 w-24 rounded-3xl border border-slate-200 object-cover dark:border-white/10"
+            />
+          ) : (
+
+            <div className="flex h-24 w-24 items-center justify-center rounded-3xl border border-emerald-500/20 bg-emerald-500/10">
+
+              <span className="text-3xl font-black text-emerald-500">
+                {
+                  company.name
+                    .charAt(0)
+                    .toUpperCase()
+                }
+              </span>
+            </div>
+          )
+        }
+
+        <div className="min-w-0 flex-1">
+
+          <div className="flex flex-wrap items-center gap-3">
+
+            <h3 className="truncate text-2xl font-black tracking-[-0.05em] text-slate-950 dark:text-white">
+              {company.name}
+            </h3>
+
+            <StatusBadge
+              status={
+                company.logo_upload_status
+              }
+            />
+          </div>
+
+          {
+            company.website && (
+
+              <a
+                href={company.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition-colors duration-300 hover:text-emerald-500 dark:text-emerald-400"
+              >
+                {
+                  company.website.replace(
+                    /^https?:\/\//,
+                    "",
+                  )
+                }
+              </a>
+            )
+          }
+        </div>
+      </div>
+
+      {/* COMPANY DESCRIPTION */}
+
+      {
+        company.description && (
+
+          <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-zinc-500">
+              About Company
+            </p>
+
+            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-zinc-300">
+              {company.description}
+            </p>
+          </div>
+        )
+      }
+
+      {/* COMPANY STATS */}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+        <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+
+          <p className="text-xs uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-500">
+            Company ID
+          </p>
+
+          <p className="mt-2 text-lg font-black text-slate-900 dark:text-white">
+            #{company.company_id}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+
+          <p className="text-xs uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-500">
+            Recruiter ID
+          </p>
+
+          <p className="mt-2 text-lg font-black text-slate-900 dark:text-white">
+            #{company.recruiter_id}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+
+          <p className="text-xs uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-500">
+            Open Positions
+          </p>
+
+          <p className="mt-2 text-lg font-black text-slate-900 dark:text-white">
+            {
+              company.jobs?.length || 0
+            }
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+
+          <p className="text-xs uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-500">
+            Created
+          </p>
+
+          <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
+            {
+              new Date(
+                company.created_at
+              ).toLocaleDateString()
+            }
+          </p>
+        </div>
+      </div>
+
+      {/* JOB SECTION */}
+
+      <div>
+
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+          <div className="flex items-center gap-3">
+
+            <h4 className="text-lg font-black tracking-[-0.04em] text-slate-950 dark:text-white">
+              Job Listings
+            </h4>
+
+            <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">
+
+              {
+                company.jobs?.length || 0
+              } Active
+            </div>
+          </div>
+
+          <Link href="/recruiter/jobs">
+
+            <Button
+              className="
+                group relative flex h-11 items-center justify-center
+                overflow-hidden rounded-xl
+                border border-emerald-400/20
+                bg-[#07130F]
+                px-6
+                text-sm font-medium tracking-[0.02em] text-white
+                shadow-[0_4px_20px_rgba(0,0,0,0.35)]
+                transition-all duration-300 ease-out
+                hover:border-emerald-400/40
+                hover:bg-[#0A1B15]
+                hover:shadow-[0_10px_35px_rgba(16,185,129,0.18)]
+                active:scale-[0.985]
+              "
+            >
+
+              <div
+                className="
+                  absolute inset-0 opacity-0
+                  transition-opacity duration-300
+                  group-hover:opacity-100
+                "
+              >
+                <div
+                  className="
+                    absolute inset-y-0 left-0 w-[40%]
+                    bg-emerald-400/15 blur-2xl
+                  "
+                />
+              </div>
+
+              <div
+                className="
+                  absolute inset-x-0 top-0 h-px
+                  bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent
+                "
+              />
+
+              <div
+                className="
+                  absolute inset-0
+                  translate-x-[-120%]
+                  bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.08),transparent)]
+                  transition-transform duration-1000
+                  group-hover:translate-x-[120%]
+                "
+              />
+
+              <span className="relative z-10 flex items-center gap-2">
+
+                <span className="text-emerald-50">
+                  Manage Jobs
+                </span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="
+                    h-4 w-4 text-emerald-400
+                    transition-transform duration-300
+                    group-hover:translate-x-0.5
+                  "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14"
+                  />
+
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m13 6 6 6-6 6"
+                  />
+                </svg>
+              </span>
+            </Button>
+          </Link>
+        </div>
+
+        {
+          company.jobs &&
+          company.jobs.length > 0 ? (
+
+            <div className="space-y-4">
+
+              {
+                company.jobs.map(
+                  (job) => (
+
+                    <JobCard
+                      key={job.job_id}
+                      job={job}
+                    />
+                  )
+                )
+              }
+            </div>
+          ) : (
+
+            <div className="rounded-3xl border border-dashed border-slate-300 py-16 text-center dark:border-white/10">
+
+              <p className="text-sm text-slate-500 dark:text-zinc-500">
+                No job listings yet
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </>
+  )
+}
+</div>
+      </div>
+    </div>,
+
+    document.body
+  )
+} 

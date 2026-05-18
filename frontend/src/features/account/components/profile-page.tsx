@@ -12,7 +12,7 @@ import ProfileSkills from "./profile-skills"
 import ProfileResume from "./profile-resume"
 import { RecruiterWorkspace } from "./recruiter/recruiter-workspace"
 import { RecruiterSidebar } from "./recruiter/recruiter-sidebar"
-import { JobseekerSidebar } from "./joobseeker/jobseeker-sidebar"
+import { JobseekerSidebar } from "./jobseeker/jobseeker-sidebar"
 
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const storeUser = useAuthStore((state) => state.user)
   const data      = storeUser ?? initialData
 
-  if (isLoading || !data || !data.skills) {
+  if (isLoading || !data) {
     return <FuturisticLoader />
   }
 

@@ -80,7 +80,7 @@ export async function getAllCompanies(): Promise<GetAllCompaniesResponse> {
 /*  Used for initial fetch AND polling for logo URL                   */
 /* ================================================================== */
 
-export async function getCompanyDetail(
+export async function   getCompanyDetail(
   companyId: number,
 ): Promise<GetCompanyDetailResponse> {
   const response = await api.get<GetCompanyDetailResponse>(
