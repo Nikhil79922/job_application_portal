@@ -1,26 +1,61 @@
 "use client"
 
-import { useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import {
+  useEffect,
+  useRef,
+} from "react"
 
-import { toast } from "sonner"
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation"
+
+import {
+  toast,
+} from "sonner"
 
 import PublicGuard from "@/components/guards/public-guard"
+
 import LoginPage from "@/features/auth/components/loginPage"
 
 const Login = () => {
 
-  const searchParams = useSearchParams()
+  const router =
+    useRouter()
+
+  const searchParams =
+    useSearchParams()
+
+  const hasShownToast =
+    useRef(false)
 
   useEffect(() => {
 
-    const logout = searchParams.get("logout")
+    const logout =
+      searchParams.get("logout")
 
-    if (logout === "true") {
-      toast.success("Logged out successfully")
+    if (
+      logout === "true" &&
+      !hasShownToast.current
+    ) {
+
+      hasShownToast.current = true
+
+      toast.success(
+        "Logged out successfully"
+      )
+
+      /* REMOVE QUERY PARAM */
+
+      router.replace(
+        "/login"
+      )
     }
 
-  }, [searchParams])
+  }, [
+    searchParams,
+    router,
+  ])
 
   return (
     <PublicGuard>
