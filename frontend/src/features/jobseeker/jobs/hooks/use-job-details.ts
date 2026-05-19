@@ -1,5 +1,4 @@
 // src/features/jobs/hooks/use-job-details.ts
-
 "use client"
 
 import {
@@ -9,7 +8,8 @@ import {
 import jobDetailsService from "../services/job-details.service"
 
 export const useJobDetails = (
-  jobId: number | null
+  jobId: number | null,
+  enabled: boolean
 ) => {
 
   return useQuery({
@@ -20,7 +20,7 @@ export const useJobDetails = (
     ],
 
     enabled:
-      !!jobId,
+      enabled && !!jobId,
 
     queryFn: async () => {
 
@@ -28,6 +28,9 @@ export const useJobDetails = (
         await jobDetailsService.getDetails(
           jobId as number
         )
+
+      // IMPORTANT
+      // return ONLY inner job object
 
       return response.data
     },

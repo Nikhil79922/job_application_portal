@@ -182,3 +182,24 @@ profile
 │   └── upload-resume.schema.ts
 │
 └── types
+
+
+
+
+
+now on the Easy Apply button integrate this API :-
+
+
+on both the components
+
+
+
+
+postman request POST 'http://localhost:8080/api/user/apply/job' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjg2LCJpYXQiOjE3NzkxMjg5ODEsImV4cCI6MTc3OTEyOTg4MX0.adOb52oHYLEPHo6hIl-ow9-lB6sJkY-1498TVbvYgZY' \
+  --header 'Cookie: Cookie_1=value; refreshToken=83e75d17c18e51f042576cc7607ee78448d304d810cd79471c4f7368343565919e138c63eed38fd660545d2bccc3432e9d903c11c062264eb42a6161c3fff7a2' \
+  --body '{
+    "jobId":1
+}' \
+  --auth-bearer-token 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjg2LCJpYXQiOjE3NzkxMjg5ODEsImV4cCI6MTc3OTEyOTg4MX0.adOb52oHYLEPHo6hIl-ow9-lB6sJkY-1498TVbvYgZY'

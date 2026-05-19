@@ -7,7 +7,6 @@ import JobCard from "./job-card"
 import {
   useActiveJobs,
 } from "../hooks/use-active-jobs"
-import AppBackground from "@/components/shared/app-background"
 
 export default function JobsList() {
 

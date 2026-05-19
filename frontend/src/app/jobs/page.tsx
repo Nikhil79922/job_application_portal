@@ -1,5 +1,5 @@
 import AppBackground from '@/components/shared/app-background'
-import JobsList from '@/features/jobs/components/jobs-list'
+import JobsList from '@/features/jobseeker/jobs/components/jobs-list'
 import React from 'react'
 
 const JobsPage = () => {

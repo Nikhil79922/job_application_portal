@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -7,9 +8,7 @@ import {
 import Image from "next/image"
 
 import {
-  Briefcase,
   Building2,
-  Clock3,
   MapPin,
 } from "lucide-react"
 
@@ -31,6 +30,10 @@ import {
 
 import JobDetailsModal from "./job-details-modal"
 
+import {
+  useApplyJob,
+} from "../hooks/use-apply-job"
+
 interface Props {
   job: ActiveJob
 }
@@ -50,6 +53,11 @@ export default function JobCard({
         state.isAuthenticated
     )
 
+  const {
+    mutate: applyJob,
+    isPending,
+  } = useApplyJob()
+
   const handleEasyApply =
     () => {
 
@@ -64,8 +72,31 @@ export default function JobCard({
         return
       }
 
-      toast.success(
-        "Application flow started."
+      applyJob(
+        job.job_id,
+        {
+
+          onSuccess: (
+            response
+          ) => {
+
+            toast.success(
+              response.message ||
+              "Successfully applied"
+            )
+          },
+
+          onError: (
+            error: any
+          ) => {
+            const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to apply"
+        
+          toast.error(message)
+          },
+        }
       )
     }
 
@@ -260,7 +291,7 @@ export default function JobCard({
             {job.description}
           </p>
 
-          {/* COMPACT META */}
+          {/* META */}
 
           <div
             className="
@@ -280,6 +311,7 @@ export default function JobCard({
                 dark:text-zinc-300
               "
             >
+
               <MapPin
                 className="
                   h-3.5 w-3.5
@@ -291,7 +323,6 @@ export default function JobCard({
                 {job.location}
               </span>
             </div>
-
           </div>
 
           {/* ACTIONS */}
@@ -304,6 +335,8 @@ export default function JobCard({
               dark:border-white/[0.06]
             "
           >
+
+            {/* VIEW DETAILS */}
 
             <Button
               onClick={() =>
@@ -325,21 +358,122 @@ export default function JobCard({
               View Details
             </Button>
 
+            {/* APPLY */}
+
             <Button
+              disabled={isPending}
               onClick={
                 handleEasyApply
               }
               className="
-                h-11 flex-1 rounded-2xl
-                bg-emerald-500
-                text-sm font-semibold text-white
-                shadow-[0_10px_30px_rgba(16,185,129,0.18)]
-                transition-all duration-300
+                group relative flex h-12 flex-1
+                items-center justify-center
+                overflow-hidden rounded-2xl
+                border border-emerald-400/20
+                bg-[#07130F]
+                px-6
+                text-sm font-semibold
+                tracking-[0.02em]
+                text-white
+                shadow-[0_4px_20px_rgba(0,0,0,0.35)]
+                transition-all duration-300 ease-out
                 hover:-translate-y-0.5
-                hover:bg-emerald-600
+                hover:border-emerald-400/40
+                hover:bg-[#0A1B15]
+                hover:shadow-[0_10px_35px_rgba(16,185,129,0.18)]
+                active:scale-[0.985]
+                disabled:cursor-not-allowed
+                disabled:opacity-70
               "
             >
-              Easy Apply
+
+              {/* glow */}
+
+              <div
+                className="
+                  absolute inset-0 opacity-0
+                  transition-opacity duration-300
+                  group-hover:opacity-100
+                "
+              >
+                <div
+                  className="
+                    absolute inset-y-0 left-0 w-[40%]
+                    bg-emerald-400/15 blur-2xl
+                  "
+                />
+              </div>
+
+              {/* top border */}
+
+              <div
+                className="
+                  absolute inset-x-0 top-0 h-px
+                  bg-gradient-to-r
+                  from-transparent
+                  via-emerald-300/40
+                  to-transparent
+                "
+              />
+
+              {/* shine */}
+
+              <div
+                className="
+                  absolute inset-0
+                  translate-x-[-120%]
+                  bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.08),transparent)]
+                  transition-transform duration-1000
+                  group-hover:translate-x-[120%]
+                "
+              />
+
+              <span
+                className="
+                  relative z-10
+                  flex items-center gap-2
+                "
+              >
+
+                <span className="text-emerald-50">
+
+                  {
+                    isPending
+                      ? "Applying..."
+                      : "Easy Apply"
+                  }
+                </span>
+
+                {
+                  !isPending && (
+
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="
+                        h-4 w-4 text-emerald-400
+                        transition-transform duration-300
+                        group-hover:translate-x-0.5
+                      "
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h14"
+                      />
+
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m13 6 6 6-6 6"
+                      />
+                    </svg>
+                  )
+                }
+              </span>
             </Button>
           </div>
         </div>
@@ -348,6 +482,7 @@ export default function JobCard({
       <JobDetailsModal
         open={open}
         jobId={job.job_id}
+        companyName={job.company_name}
         onClose={() =>
           setOpen(false)
         }
