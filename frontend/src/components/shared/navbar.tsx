@@ -13,10 +13,12 @@ import {
 
 import {
   ArrowRight,
+  Briefcase,
   BriefcaseBusiness,
   Building2,
   ChevronDown,
   CircleHelp,
+  FileText,
   Home,
   LogIn,
   LogOut,
@@ -24,10 +26,8 @@ import {
   SearchCheck,
   User,
   UserPlus,
-  X,
   Users,
-  Briefcase,
-  FileText,
+  X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -36,8 +36,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/models/dropdown-menu"
 
@@ -50,28 +50,6 @@ import {
 import {
   useLogout,
 } from "@/features/auth/hooks/use-logout"
-
-/* ────────────────────────────────────────────────────────────────────────── */
-/* NAVIGATION */
-/* ────────────────────────────────────────────────────────────────────────── */
-
-const baseNavLinks = [
-  {
-    name: "Home",
-    href: "/",
-    icon: Home,
-  },
-  {
-    name: "Find Jobs",
-    href: "/jobs",
-    icon: SearchCheck,
-  },
-  {
-    name: "About",
-    href: "/about",
-    icon: CircleHelp,
-  },
-]
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* JOBSEEKER */
@@ -133,6 +111,39 @@ const Navbar = () => {
 
   const isRecruiter =
     user?.role === "recruiter"
+
+  /* NAVIGATION LINKS */
+
+  const baseNavLinks = [
+    {
+      name: "Home",
+      href: "/",
+      icon: Home,
+    },
+
+    {
+      name:
+        isRecruiter
+          ? "Companies"
+          : "Find Jobs",
+
+      href:
+        isRecruiter
+          ? "/recruiter/companies"
+          : "/jobs",
+
+      icon:
+        isRecruiter
+          ? Building2
+          : SearchCheck,
+    },
+
+    {
+      name: "About",
+      href: "/about",
+      icon: CircleHelp,
+    },
+  ]
 
   /* NAVIGATION */
 

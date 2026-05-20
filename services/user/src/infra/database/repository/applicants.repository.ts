@@ -18,22 +18,41 @@ export class PostgresApplicationRepository implements IApplicantionsRepository {
     applicant_id: number,
     client?: PoolClient
   ): Promise<any> {
-    const db = client ?? pool;
-
-    let query = `
-      SELECT 
-      a.*,
+  
+    const db =
+      client ?? pool
+  
+    const query = `
+      SELECT
+        a.*,
+  
         j.title AS job_title,
         j.salary AS job_salary,
-        j.location AS job_location
+        j.location AS job_location,
+  
+        c.company_id,
+        c.name AS company_name,
+        c.logo AS company_logo
+  
       FROM applications a
-      JOIN jobs j ON a.job_id = j.job_id
+  
+      JOIN jobs j
+        ON a.job_id = j.job_id
+  
+      JOIN companies c
+        ON j.company_id = c.company_id
+  
       WHERE a.applicant_id = $1
-    `;
-
-    const result = await db.query(query, [applicant_id]);
-
-    return result.rows;
+      ORDER BY a.applied_at DESC
+    `
+  
+    const result =
+      await db.query(
+        query,
+        [applicant_id]
+      )
+  
+    return result.rows
   }
 
   async existingApplicants(job_id: number, client?: PoolClient): Promise<boolean> {
