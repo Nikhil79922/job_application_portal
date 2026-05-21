@@ -1,11 +1,15 @@
-import React from 'react'
+// src/app/recruiter/jobs/page.tsx
 
-const jobsPage = () => {
-  return (
-    <div>
-      Jobs
-    </div>
-  )
-}
+"use client"
 
-export default jobsPage
+import JobsPageView from "@/features/recruiter/jobs/components/jobs-page"
+
+const JobsPage =
+  () => {
+
+    return (
+      <JobsPageView />
+    )
+  }
+
+export default JobsPage
