@@ -1,23 +1,19 @@
 "use client"
 
-import {
-  useMutation,
-} from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import applyJobService from "../services/apply-job.service"
 
-export const useApplyJob =
-  () => {
+export const useApplyJob = () => {
+  const queryClient = useQueryClient()
 
-    return useMutation({
-retry:false,
-      mutationFn: (
-        jobId: number
-      ) => {
+  return useMutation({
+    mutationFn: (jobId: number) =>applyJobService.apply({jobId}),
 
-        return applyJobService.apply({
-          jobId,
-        })
-      },
-    })
-  }
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["applications"],
+      })
+    },
+  })
+}
