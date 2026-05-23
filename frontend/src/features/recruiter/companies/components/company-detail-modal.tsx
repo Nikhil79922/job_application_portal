@@ -446,7 +446,7 @@ export default function CompanyDetailModal({
             </div>
           </div>
 
-          <Link href={`/recruiter/jobs?companyId=${company.company_id}`}>
+          <Link href={`/recruiter/jobs/${company.company_id}`}>
 
 <Button
   className="

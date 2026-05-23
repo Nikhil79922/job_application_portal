@@ -1,15 +1,19 @@
 // src/app/recruiter/jobs/page.tsx
 
-"use client"
+import RoleGuard from "@/components/guards/role-guard"
+import JobsIndexView from "@/features/recruiter/jobs/components/jobs-index-view"
+import { Suspense } from "react"
 
-import JobsPageView from "@/features/recruiter/jobs/components/jobs-page"
-
-const JobsPage =
-  () => {
-
-    return (
-      <JobsPageView />
-    )
-  }
-
-export default JobsPage
+export default function JobsPage() {
+  return (
+    <RoleGuard
+    allowedRoles={[
+      "recruiter",
+    ]}
+  >
+    <Suspense>
+      <JobsIndexView/>
+    </Suspense>
+    </RoleGuard>
+  )
+}
