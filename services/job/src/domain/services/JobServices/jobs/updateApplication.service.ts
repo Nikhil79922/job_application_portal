@@ -18,10 +18,10 @@ export class updateApplicationSer {
         if (!application) {
             throw new AppError('Application not found', 404);
         }
-        console.log(application)
+
         let selectedRow= ['posted_by_recruiter' ,'title']
         let jobDetails = await this.jobRepo.findJobData(application.job_id,selectedRow)
-      console.log(jobDetails)
+
         if (!jobDetails) {
             throw new AppError('No job with this application Id is found', 404);
         }

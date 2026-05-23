@@ -84,7 +84,6 @@ export class PostgresJobsRepository implements IJobsRepository {
     const db = client ?? pool;
   
     const selectedFields = fields.join(", ");
-  console.log(selectedFields , job_id)
     const result = await db.query(
       `SELECT ${selectedFields} FROM jobs WHERE job_id = $1`,
       [job_id]

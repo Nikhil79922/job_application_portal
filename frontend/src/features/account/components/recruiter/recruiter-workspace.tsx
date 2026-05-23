@@ -265,57 +265,6 @@ export function RecruiterWorkspace({ user }: { user: ReturnType<typeof useAuthSt
   const profileDone       = profileItems.filter((i) => i.done).length
   const profileCompletion = Math.round((profileDone / profileItems.length) * 100)
 
-  // Hiring readiness sections
-  const hiringReadiness = [
-    {
-      icon: <Users className="h-5 w-5" />,
-      title: "Candidate Pipeline",
-      desc: "Browse, filter, and shortlist job seekers that match your open roles. Use filters like skills, location, and experience to find the right fit.",
-      accent:   "border-cyan-200/80 dark:border-cyan-500/20",
-      iconBg:   "bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400",
-      glow:     "bg-cyan-500/[0.04]",
-      badge:    "Explore Candidates",
-      badgeCls: "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-500/15 dark:bg-cyan-500/10 dark:text-cyan-400",
-      stat:     "0 Active",
-      statLabel:"Candidates tracked",
-    },
-    {
-      icon: <Briefcase className="h-5 w-5" />,
-      title: "Job Postings",
-      desc: "Create targeted job listings and publish them to a pool of vetted, active job seekers. Set requirements, deadlines, and salary ranges.",
-      accent:   "border-violet-200/80 dark:border-violet-500/20",
-      iconBg:   "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
-      glow:     "bg-violet-500/[0.04]",
-      badge:    "Create Listing",
-      badgeCls: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/15 dark:bg-violet-500/10 dark:text-violet-400",
-      stat:     "0 Live",
-      statLabel:"Job postings active",
-    },
-    {
-      icon: <TrendingUp className="h-5 w-5" />,
-      title: "Hiring Analytics",
-      desc: "Track application volume, profile view rates, shortlist conversion, and time-to-hire across all your active job listings.",
-      accent:   "border-emerald-200/80 dark:border-emerald-500/20",
-      iconBg:   "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
-      glow:     "bg-emerald-500/[0.04]",
-      badge:    "View Insights",
-      badgeCls: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/15 dark:bg-emerald-500/10 dark:text-emerald-400",
-      stat:     "—",
-      statLabel:"Analytics available",
-    },
-    {
-      icon: <Zap className="h-5 w-5" />,
-      title: "AI Candidate Matching",
-      desc: "Our AI automatically surfaces the highest-fit candidates for your open roles based on skills, experience, bio, and ATS-verified resumes.",
-      accent:   "border-yellow-200/80 dark:border-yellow-500/20",
-      iconBg:   "bg-yellow-50 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400",
-      glow:     "bg-yellow-500/[0.03]",
-      badge:    "Enable Matching",
-      badgeCls: "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/15 dark:bg-yellow-500/10 dark:text-yellow-400",
-      stat:     "New",
-      statLabel:"AI-powered feature",
-    },
-  ]
 
   return (
     <>
@@ -395,7 +344,7 @@ export function RecruiterWorkspace({ user }: { user: ReturnType<typeof useAuthSt
 
   {/* QUICK ACCESS */}
 
-  <div className="mt-8 grid gap-4 sm:grid-cols-3">
+  <div className="mt-8 grid gap-4 sm:grid-cols-2">
 
     <QuickNavCard
       icon={
@@ -423,18 +372,6 @@ export function RecruiterWorkspace({ user }: { user: ReturnType<typeof useAuthSt
       badgeCls="border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-500/15 dark:bg-cyan-500/10 dark:text-cyan-400"
     />
 
-    <QuickNavCard
-      icon={
-        <Users className="h-5 w-5" />
-      }
-      title="Applicants"
-      desc="Track, shortlist, and manage recruitment applications."
-      href="/recruiter/applicants"
-      accent="border-emerald-200/80 dark:border-emerald-500/20"
-      iconBg="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
-      badgeText="Open Applicants"
-      badgeCls="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/15 dark:bg-emerald-500/10 dark:text-emerald-400"
-    />
   </div>
 </div>
 </div>

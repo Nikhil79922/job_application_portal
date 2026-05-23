@@ -1,13 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useRouter }
-from "next/navigation"
+import {
+  useRouter,
+} from "next/navigation"
 
-import { useMutation }
-from "@tanstack/react-query"
+import {
+  useMutation,
+} from "@tanstack/react-query"
 
-import logoutService
-from "../services/logout.service"
+import {
+  toast,
+} from "sonner"
+
+import logoutService from "../services/logout.service"
 
 import {
   useAuthStore,
@@ -16,9 +22,6 @@ import {
 import type {
   ApiErrorResponse,
 } from "@/types/api/response.types"
-
-import { toast }
-from "sonner"
 
 export const useLogout =
   () => {
@@ -45,7 +48,16 @@ export const useLogout =
 
       retry: false,
 
-      onSuccess: () => {
+      onSuccess: (
+        response: any
+      ) => {
+
+        /* SUCCESS TOAST */
+
+        toast.success(
+          response?.message ||
+          "Logged out successfully"
+        )
 
         /* CLEAR AUTH */
 
@@ -59,9 +71,13 @@ export const useLogout =
 
         /* REDIRECT */
 
-        router.replace(
-          "/login?logout=true"
-        )
+        setTimeout(() => {
+
+          router.replace(
+            "/login?logout=true"
+          )
+
+        }, 300)
       },
 
       onError: (
@@ -70,7 +86,8 @@ export const useLogout =
       ) => {
 
         toast.error(
-          error.message
+          error?.message ||
+          "Failed to logout"
         )
       },
     })

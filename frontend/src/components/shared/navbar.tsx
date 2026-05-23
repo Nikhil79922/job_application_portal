@@ -77,12 +77,7 @@ const recruiterDropdownLinks = [
     name: "My Jobs",
     href: "/recruiter/jobs",
     icon: Briefcase,
-  },
-  {
-    name: "Applicants",
-    href: "/recruiter/applicants",
-    icon: Users,
-  },
+  }
 ]
 
 const Navbar = () => {
