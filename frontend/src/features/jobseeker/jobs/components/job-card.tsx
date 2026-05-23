@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import {
-  useState,
-} from "react"
+import { useState } from "react"
 
 import Image from "next/image"
 
@@ -12,676 +10,295 @@ import {
   MapPin,
 } from "lucide-react"
 
-import {
-  toast,
-} from "sonner"
+import { toast } from "sonner"
 
-import type {
-  ActiveJob,
-} from "../types/job.types"
+import type { ActiveJob } from "../types/job.types"
 
-import {
-  useAuthStore,
-} from "@/stores/auth.store"
+import { useAuthStore } from "@/stores/auth.store"
 
-import {
-  Button,
-} from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 import JobDetailsModal from "./job-details-modal"
 
-import {
-  useApplyJob,
-} from "../hooks/use-apply-job"
+import { useApplyJob } from "../hooks/use-apply-job"
 
 interface Props {
   job: ActiveJob
 }
 
-export default function JobCard({
-  job,
-}: Props) {
+export default function JobCard({ job }: Props) {
 
-  const [
-    open,
-    setOpen,
-  ] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const isAuthenticated =
-    useAuthStore(
-      (state) =>
-        state.isAuthenticated
-    )
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
-  const {
-    mutate: applyJob,
-    isPending,
-  } = useApplyJob()
+  const { mutate: applyJob, isPending } = useApplyJob()
 
-  const handleEasyApply =
-    () => {
-
-      if (
-        !isAuthenticated
-      ) {
-
-        toast.error(
-          "Please login to apply for jobs."
-        )
-
-        return
-      }
-
-      applyJob(
-        job.job_id,
-        {
-
-          onSuccess: (
-            response
-          ) => {
-
-            toast.success(
-              response.message ||
-              "Successfully applied"
-            )
-          },
-
-          onError: (
-            error: any
-          ) => {
-
-            const message =
-              error?.response?.data?.message ||
-              error?.message ||
-              "Failed to apply"
-
-            toast.error(
-              message
-            )
-          },
-        }
-      )
+  const handleEasyApply = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to apply for jobs.")
+      return
     }
 
-  return (
+    applyJob(job.job_id, {
+      onSuccess: (response: any) => {
+        toast.success(response.message || "Successfully applied")
+      },
+      onError: (error: any) => {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to apply"
+        toast.error(message)
+      },
+    })
+  }
 
+  return (
     <>
+      {/*
+        KEY FIX: h-full ensures the card stretches to fill whatever height
+        the parent grid cell gives it. The parent grid must use
+        `grid-rows` or `items-stretch` (default) so all cards in a row
+        share the same row height.
+
+        Inside, flex-col + the spacer div (flex-1 on the description block)
+        pushes the action bar to the bottom in every card, keeping
+        buttons perfectly aligned across columns.
+      */}
       <div
         className="
           group relative
+          flex h-full flex-col
           overflow-hidden
-
           rounded-[30px]
-
           border border-slate-200
           bg-white
-
           shadow-[0_12px_40px_rgba(15,23,42,0.06)]
-
           transition-all duration-300
-
           hover:-translate-y-1
           hover:border-emerald-300/40
           hover:shadow-[0_25px_60px_rgba(15,23,42,0.10)]
-
           dark:border-white/10
           dark:bg-[#111111]
-
           dark:hover:border-emerald-500/20
           dark:hover:shadow-[0_25px_60px_rgba(0,0,0,0.45)]
         "
       >
 
         {/* background glow */}
-
         <div
           className="
-            pointer-events-none
-            absolute inset-0
-
-            bg-gradient-to-br
-            from-emerald-500/[0.03]
-            via-transparent
-            to-cyan-500/[0.03]
-
-            opacity-0
-            transition-opacity duration-300
-
-            group-hover:opacity-100
+            pointer-events-none absolute inset-0
+            bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-cyan-500/[0.03]
+            opacity-0 transition-opacity duration-300 group-hover:opacity-100
           "
         />
 
-        {/* top glow */}
-
+        {/* top glow line */}
         <div
           className="
-            absolute inset-x-0 top-0
-            h-[1px]
-
-            bg-gradient-to-r
-            from-transparent
-            via-emerald-400/60
-            to-transparent
-
-            opacity-0
-            transition-opacity duration-300
-
-            group-hover:opacity-100
+            absolute inset-x-0 top-0 h-[1px]
+            bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent
+            opacity-0 transition-opacity duration-300 group-hover:opacity-100
           "
         />
 
-        {/* CONTENT */}
+        {/* ── CONTENT ── */}
+        <div className="relative z-10 flex h-full flex-col p-6">
 
-        <div
-          className="
-            relative z-10
-            flex h-full flex-col
-            p-6
-          "
-        >
+          {/* ── HEADER: logo + title + badges ── */}
+          <div className="flex items-start gap-4">
 
-          {/* HEADER */}
-
-          <div
-            className="
-              flex items-start
-              gap-4
-            "
-          >
-
-            {/* LOGO */}
-
+            {/* logo */}
             <div
               className="
-                relative
-                flex h-[72px]
-                w-[72px]
-                shrink-0
-                items-center
-                justify-center
-                overflow-hidden
-
-                rounded-2xl
-
-                border border-slate-200
-
-                bg-gradient-to-br
-                from-slate-50
-                to-slate-100
-
-                dark:border-white/10
-
-                dark:from-white/[0.05]
-                dark:to-white/[0.02]
+                relative flex h-[72px] w-[72px] shrink-0
+                items-center justify-center overflow-hidden
+                rounded-2xl border border-slate-200
+                bg-gradient-to-br from-slate-50 to-slate-100
+                dark:border-white/10 dark:from-white/[0.05] dark:to-white/[0.02]
               "
             >
-
-              {
-                job.company_logo ? (
-
-                  <Image
-                    src={
-                      job.company_logo
-                    }
-                    alt={
-                      job.company_name
-                    }
-                    fill
-                    className="
-                      object-cover
-                    "
-                  />
-                ) : (
-
-                  <Building2
-                    className="
-                      h-8 w-8
-                      text-emerald-500
-                    "
-                  />
-                )
-              }
+              {job.company_logo ? (
+                <Image
+                  src={job.company_logo}
+                  alt={job.company_name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <Building2 className="h-8 w-8 text-emerald-500" />
+              )}
             </div>
 
-            {/* DETAILS */}
-
-            <div
-              className="
-                min-w-0 flex-1
-              "
-            >
-
-              <div
-                className="
-                  flex items-start
-                  justify-between
-                  gap-3
-                "
-              >
-
-                <div
-                  className="
-                    min-w-0
-                  "
-                >
-
+            {/* title + company + status */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <h3
                     className="
-                      line-clamp-2
-
-                      text-[22px]
-                      font-black
-                      leading-tight
-                      tracking-[-0.05em]
-
-                      text-slate-950
-
-                      dark:text-white
+                      line-clamp-1 text-[22px] font-black
+                      leading-tight tracking-[-0.05em]
+                      text-slate-950 dark:text-white
                     "
                   >
-                    {
-                      job.title
-                    }
+                    {job.title}
                   </h3>
 
-                  <p
-                    className="
-                      mt-1.5 truncate
-                      text-sm font-medium
-
-                      text-slate-500
-
-                      dark:text-zinc-400
-                    "
-                  >
-                    {
-                      job.company_name
-                    }
+                  <p className="mt-1.5 truncate text-sm font-medium text-slate-500 dark:text-zinc-400">
+                    {job.company_name}
                   </p>
                 </div>
 
-                {/* STATUS */}
-
                 <div
                   className="
-                    shrink-0
-
-                    rounded-full
-
-                    border border-emerald-200
-                    bg-emerald-50
-
+                    shrink-0 rounded-full
+                    border border-emerald-200 bg-emerald-50
                     px-2.5 py-1
-
-                    text-[10px]
-                    font-bold
-                    uppercase
-                    tracking-[0.14em]
-
-                    text-emerald-700
-
-                    dark:border-emerald-500/10
-                    dark:bg-emerald-500/10
-                    dark:text-emerald-400
+                    text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700
+                    dark:border-emerald-500/10 dark:bg-emerald-500/10 dark:text-emerald-400
                   "
                 >
                   Active
                 </div>
               </div>
 
-              {/* BADGES */}
-
-              <div
-                className="
-                  mt-5
-                  flex flex-wrap
-                  gap-2
-                "
-              >
-
-                <div
+              {/* type + location badges */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span
                   className="
-                    inline-flex
-                    items-center
-
-                    rounded-full
-
-                    border border-emerald-500/20
-                    bg-emerald-500/10
-
-                    px-3 py-1
-
-                    text-[11px]
-                    font-semibold
-
-                    text-emerald-600
-
-                    dark:text-emerald-400
+                    inline-flex items-center rounded-full
+                    border border-emerald-500/20 bg-emerald-500/10
+                    px-3 py-1 text-[11px] font-semibold
+                    text-emerald-600 dark:text-emerald-400
                   "
                 >
-                  {
-                    job.job_type
-                  }
-                </div>
+                  {job.job_type}
+                </span>
 
-                <div
+                <span
                   className="
-                    inline-flex
-                    items-center
-
-                    rounded-full
-
-                    border border-cyan-500/20
-                    bg-cyan-500/10
-
-                    px-3 py-1
-
-                    text-[11px]
-                    font-semibold
-
-                    text-cyan-600
-
-                    dark:text-cyan-400
+                    inline-flex items-center rounded-full
+                    border border-cyan-500/20 bg-cyan-500/10
+                    px-3 py-1 text-[11px] font-semibold
+                    text-cyan-600 dark:text-cyan-400
                   "
                 >
-                  {
-                    job.work_location
-                  }
-                </div>
+                  {job.work_location}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* DESCRIPTION */}
-
-          <div
-            className="
-              mt-5
-              min-h-[56px]
-            "
-          >
-
-            <p
-              className="
-                line-clamp-2
-
-                text-sm
-                leading-7
-
-                text-slate-600
-
-                dark:text-zinc-400
-              "
-            >
-              {
-                job.description
-              }
+          {/*
+            ── DESCRIPTION ──
+            flex-1 makes this block consume all leftover vertical space,
+            so the action bar is always pinned to the bottom regardless
+            of how many lines the description has.
+          */}
+          <div className="mt-5 flex-1">
+            <p className="line-clamp-2 text-sm leading-7 text-slate-600 dark:text-zinc-400">
+              {job.description}
             </p>
           </div>
 
-          {/* META */}
-
-          <div
-            className="
-              mt-5
-            "
-          >
-
+          {/* ── LOCATION ── */}
+          <div className="mt-5">
             <div
               className="
-                inline-flex
-                items-center
-                gap-2
-
-                rounded-full
-
-                border border-slate-200
-                bg-slate-50
-
+                inline-flex items-center gap-2 rounded-full
+                border border-slate-200 bg-slate-50
                 px-3 py-1.5
-
-                text-xs
-                font-semibold
-
-                text-slate-700
-
-                dark:border-white/10
-                dark:bg-white/[0.03]
-                dark:text-zinc-300
+                text-xs font-semibold text-slate-700
+                dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300
               "
             >
-
-              <MapPin
-                className="
-                  h-3.5 w-3.5
-                  text-emerald-500
-                "
-              />
-
-              <span
-                className="
-                  truncate
-                  max-w-[180px]
-                "
-              >
-                {
-                  job.location
-                }
-              </span>
+              <MapPin className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="max-w-[180px] truncate">{job.location}</span>
             </div>
           </div>
 
-          {/* ACTIONS */}
-
+          {/* ── ACTIONS ── always at the bottom ── */}
           <div
             className="
-              mt-auto
-
-              flex items-center
-              gap-3
-
-              border-t border-slate-100
-
-              pt-6
-
+              mt-6 flex items-center gap-3
+              border-t border-slate-100 pt-6
               dark:border-white/[0.06]
             "
           >
 
-            {/* VIEW DETAILS */}
-
+            {/* View Details */}
             <Button
-              onClick={() =>
-                setOpen(true)
-              }
+              onClick={() => setOpen(true)}
               className="
-                h-12 flex-1
-
-                rounded-2xl
-
-                border border-slate-200
-                bg-white
-
-                text-sm
-                font-semibold
-
-                text-slate-700
-
+                h-12 flex-1 rounded-2xl
+                border border-slate-200 bg-white
+                text-sm font-semibold text-slate-700
                 transition-all duration-300
-
                 hover:bg-slate-100
-
-                dark:border-white/10
-                dark:bg-white/[0.03]
-                dark:text-zinc-200
-
+                dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200
                 dark:hover:bg-white/[0.06]
               "
             >
               View Details
             </Button>
 
-            {/* APPLY */}
-
+            {/* Easy Apply */}
             <Button
-              disabled={
-                isPending
-              }
-              onClick={
-                handleEasyApply
-              }
+              disabled={isPending}
+              onClick={handleEasyApply}
               className="
-                group relative
-
-                flex h-12
-                flex-1
-
-                items-center
-                justify-center
-
-                overflow-hidden
-
-                rounded-2xl
-
-                border border-emerald-400/20
-
-                bg-[#07130F]
-
-                px-6
-
-                text-sm
-                font-semibold
-                tracking-[0.02em]
-
-                text-white
-
+                group/apply relative
+                flex h-12 flex-1 items-center justify-center
+                overflow-hidden rounded-2xl
+                border border-emerald-400/20 bg-[#07130F]
+                px-6 text-sm font-semibold tracking-[0.02em] text-white
                 shadow-[0_4px_20px_rgba(0,0,0,0.35)]
-
                 transition-all duration-300 ease-out
-
                 hover:-translate-y-0.5
-                hover:border-emerald-400/40
-                hover:bg-[#0A1B15]
-
+                hover:border-emerald-400/40 hover:bg-[#0A1B15]
                 hover:shadow-[0_10px_35px_rgba(16,185,129,0.18)]
-
                 active:scale-[0.985]
-
-                disabled:cursor-not-allowed
-                disabled:opacity-70
+                disabled:cursor-not-allowed disabled:opacity-70
               "
             >
-
               {/* glow */}
-
-              <div
-                className="
-                  absolute inset-0
-                  opacity-0
-
-                  transition-opacity duration-300
-
-                  group-hover:opacity-100
-                "
-              >
-
-                <div
-                  className="
-                    absolute inset-y-0 left-0
-                    w-[40%]
-
-                    bg-emerald-400/15
-                    blur-2xl
-                  "
-                />
+              <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/apply:opacity-100">
+                <div className="absolute inset-y-0 left-0 w-[40%] bg-emerald-400/15 blur-2xl" />
               </div>
 
-              {/* top border */}
+              {/* top border shimmer */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent" />
 
+              {/* sweep shine */}
               <div
                 className="
-                  absolute inset-x-0 top-0
-                  h-px
-
-                  bg-gradient-to-r
-                  from-transparent
-                  via-emerald-300/40
-                  to-transparent
-                "
-              />
-
-              {/* shine */}
-
-              <div
-                className="
-                  absolute inset-0
-
-                  translate-x-[-120%]
-
+                  absolute inset-0 translate-x-[-120%]
                   bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.08),transparent)]
-
                   transition-transform duration-1000
-
-                  group-hover:translate-x-[120%]
+                  group-hover/apply:translate-x-[120%]
                 "
               />
 
-              <span
-                className="
-                  relative z-10
-
-                  flex items-center
-                  gap-2
-                "
-              >
-
-                <span
-                  className="
-                    text-emerald-50
-                  "
-                >
-
-                  {
-                    isPending
-                      ? "Applying..."
-                      : "Easy Apply"
-                  }
+              <span className="relative z-10 flex items-center gap-2">
+                <span className="text-emerald-50">
+                  {isPending ? "Applying…" : "Easy Apply"}
                 </span>
 
-                {
-                  !isPending && (
-
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="
-                        h-4 w-4
-
-                        text-emerald-400
-
-                        transition-transform duration-300
-
-                        group-hover:translate-x-0.5
-                      "
-                    >
-
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 12h14"
-                      />
-
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m13 6 6 6-6 6"
-                      />
-                    </svg>
-                  )
-                }
+                {!isPending && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover/apply:translate-x-0.5"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m13 6 6 6-6 6" />
+                  </svg>
+                )}
               </span>
             </Button>
           </div>
@@ -692,9 +309,7 @@ export default function JobCard({
         open={open}
         jobId={job.job_id}
         companyName={job.company_name}
-        onClose={() =>
-          setOpen(false)
-        }
+        onClose={() => setOpen(false)}
       />
     </>
   )

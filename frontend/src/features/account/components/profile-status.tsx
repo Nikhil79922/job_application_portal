@@ -9,6 +9,7 @@ import {
     UserCircle2,
     XCircle,
     FileText,
+    HelpCircle,
 } from "lucide-react"
 
 import type {
@@ -19,21 +20,30 @@ interface Props {
     user: MeUser
 }
 
+type UploadStatus =
+    | "pending"
+    | "success"
+    | "fail"
+    | string
+    | undefined
+    | null
+
 export default function ProfileStatus({
     user,
 }: Props) {
 
     const getStatusConfig = (
-        status:
-            | "pending"
-            | "success"
-            | "fail"
+        status: UploadStatus
     ) => {
 
-        switch (status) {
+        switch (
+            status?.toLowerCase?.()
+        ) {
 
             case "success":
+
                 return {
+
                     icon:
                         <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
 
@@ -45,7 +55,9 @@ export default function ProfileStatus({
                 }
 
             case "pending":
+
                 return {
+
                     icon:
                         <Clock3 className="h-5 w-5 text-yellow-500" />,
 
@@ -57,7 +69,9 @@ export default function ProfileStatus({
                 }
 
             case "fail":
+
                 return {
+
                     icon:
                         <XCircle className="h-5 w-5 text-red-500" />,
 
@@ -67,21 +81,37 @@ export default function ProfileStatus({
                     badgeClass:
                         "border-red-200 bg-red-50 text-red-700 dark:border-red-500/10 dark:bg-red-500/10 dark:text-red-400",
                 }
+
+            /* SAFE FALLBACK */
+
+            default:
+
+                return {
+
+                    icon:
+                        <HelpCircle className="h-5 w-5 text-slate-400 dark:text-zinc-500" />,
+
+                    badge:
+                        "Unknown",
+
+                    badgeClass:
+                        "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-400",
+                }
         }
     }
 
     const profileStatus =
         getStatusConfig(
-            user.profile_pic_upload_status
+            user?.profile_pic_upload_status
         )
 
     const resumeStatus =
         getStatusConfig(
-            user.resume_upload_status
+            user?.resume_upload_status
         )
 
     const isJobseeker =
-        user.role ===
+        user?.role ===
         "jobseeker"
 
     return (
@@ -223,7 +253,7 @@ export default function ProfileStatus({
 
                         <div className="rounded-full border border-yellow-200 bg-yellow-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-yellow-700 dark:border-yellow-500/10 dark:bg-yellow-500/10 dark:text-yellow-400">
 
-                            {user.subscription || "Free"}
+                            {user?.subscription || "Free"}
                         </div>
                     </div>
                 </div>
@@ -261,7 +291,7 @@ export default function ProfileStatus({
 
                             <Sparkles className="h-3.5 w-3.5" />
 
-                            {user.role}
+                            {user?.role || "User"}
                         </div>
                     </div>
                 </div>
