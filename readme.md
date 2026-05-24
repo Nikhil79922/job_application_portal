@@ -8,16 +8,17 @@
 <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql" />
 <img src="https://img.shields.io/badge/Async-Kafka-231F20?style=for-the-badge&logo=apachekafka" />
 <img src="https://img.shields.io/badge/AI-Groq-FF6B35?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Payments-Razorpay-0C2451?style=for-the-badge" />
 
 ---
 
 # Production-Grade AI Job Portal Platform
 
-Scalable microservices-based job portal platform built with distributed backend architecture, AI-powered workflows, asynchronous processing, and modern frontend engineering principles.
+Scalable microservices-based job portal platform built with distributed backend architecture, AI-powered workflows, asynchronous processing, payment infrastructure, and modern frontend engineering principles.
 
 ### ⚡ Core Highlights
 
-Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems • Clean Architecture • Scalable Frontend • Production-Oriented Backend Engineering
+Microservices • API Gateway • AI Workflows • Kafka • Razorpay • Distributed Systems • Clean Architecture • Scalable Frontend • Production-Oriented Backend Engineering
 
 </div>
 
@@ -35,10 +36,10 @@ Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems
 - [API Gateway](#-api-gateway)
 - [Backend Microservices](#-backend-microservices)
 - [AI Features](#-ai-features)
+- [Payment Infrastructure](#-payment-infrastructure)
 - [Async Processing](#-async-processing)
 - [Database Design](#-database-design)
 - [Authentication & Security](#-authentication--security)
-- [Payment Integration](#-payment-integration)
 - [Infrastructure](#-infrastructure)
 - [Installation](#-installation)
 - [Environment Variables](#-environment-variables)
@@ -64,8 +65,8 @@ The project combines:
 - AI-powered Resume Intelligence
 - Event-driven Workflows
 - Kafka-based Async Processing
+- Production-grade Payment Infrastructure
 - Clean Architecture Principles
-- Production-oriented Backend Engineering
 - Modern Frontend Architecture
 - Domain Separation & Service Isolation
 
@@ -100,6 +101,21 @@ The project combines:
 - Candidate Workflow Management
 - Company Logo Upload
 - Protected Recruiter Routes
+
+---
+
+# 💳 Payment & Subscription Features
+
+- Razorpay Checkout Integration
+- Secure Subscription Activation
+- Signature Verification
+- Webhook-based Payment Handling
+- Subscription Lifecycle Management
+- Payment Audit Handling
+- Payment Failure Recovery
+- Expiry Tracking
+- Production-safe Checkout UX
+- Backend Payment Verification Service
 
 ---
 
@@ -147,13 +163,25 @@ The project combines:
                     │ • Logging & Middleware          │
                     └──────────┬──────────────────────┘
                                │
-        ┌──────────────────────┼──────────────────────┐
-        ▼                      ▼                      ▼
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│ Auth Service │      │ User Service │      │ Job Service  │
-└──────┬───────┘      └──────┬───────┘      └──────┬───────┘
-       │                     │                     │
-       └─────────────────────┼─────────────────────┘
+      ┌────────────────────────┼────────────────────────┐
+      ▼                        ▼                        ▼
+┌──────────────┐      ┌──────────────┐        ┌──────────────┐
+│ Auth Service │      │ User Service │        │ Job Service  │
+└──────┬───────┘      └──────┬───────┘        └──────┬───────┘
+       │                     │                       │
+       └─────────────────────┼───────────────────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Payment Service │
+                    │-----------------│
+                    │ • Razorpay API  │
+                    │ • Webhooks      │
+                    │ • Verification  │
+                    │ • Subscriptions │
+                    │ • Audit Logs    │
+                    └────────┬────────┘
+                             │
                              ▼
                     ┌─────────────────┐
                     │  Utils Service  │
@@ -247,6 +275,9 @@ The project combines:
 | Razorpay | Subscription payments |
 | Webhooks | Payment verification |
 | Signature Validation | Payment security |
+| Backend Verification Service | Secure payment validation |
+| Payment Audit Logs | Transaction tracking |
+| Subscription Engine | Subscription lifecycle handling |
 
 ---
 
@@ -274,6 +305,7 @@ job_portal_application/
 │   ├── auth/
 │   ├── user/
 │   ├── job/
+│   ├── payment/
 │   └── utils/
 │
 └── README.md
@@ -340,19 +372,6 @@ Frontend is built using Next.js App Router with modular feature-based architectu
 
 ---
 
-# 🧠 Frontend Architecture Patterns
-
-| Pattern | Usage |
-|---|---|
-| Feature-based Architecture | Modular scalability |
-| React Query | Server-state management |
-| Zustand | Global auth management |
-| Service Layer | API abstraction |
-| Hooks-based Logic | Reusable business logic |
-| Component Isolation | Better maintainability |
-
----
-
 # 🌐 API Gateway
 
 The API Gateway acts as the centralized entry point for all requests.
@@ -370,27 +389,6 @@ The API Gateway acts as the centralized entry point for all requests.
 | Circuit Breakers | Fault tolerance |
 | Middleware Handling | Shared middleware layer |
 | Request Routing | Service communication |
-
----
-
-# 📌 Gateway Stack
-
-- Fastify
-- Redis
-- Pino Logger
-- Fastify HTTP Proxy
-
----
-
-# 📌 Gateway Features
-
-- Streaming Proxy
-- Request Interception
-- Auth Middleware
-- AI Quota Middleware
-- Circuit Breakers
-- Shared Error Handling
-- Distributed Rate Limiting
 
 ---
 
@@ -461,6 +459,25 @@ Handles recruiter workflows and job management.
 
 ---
 
+# 💳 Payment Service
+
+Dedicated backend service responsible for secure payment processing and subscription management.
+
+## Features
+
+- Razorpay Order Creation
+- Payment Verification
+- Signature Validation
+- Subscription Activation
+- Subscription Expiry Handling
+- Webhook Verification
+- Payment Audit Logs
+- Transaction Validation
+- Failure Handling & Retry Logic
+- Secure Checkout Processing
+
+---
+
 # 🤖 Utils Service
 
 Dedicated service for asynchronous and AI-powered workflows.
@@ -501,6 +518,7 @@ Background Processing
 - Upload Handling
 - AI Workflows
 - Background Jobs
+- Subscription Events
 
 ---
 
@@ -513,17 +531,6 @@ Background Processing
 - Service-level Isolation
 - Migration-based Schema Control
 - No ORM Usage
-
----
-
-# 📌 Database Design Principles
-
-| Principle | Purpose |
-|---|---|
-| Raw SQL | Better query control |
-| Service Isolation | Independent scalability |
-| Migration Versioning | Controlled schema evolution |
-| Strong Constraints | Data integrity |
 
 ---
 
@@ -547,10 +554,12 @@ Background Processing
 - Internal API Protection
 - Service Isolation
 - Razorpay Signature Validation
+- Payment Verification Layer
+- Webhook Security Validation
 
 ---
 
-# 💳 Payment Integration
+# 💳 Payment Infrastructure
 
 Premium subscription system integrated using Razorpay.
 
@@ -563,34 +572,15 @@ Premium subscription system integrated using Razorpay.
 - Payment Audit Handling
 - Payment Failure Handling
 - Subscription Expiry Tracking
-
----
-
-# ☁️ Infrastructure
-
-# 📌 Current Infrastructure
-
-| Service | Provider |
-|---|---|
-| PostgreSQL | Neon |
-| Redis | Upstash |
-
----
-
-# 📌 Planned Infrastructure
-
-| Service | Status |
-|---|---|
-| Dockerization | Planned |
-| Kubernetes | Planned |
-| AWS Deployment | Planned |
-| CI/CD | Planned |
+- Secure Backend Verification
+- Transaction Validation
+- Production-safe Checkout Architecture
 
 ---
 
 # 🚀 Installation
 
-# 📌 Clone Repository
+## Clone Repository
 
 ```bash
 git clone <repository-url>
@@ -599,13 +589,14 @@ cd job_portal_application
 
 ---
 
-# 📌 Install Dependencies
+# ▶️ Running The Project
 
 ## Frontend
 
 ```bash
 cd frontend
 npm install
+npm run dev
 ```
 
 ## API Gateway
@@ -613,6 +604,7 @@ npm install
 ```bash
 cd api-gateway
 npm install
+npm run dev
 ```
 
 ## Auth Service
@@ -620,36 +612,44 @@ npm install
 ```bash
 cd services/auth
 npm install
+npm run dev
 ```
 
 ## User Service
 
 ```bash
-cd ../user
+cd services/user
 npm install
+npm run dev
 ```
 
 ## Job Service
 
 ```bash
-cd ../job
+cd services/job
 npm install
+npm run dev
+```
+
+## Payment Service
+
+```bash
+cd services/payment
+npm install
+npm run dev
 ```
 
 ## Utils Service
 
 ```bash
-cd ../utils
+cd services/utils
 npm install
+npm run dev
 ```
 
 ---
 
 # ⚙️ Environment Variables
-
-Each service maintains its own `.env` configuration.
-
-## Example
 
 ```env
 PORT=
@@ -666,53 +666,10 @@ GROQ_API_KEY=
 
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
 
 FRONTEND_URL=
 ```
-
----
-
-# ▶️ Running The Project
-
-# 📌 Start Frontend
-
-```bash
-cd frontend
-npm run dev
-```
-
----
-
-# 📌 Start API Gateway
-
-```bash
-cd api-gateway
-npm run dev
-```
-
----
-
-# 📌 Start Services
-
-Run each service individually.
-
-```bash
-npm run dev
-```
-
----
-
-# 🧠 Engineering Decisions
-
-| Decision | Reason |
-|---|---|
-| Microservices Architecture | Independent scalability |
-| API Gateway | Centralized control |
-| Raw SQL | Predictable database behavior |
-| Kafka | Async workflows |
-| Clean Architecture | Long-term maintainability |
-| Dedicated Utils Service | AI workload isolation |
-| Service Isolation | Independent deployments |
 
 ---
 
@@ -731,6 +688,7 @@ npm run dev
 - Refresh Token Rotation
 - Async Workflow Isolation
 - Razorpay Integration
+- Payment Verification Pipelines
 - Background Workers
 
 ---
@@ -746,6 +704,7 @@ npm run dev
 | Auth Service | ✅ Stable |
 | User Service | ✅ Stable |
 | Job Service | ✅ Stable |
+| Payment Service | ✅ Stable |
 | AI Features | ✅ Working |
 | Kafka Consumers | ✅ Working |
 | Razorpay Integration | ✅ Stable |
@@ -756,7 +715,7 @@ npm run dev
 
 # 🛣 Roadmap
 
-# Backend
+## Backend
 
 - [ ] Distributed tracing
 - [ ] OpenTelemetry integration
@@ -769,7 +728,7 @@ npm run dev
 
 ---
 
-# Frontend
+## Frontend
 
 - [ ] Recruiter analytics dashboard
 - [ ] Real-time notifications
@@ -779,7 +738,7 @@ npm run dev
 
 ---
 
-# AI Features
+## AI Features
 
 - [ ] AI Job Matching
 - [ ] Resume Scoring
@@ -821,6 +780,6 @@ Focused on:
 
 # ⭐ Final Note
 
-This project was built to demonstrate production-oriented software engineering concepts including scalable architecture, asynchronous systems, AI integrations, distributed workflows, and modern frontend engineering practices.
+This project was built to demonstrate production-oriented software engineering concepts including scalable architecture, asynchronous systems, AI integrations, distributed workflows, payment infrastructure, and modern frontend engineering practices.
 
 If you found this project useful, consider giving it a ⭐ on GitHub.
