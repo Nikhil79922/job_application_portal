@@ -2,13 +2,20 @@
 
 <div align="center">
 
-## Production-Grade Full Stack Job Portal Platform
-
-Scalable microservices-based platform built with distributed backend architecture, AI-powered workflows, asynchronous processing, and modern frontend engineering principles.
+<img src="https://img.shields.io/badge/Architecture-Microservices-10B981?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Frontend-Next.js_15-000000?style=for-the-badge&logo=nextdotjs" />
+<img src="https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=node.js" />
+<img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql" />
+<img src="https://img.shields.io/badge/Async-Kafka-231F20?style=for-the-badge&logo=apachekafka" />
+<img src="https://img.shields.io/badge/AI-Groq-FF6B35?style=for-the-badge" />
 
 ---
 
-### Core Highlights
+# Production-Grade AI Job Portal Platform
+
+Scalable microservices-based job portal platform built with distributed backend architecture, AI-powered workflows, asynchronous processing, and modern frontend engineering principles.
+
+### ⚡ Core Highlights
 
 Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems • Clean Architecture • Scalable Frontend • Production-Oriented Backend Engineering
 
@@ -19,6 +26,7 @@ Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems
 # 📌 Table of Contents
 
 - [Overview](#-overview)
+- [Live Features](#-live-features)
 - [Architecture](#-architecture)
 - [System Design](#-system-design)
 - [Tech Stack](#-tech-stack)
@@ -30,6 +38,7 @@ Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems
 - [Async Processing](#-async-processing)
 - [Database Design](#-database-design)
 - [Authentication & Security](#-authentication--security)
+- [Payment Integration](#-payment-integration)
 - [Infrastructure](#-infrastructure)
 - [Installation](#-installation)
 - [Environment Variables](#-environment-variables)
@@ -39,6 +48,7 @@ Microservices • API Gateway • AI Workflows • Kafka • Distributed Systems
 - [Current Status](#-current-status)
 - [Roadmap](#-roadmap)
 - [Design Philosophy](#-design-philosophy)
+- [Author](#-author)
 
 ---
 
@@ -58,6 +68,62 @@ The project combines:
 - Production-oriented Backend Engineering
 - Modern Frontend Architecture
 - Domain Separation & Service Isolation
+
+---
+
+# ✨ Live Features
+
+# 👨‍💻 Job Seeker Features
+
+- Secure Authentication
+- AI Resume Analysis
+- AI Career Guidance
+- Resume Upload & Tracking
+- Skills Management
+- Profile Completion Tracking
+- Premium Subscription System
+- Razorpay Payment Integration
+- Dynamic Resume Polling
+- Responsive Dashboard
+- Job Applications
+- Application History
+
+---
+
+# 🏢 Recruiter Features
+
+- Recruiter Workspace
+- Company Management
+- Job Creation
+- Applicant Tracking
+- Recruiter Dashboard
+- Candidate Workflow Management
+- Company Logo Upload
+- Protected Recruiter Routes
+
+---
+
+# 🤖 AI Features
+
+- Resume Intelligence
+- Skills Extraction
+- Experience Analysis
+- Resume Suggestions
+- Career Guidance Engine
+- Personalized Learning Roadmaps
+- Technology Recommendations
+- AI-driven Resume Insights
+
+---
+
+# ⚡ Async Processing Features
+
+- Kafka-based Event Processing
+- Upload Processing Workers
+- Email Processing Workers
+- Background Resume Processing
+- Retry-safe Consumer Handling
+- Polling-based Status Updates
 
 ---
 
@@ -106,6 +172,7 @@ The project combines:
                │ Redis                    │
                │ Kafka                    │
                │ Groq AI                  │
+               │ Razorpay                 │
                └──────────────────────────┘
 ```
 
@@ -142,6 +209,8 @@ The project combines:
 | TanStack Query | Server state |
 | Axios | API communication |
 | ShadCN UI | Reusable UI components |
+| Framer Motion | Animations |
+| Lucide React | Icons |
 
 ---
 
@@ -156,6 +225,8 @@ The project combines:
 | PostgreSQL | Primary database |
 | Redis | Rate limiting & caching |
 | Kafka | Async event processing |
+| Zod | Validation |
+| JWT | Authentication |
 
 ---
 
@@ -166,6 +237,16 @@ The project combines:
 | Groq AI | Resume intelligence |
 | Kafka Consumers | Background processing |
 | Async Workers | Upload & email jobs |
+
+---
+
+# 💳 Payment Stack
+
+| Technology | Purpose |
+|---|---|
+| Razorpay | Subscription payments |
+| Webhooks | Payment verification |
+| Signature Validation | Payment security |
 
 ---
 
@@ -231,6 +312,7 @@ Frontend is built using Next.js App Router with modular feature-based architectu
 - Application History
 - AI Resume Analysis
 - AI Career Guidance
+- Subscription Management
 
 ---
 
@@ -254,6 +336,7 @@ Frontend is built using Next.js App Router with modular feature-based architectu
 - Dynamic Modals
 - Polling-based Updates
 - Reusable Components
+- Smooth UI Animations
 
 ---
 
@@ -329,9 +412,7 @@ composition-root/
 
 Handles all authentication workflows.
 
----
-
-# 📌 Features
+## Features
 
 - User Registration
 - User Login
@@ -346,40 +427,11 @@ Handles all authentication workflows.
 
 ---
 
-# 📌 Internal Modules
-
-## API Layer
-- Controllers
-- Routes
-- DTO Validation
-
-## Domain Layer
-- Entities
-- Interfaces
-- Services
-
-## Infrastructure Layer
-- PostgreSQL Repositories
-- Redis Integration
-- Kafka Producer
-- Token Service
-- Password Service
-
-## Shared Layer
-- Middleware
-- Error Handling
-- Utilities
-- Cron Jobs
-
----
-
 # 👤 User Service
 
 Handles job seeker workflows.
 
----
-
-# 📌 Features
+## Features
 
 - Profile Management
 - Resume Uploads
@@ -389,16 +441,7 @@ Handles job seeker workflows.
 - Apply For Jobs
 - Application History
 - Resume Polling
-
----
-
-# 📌 Internal Features
-
-- Migration System
-- Kafka Producer
-- Raw SQL Repositories
-- Token Verification
-- File Upload Status Tracking
+- Subscription Management
 
 ---
 
@@ -406,43 +449,15 @@ Handles job seeker workflows.
 
 Handles recruiter workflows and job management.
 
----
+## Features
 
-# 📌 Company Management
-
-- Create Company
-- Delete Company
-- Company Detail View
-- Company Logo Upload
-- Company Polling System
-
----
-
-# 📌 Job Management
-
+- Company Management
 - Create Jobs
 - Update Jobs
-- Active Job Listings
-- Job Details
+- Active Listings
 - Recruiter Dashboard
-
----
-
-# 📌 Application Management
-
 - Applicant Tracking
-- Application Status Updates
-- Recruiter Applicant Workflows
-
----
-
-# 📌 Backend Features
-
-- Raw SQL Queries
-- Migration Runner
-- Kafka Producer
-- Token Verification
-- Repository Pattern
+- Recruiter Workflows
 
 ---
 
@@ -450,51 +465,14 @@ Handles recruiter workflows and job management.
 
 Dedicated service for asynchronous and AI-powered workflows.
 
----
+## Features
 
-# 📌 AI Workflows
-
-# 📄 Resume Analyzer
-
-AI-powered resume analysis including:
-
-- Skills Extraction
-- Experience Analysis
-- Resume Insights
-- Improvement Suggestions
-- Strength Identification
-- Resume Recommendations
-
----
-
-# 🧭 Career Guidance Engine
-
-Provides:
-
-- Personalized Learning Roadmaps
-- Technology Recommendations
-- Career Suggestions
-- Growth Strategies
-- Learning Paths
-
----
-
-# 📌 Async Processing
-
-- Email Processing
-- Upload Processing
 - Kafka Consumers
+- Resume Analysis
+- Upload Processing
+- Email Workers
 - AI Workflows
 - Background Jobs
-
----
-
-# 📌 Kafka Consumers
-
-## Current Consumers
-
-- Send Email Consumer
-- Upload Processing Consumer
 
 ---
 
@@ -502,9 +480,7 @@ Provides:
 
 Kafka is used for asynchronous workflows.
 
----
-
-# 📌 Event Flow
+## Event Flow
 
 ```text
 Producer
@@ -530,30 +506,13 @@ Background Processing
 
 # 🗄 Database Design
 
----
-
-# 📌 Database Strategy
+## Database Strategy
 
 - PostgreSQL
 - Raw SQL Queries
 - Service-level Isolation
 - Migration-based Schema Control
 - No ORM Usage
-
----
-
-# 📌 Migration System
-
-Every service maintains its own migration runner.
-
----
-
-# 📌 Features
-
-- Version-controlled migrations
-- Advisory locking
-- Raw SQL migrations
-- Service-level schema isolation
 
 ---
 
@@ -569,8 +528,6 @@ Every service maintains its own migration runner.
 ---
 
 # 🛡 Authentication & Security
-
----
 
 # 📌 Authentication Security
 
@@ -589,17 +546,23 @@ Every service maintains its own migration runner.
 - Structured Error Handling
 - Internal API Protection
 - Service Isolation
+- Razorpay Signature Validation
 
 ---
 
-# 📌 Security Patterns
+# 💳 Payment Integration
 
-| Pattern | Purpose |
-|---|---|
-| Refresh Token Rotation | Session security |
-| Distributed Rate Limiting | Abuse prevention |
-| Middleware Isolation | Shared protection |
-| Secure Cookies | Token protection |
+Premium subscription system integrated using Razorpay.
+
+## Features
+
+- Subscription Activation
+- Secure Checkout
+- Razorpay Webhooks
+- Signature Verification
+- Payment Audit Handling
+- Payment Failure Handling
+- Subscription Expiry Tracking
 
 ---
 
@@ -636,52 +599,44 @@ cd job_portal_application
 
 ---
 
-# 📌 Install Frontend Dependencies
+# 📌 Install Dependencies
+
+## Frontend
 
 ```bash
 cd frontend
 npm install
 ```
 
----
-
-# 📌 Install API Gateway Dependencies
+## API Gateway
 
 ```bash
 cd api-gateway
 npm install
 ```
 
----
-
-# 📌 Install Auth Service Dependencies
+## Auth Service
 
 ```bash
 cd services/auth
 npm install
 ```
 
----
-
-# 📌 Install User Service Dependencies
+## User Service
 
 ```bash
 cd ../user
 npm install
 ```
 
----
-
-# 📌 Install Job Service Dependencies
+## Job Service
 
 ```bash
 cd ../job
 npm install
 ```
 
----
-
-# 📌 Install Utils Service Dependencies
+## Utils Service
 
 ```bash
 cd ../utils
@@ -694,9 +649,7 @@ npm install
 
 Each service maintains its own `.env` configuration.
 
----
-
-# 📌 Example
+## Example
 
 ```env
 PORT=
@@ -710,6 +663,9 @@ JWT_REFRESH_SECRET=
 KAFKA_BROKER=
 
 GROQ_API_KEY=
+
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 
 FRONTEND_URL=
 ```
@@ -774,6 +730,8 @@ npm run dev
 - Domain-driven Structure
 - Refresh Token Rotation
 - Async Workflow Isolation
+- Razorpay Integration
+- Background Workers
 
 ---
 
@@ -783,13 +741,14 @@ npm run dev
 |---|---|
 | Frontend Authentication | ✅ Stable |
 | Job Seeker Features | ✅ Stable |
-| Recruiter Features | 🚧 In Progress |
+| Recruiter Features | ✅ Stable |
 | API Gateway | ✅ Stable |
 | Auth Service | ✅ Stable |
 | User Service | ✅ Stable |
-| Job Service | 🚧 Active Development |
+| Job Service | ✅ Stable |
 | AI Features | ✅ Working |
-| Kafka Consumers | ⚠️ Partial |
+| Kafka Consumers | ✅ Working |
+| Razorpay Integration | ✅ Stable |
 | Dockerization | 🚧 Planned |
 | AWS Deployment | 🚧 Planned |
 
@@ -847,6 +806,21 @@ The focus areas are:
 
 # 👨‍💻 Author
 
-Built by Nikhil Singh.
+## Nikhil Singh
 
-Focused on distributed systems, scalable backend architecture, modern frontend engineering, and AI-powered platform development.
+Focused on:
+
+- Distributed Systems
+- Scalable Backend Architecture
+- Modern Frontend Engineering
+- AI-powered Platform Development
+- Microservices Engineering
+- Production-grade System Design
+
+---
+
+# ⭐ Final Note
+
+This project was built to demonstrate production-oriented software engineering concepts including scalable architecture, asynchronous systems, AI integrations, distributed workflows, and modern frontend engineering practices.
+
+If you found this project useful, consider giving it a ⭐ on GitHub.
