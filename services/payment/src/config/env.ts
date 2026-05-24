@@ -3,26 +3,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const env = {
-  PORT: Number(process.env.PORT) || 3000,
-
-  NODE_ENV: process.env.NODE_ENV,
-
+  PORT: process.env.PORT || 3000,
   DATABASE_URL: process.env.DB_URL!,
-
-  CLOUDINARY: {
-    CLOUD_NAME: process.env.CLOUD_NAME!,
-    API_KEY: process.env.API_KEY!,
-    API_SECRET: process.env.API_SECRET!,
-  },
-
-  KAFKA_BROKER: process.env.KAFKA_BROKER!,
-
-  GMAIL: {
-    USER: process.env.GMAIL_USER!,
-    PASSWORD: process.env.GMAIL_PASSWORD!,
-  },
-
-  GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
-
-  GROQ_API_KEY: process.env.GROQ_API_KEY!,
+  REDIS_URL: process.env.Redis_url!,
+  JWT_SECRET: process.env.SECRET_KEY!,
+  NODE_ENV: process.env.NODE_ENV,
+  Utils_service: process.env.Utils_service,
+  Kakfa_Broker: process.env.Kakfa_Broker,
+  Frontend_Url: process.env.Frontend_Url,
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET
 };

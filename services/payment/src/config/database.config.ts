@@ -1,7 +1,6 @@
 import { Pool } from "pg";
 import { env } from "./env.js";
 
-
 export const pool = new Pool({
   connectionString: env.DATABASE_URL as string,
 
@@ -16,10 +15,10 @@ export const pool = new Pool({
 
 // ADD HERE (keep-alive)
 setInterval(async () => {
-    try {
-      await pool.query("SELECT 1");
-      console.log("[DB] keep-alive ping");
-    } catch (err) {
-      console.error("[DB] ping failed", err);
-    }
-  }, 2 * 60 * 1000); // every 2 minutes
+  try {
+    await pool.query("SELECT 1");
+    console.log("[DB] keep-alive ping");
+  } catch (err) {
+    console.error("[DB] ping failed", err);
+  }
+}, 2 * 60 * 1000); // every 2 minutes

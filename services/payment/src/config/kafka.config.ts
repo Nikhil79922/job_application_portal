@@ -1,7 +1,7 @@
-import { Kafka } from "kafkajs"
 import { env } from "./env.js"
+import { Kafka } from "kafkajs"
 
 export const kafka = new Kafka({
-    clientId: 'utils-service',
-    brokers: [env.KAFKA_BROKER || 'localhost:9092'],
+    clientId: 'user-service',
+    brokers: [env.Kakfa_Broker || 'localhost:9092'],
 })

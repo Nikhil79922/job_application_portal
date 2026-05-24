@@ -1,47 +1,35 @@
-import express from 'express'
-import cors from 'cors'
-import genAIRoutes from './routes/genAI.js';
-import { v2 as cloudinary } from 'cloudinary';
-import { sendMailConsumer } from './infra/messaging/consumers/sendEmail.consumer.js';
-import { KafkaAdmin } from './infra/messaging/config/kafka.admin.js';
-import "./config/database.config.js";
+import app from './app.js'
+import { UserModel } from './infra/database/models/user.model.js';
 import { env } from './config/env.js';
-import { startUploadConsumer } from './infra/messaging/consumers/upload.consumer.js';
-import logger from './shared/middleware/logger.middleware.js';
+import { runMigrations } from './infra/database/migrationRunner.js';
+import { pool } from './config/database.config.js';
 
-// Configuration
-cloudinary.config({
-    cloud_name: env.CLOUDINARY.CLOUD_NAME,
-    api_key: env.CLOUDINARY.API_KEY,
-    api_secret: env.CLOUDINARY.API_SECRET,
-});
 
-const app = express();
+let port = env.PORT
 
-app.use(logger);
-//Kafka consumer and Admin 
-const KA = new KafkaAdmin();
-await KA.connect();
-sendMailConsumer();
-startUploadConsumer();
+const users= new UserModel();
 
-let port = process.env.PORT
 
-app.use(
-    cors({
-      origin: [
-        "http://localhost:3000",
-      ],
-  
-      credentials: true,
+//DB
+async function initDB() {
+    try {
+       await users.createRoleEnum();
+
+       await users.createTable(); 
+       
+        console.log("✅ DataBase initialization successfully done",);
+        await Promise.all(
+            Array.from({ length: 1 }, () => pool.query("SELECT 1"))
+        );
+        console.log("✅ DB warmed up");
+    } catch (e) {
+        console.log("❌ Error in DataBase initialization", e);
+        process.exit(1);
+    }
+}
+initDB().then(() => {
+    app.listen(port, () => {
+        console.log(`Payment Server is Listening at Port ${port}`)
+        runMigrations()
     })
-  )
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }))
-
-app.use("/api/utils/ai", genAIRoutes)
-
-app.listen(port, () => {
-    console.log(`Utils Server is Listening at Port ${port}`)
 })
-

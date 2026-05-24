@@ -60,7 +60,12 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
       console.log(JSON.stringify(log));
       return;
     }
-
+    console.log(
+      "Request Details",
+      {
+        body: req.body,
+      }
+    )
     console.log(
         `${colors.gray(log.timestamp)} ` +
           `${log.method} ${log.path}${formatQuery(log.query)} ` +
