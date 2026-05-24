@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.route";
 import jobRoutes from "./routes/job.route";
 import { verifyToken } from "./middlewares/auth.middleware";
 import utilsRoute from "./routes/utils.route";
+import paymentRoute from "./routes/payment.route";
 import cors from "@fastify/cors"
 
 const app = Fastify({
@@ -73,6 +74,7 @@ app.register(authRoutes);
 app.register(userRoutes);
 app.register(jobRoutes);
 app.register(utilsRoute);
+app.register(paymentRoute);
 
 app.setErrorHandler((error: any, req, reply) => {
   if (error.statusCode && error.statusCode < 500) {

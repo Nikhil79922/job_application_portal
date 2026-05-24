@@ -13,6 +13,7 @@ export const env = {
     USER: process.env.USER_SERVICE!,
     JOB: process.env.JOB_SERVICE!,
     UTILS: process.env.UTILS_SERVICE!,
+    PAYMENT: process.env.PAYMENT_SERVICE!,
   },
   AI_SERVICE:{
     AI_PER_MINUTE_LIMIT: process.env.AI_PER_MINUTE_LIMIT,
