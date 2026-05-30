@@ -707,8 +707,7 @@ FRONTEND_URL=
 | Payment Service | ✅ Stable |
 | AI Features | ✅ Working |
 | Kafka Consumers | ✅ Working |
-| Razorpay Integration | ✅ Stable |
-| Dockerization | 🚧 Planned |
+| Razorpay Integration | ✅ Working |
 | AWS Deployment | 🚧 Planned |
 
 ---
