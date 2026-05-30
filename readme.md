@@ -9,578 +9,338 @@
 <img src="https://img.shields.io/badge/Async-Kafka-231F20?style=for-the-badge&logo=apachekafka" />
 <img src="https://img.shields.io/badge/AI-Groq-FF6B35?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Payments-Razorpay-0C2451?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Logging-Winston-4B32C3?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Observability-Log_Admin-7C3AED?style=for-the-badge" />
 
 ---
 
-# Production-Grade AI Job Portal Platform
-
-Scalable microservices-based job portal platform built with distributed backend architecture, AI-powered workflows, asynchronous processing, payment infrastructure, and modern frontend engineering principles.
-
-### ⚡ Core Highlights
-
-Microservices • API Gateway • AI Workflows • Kafka • Razorpay • Distributed Systems • Clean Architecture • Scalable Frontend • Production-Oriented Backend Engineering
+**Production-grade distributed job portal platform** with microservices architecture, AI-powered workflows, async event processing, payment infrastructure, structured observability, and a dedicated admin monitoring dashboard.
 
 </div>
 
 ---
 
-# 📌 Table of Contents
+## 📌 Table of Contents
 
 - [Overview](#-overview)
-- [Live Features](#-live-features)
 - [Architecture](#-architecture)
-- [System Design](#-system-design)
 - [Tech Stack](#-tech-stack)
 - [Monorepo Structure](#-monorepo-structure)
-- [Frontend Architecture](#-frontend-architecture)
-- [API Gateway](#-api-gateway)
-- [Backend Microservices](#-backend-microservices)
-- [AI Features](#-ai-features)
-- [Payment Infrastructure](#-payment-infrastructure)
-- [Async Processing](#-async-processing)
+- [Services](#-services)
+- [Features](#-features)
+- [Observability & Logging](#-observability--logging)
+- [Request Flows](#-request-flows)
 - [Database Design](#-database-design)
 - [Authentication & Security](#-authentication--security)
-- [Infrastructure](#-infrastructure)
 - [Installation](#-installation)
 - [Environment Variables](#-environment-variables)
 - [Running The Project](#-running-the-project)
-- [Engineering Decisions](#-engineering-decisions)
-- [Advanced Concepts Used](#-advanced-concepts-used)
+- [Engineering Patterns](#-engineering-patterns)
 - [Current Status](#-current-status)
 - [Roadmap](#-roadmap)
-- [Design Philosophy](#-design-philosophy)
 - [Author](#-author)
 
 ---
 
-# 🧠 Overview
+## 🧠 Overview
 
-This platform is designed to simulate a real-world scalable distributed engineering system rather than a simple CRUD application.
+A scalable distributed platform designed to simulate real-world production engineering — not a simple CRUD app.
 
-The project combines:
-
-- Scalable Microservices Architecture
-- API Gateway Pattern
-- Distributed Authentication
-- AI-powered Resume Intelligence
-- Event-driven Workflows
-- Kafka-based Async Processing
-- Production-grade Payment Infrastructure
-- Clean Architecture Principles
-- Modern Frontend Architecture
-- Domain Separation & Service Isolation
+**Core pillars:**
+- Microservices with clean architecture per service
+- API Gateway with circuit breakers & rate limiting
+- Event-driven async processing via Kafka
+- AI-powered resume intelligence & career guidance
+- Production-grade payment infrastructure (Razorpay)
+- Structured logging with Winston + dedicated observability dashboard
+- Modern frontend with Next.js 15 App Router
 
 ---
 
-# ✨ Live Features
+## 🏗 Architecture
 
-# 👨‍💻 Job Seeker Features
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Frontend (Next.js 15 · :3000)                 │
+│         Zustand · TanStack Query · Axios · ShadCN · Tailwind    │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   API Gateway (Fastify · :8080)                  │
+│     JWT Verify · Redis Rate Limit · Circuit Breaker · Proxy     │
+│                    Winston Structured Logging                    │
+└──────┬──────────┬──────────┬──────────┬──────────┬──────────────┘
+       │          │          │          │          │
+       ▼          ▼          ▼          ▼          ▼
+   ┌──────┐  ┌──────┐  ┌──────┐  ┌───────┐  ┌──────┐
+   │ Auth │  │ User │  │ Job  │  │Payment│  │Utils │
+   │:4000 │  │:5003 │  │:5004 │  │ :5005 │  │:5002 │
+   └──┬───┘  └──┬───┘  └──┬───┘  └───┬───┘  └──┬───┘
+      │         │         │           │          │
+      └─────────┴─────────┴───────────┴──────────┘
+                          │
+       ┌──────────────────┼──────────────────────┐
+       │                  │                      │
+       ▼                  ▼                      ▼
+  ┌─────────┐      ┌──────────┐          ┌──────────┐
+  │PostgreSQL│      │  Redis   │          │  Kafka   │
+  │  (Neon)  │      │(Upstash) │          │  :9092   │
+  └─────────┘      └──────────┘          └──────────┘
+                                               │
+                          ┌────────────────────┘
+                          ▼
+                   ┌─────────────┐     ┌──────────┐
+                   │   Groq AI   │     │ Razorpay │
+                   └─────────────┘     └──────────┘
 
-- Secure Authentication
-- AI Resume Analysis
-- AI Career Guidance
-- Resume Upload & Tracking
-- Skills Management
-- Profile Completion Tracking
-- Premium Subscription System
-- Razorpay Payment Integration
-- Dynamic Resume Polling
-- Responsive Dashboard
-- Job Applications
-- Application History
-
----
-
-# 🏢 Recruiter Features
-
-- Recruiter Workspace
-- Company Management
-- Job Creation
-- Applicant Tracking
-- Recruiter Dashboard
-- Candidate Workflow Management
-- Company Logo Upload
-- Protected Recruiter Routes
-
----
-
-# 💳 Payment & Subscription Features
-
-- Razorpay Checkout Integration
-- Secure Subscription Activation
-- Signature Verification
-- Webhook-based Payment Handling
-- Subscription Lifecycle Management
-- Payment Audit Handling
-- Payment Failure Recovery
-- Expiry Tracking
-- Production-safe Checkout UX
-- Backend Payment Verification Service
-
----
-
-# 🤖 AI Features
-
-- Resume Intelligence
-- Skills Extraction
-- Experience Analysis
-- Resume Suggestions
-- Career Guidance Engine
-- Personalized Learning Roadmaps
-- Technology Recommendations
-- AI-driven Resume Insights
-
----
-
-# ⚡ Async Processing Features
-
-- Kafka-based Event Processing
-- Upload Processing Workers
-- Email Processing Workers
-- Background Resume Processing
-- Retry-safe Consumer Handling
-- Polling-based Status Updates
-
----
-
-# 🏗 Architecture
-
-```text
-                            ┌─────────────────────┐
-                            │     Frontend        │
-                            │     Next.js App     │
-                            └──────────┬──────────┘
-                                       │
-                                       ▼
-                    ┌─────────────────────────────────┐
-                    │          API Gateway            │
-                    │---------------------------------│
-                    │ • JWT Authentication            │
-                    │ • Redis Rate Limiting           │
-                    │ • Reverse Proxy                 │
-                    │ • Circuit Breakers              │
-                    │ • Request Routing               │
-                    │ • Logging & Middleware          │
-                    └──────────┬──────────────────────┘
-                               │
-      ┌────────────────────────┼────────────────────────┐
-      ▼                        ▼                        ▼
-┌──────────────┐      ┌──────────────┐        ┌──────────────┐
-│ Auth Service │      │ User Service │        │ Job Service  │
-└──────┬───────┘      └──────┬───────┘        └──────┬───────┘
-       │                     │                       │
-       └─────────────────────┼───────────────────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │ Payment Service │
-                    │-----------------│
-                    │ • Razorpay API  │
-                    │ • Webhooks      │
-                    │ • Verification  │
-                    │ • Subscriptions │
-                    │ • Audit Logs    │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │  Utils Service  │
-                    │-----------------│
-                    │ • Kafka Consumer│
-                    │ • AI Workflows  │
-                    │ • Upload Worker │
-                    │ • Email Worker  │
-                    └────────┬────────┘
-                             │
-                             ▼
-               ┌──────────────────────────┐
-               │ Infrastructure Layer     │
-               │--------------------------│
-               │ PostgreSQL               │
-               │ Redis                    │
-               │ Kafka                    │
-               │ Groq AI                  │
-               │ Razorpay                 │
-               └──────────────────────────┘
+  ┌─────────────────────────────────────────────────────────────┐
+  │              Log Admin Dashboard (:9000)                     │
+  │   Aggregates logs from all services · Live DB metrics       │
+  │   ER Diagram · Service health · Architecture view           │
+  └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-# 🧩 System Design
+## ⚙️ Tech Stack
 
-## Architectural Patterns
-
-| Pattern | Purpose |
-|---|---|
-| Microservices Architecture | Independent scalability |
-| API Gateway Pattern | Centralized control & routing |
-| Clean Architecture | Better maintainability |
-| Repository Pattern | Database abstraction |
-| Event-driven Architecture | Async workflows |
-| Dependency Injection | Loose coupling |
-| Circuit Breaker Pattern | Fault tolerance |
-| Distributed Rate Limiting | Security & abuse prevention |
-
----
-
-# ⚙️ Tech Stack
-
-# 🌐 Frontend Stack
-
+### Frontend
 | Technology | Purpose |
 |---|---|
-| Next.js 15 | Frontend framework |
-| React | UI rendering |
+| Next.js 15 (App Router) | Framework |
 | TypeScript | Type safety |
 | Tailwind CSS | Styling |
 | Zustand | Global state |
-| TanStack Query | Server state |
-| Axios | API communication |
-| ShadCN UI | Reusable UI components |
+| TanStack Query | Server state & caching |
+| Axios | HTTP client |
+| ShadCN UI | Component library |
 | Framer Motion | Animations |
-| Lucide React | Icons |
 
----
-
-# 🔧 Backend Stack
-
+### Backend
 | Technology | Purpose |
 |---|---|
-| Node.js | Runtime |
+| Node.js + TypeScript | Runtime |
 | Fastify | API Gateway |
 | Express.js | Microservices |
-| TypeScript | Type safety |
-| PostgreSQL | Primary database |
-| Redis | Rate limiting & caching |
-| Kafka | Async event processing |
-| Zod | Validation |
-| JWT | Authentication |
+| PostgreSQL (Neon) | Primary database |
+| Redis (Upstash) | Rate limiting & caching |
+| Apache Kafka | Async event processing |
+| Winston + DailyRotateFile | Structured logging |
+| Zod | Request validation |
+| JWT + bcrypt | Authentication |
 
----
-
-# 🤖 AI & Async Stack
-
+### AI & Payments
 | Technology | Purpose |
 |---|---|
-| Groq AI | Resume intelligence |
-| Kafka Consumers | Background processing |
-| Async Workers | Upload & email jobs |
-
----
-
-# 💳 Payment Stack
-
-| Technology | Purpose |
-|---|---|
+| Groq AI (llama/mixtral) | Resume analysis & career guidance |
 | Razorpay | Subscription payments |
-| Webhooks | Payment verification |
-| Signature Validation | Payment security |
-| Backend Verification Service | Secure payment validation |
-| Payment Audit Logs | Transaction tracking |
-| Subscription Engine | Subscription lifecycle handling |
 
----
-
-# ☁️ Infrastructure Stack
-
+### Observability
 | Technology | Purpose |
 |---|---|
-| Neon PostgreSQL | Cloud database |
-| Upstash Redis | Managed Redis |
-| Docker | Containerization (planned) |
-| AWS | Cloud deployment (planned) |
+| Winston | Structured JSON logging per service |
+| Log Admin Dashboard | Real-time monitoring & metrics |
+| pg_stat_activity | Live DB introspection |
 
 ---
 
-# 📁 Monorepo Structure
+## 📁 Monorepo Structure
 
-```bash
+```
 job_portal_application/
-│
-├── api-gateway/
-│
-├── frontend/
-│
+├── frontend/                  # Next.js 15 App Router
+├── api-gateway/               # Fastify reverse proxy
 ├── services/
-│   ├── auth/
-│   ├── user/
-│   ├── job/
-│   ├── payment/
-│   └── utils/
-│
+│   ├── auth/                  # Authentication & sessions
+│   ├── user/                  # Job seeker workflows
+│   ├── job/                   # Recruiter & job management
+│   ├── payment/               # Razorpay integration
+│   ├── utils/                 # Kafka consumers & AI
+│   └── log-admin/             # Observability dashboard
 └── README.md
 ```
 
----
-
-# 🌐 Frontend Architecture
-
-Frontend is built using Next.js App Router with modular feature-based architecture.
-
----
-
-# 📌 Frontend Features
-
-# 🔐 Authentication
-
-- Login
-- Register
-- Forgot Password
-- Reset Password
-- Session Restoration
-- Protected Routes
-- Auth Guards
-- Role Guards
+Each backend service follows **Clean Architecture**:
+```
+service/
+├── src/
+│   ├── api/                   # Controllers + routes
+│   ├── domain/                # Business logic & services
+│   ├── infra/                 # DB repositories + Kafka
+│   ├── shared/                # Middleware + utilities
+│   ├── composition-root/      # Dependency injection
+│   └── config/                # Logger + env
+```
 
 ---
 
-# 👤 Job Seeker Features
+## 🔧 Services
 
-- Profile Management
-- Resume Upload
-- Resume Tracking
-- Skills Management
-- Job Applications
-- Application History
-- AI Resume Analysis
-- AI Career Guidance
-- Subscription Management
+### 🚪 API Gateway (Fastify · :8080)
+- JWT verification at gateway level
+- Redis rate limiting (200 req/min per IP)
+- Circuit breakers per downstream service (opossum)
+- Reverse proxy via http-proxy
+- Winston structured logging with request correlation
+
+### 🔐 Auth Service (Express · :4000)
+- Registration & login
+- Refresh token rotation (access: 15m, refresh: 7d)
+- Forgot/reset password
+- Device tracking & session management
+- Kafka producer: `send-mail` topic
+
+### 👤 User Service (Express · :5003)
+- Profile management & completion tracking
+- Resume & profile-pic upload (Kafka → async processing)
+- Skills CRUD
+- Job applications & history
+- Subscription status management
+- Kafka producer: `upload-content` topic
+
+### 💼 Job Service (Express · :5004)
+- Company management (CRUD + logo upload)
+- Job creation & updates
+- Recruiter dashboard & applicant tracking
+- Kafka producer: `send-mail`, `upload-content`
+
+### 💳 Payment Service (Express · :5005)
+- Razorpay order creation
+- HMAC signature verification
+- Subscription activation (30-day cycle)
+- Webhook handling & payment audit
+- Failure recovery
+
+### 🤖 Utils Service (Express · :5002)
+- Kafka consumers: `send-mail` + `upload-content`
+- Email dispatch worker
+- File upload processing worker
+- Groq AI: resume analysis, skills extraction, career guidance
+- Background job orchestration
+
+### 📊 Log Admin Dashboard (Express · :9000)
+- Real-time log aggregation across all 6 services
+- Per-service metrics (request volume, errors, latency)
+- Live PostgreSQL introspection (ER diagram, connections, TPS, cache hit)
+- Top queries from pg_stat_activity
+- Kafka & Redis monitoring panels
+- Full architecture visualization with wire flows
+- Cursor-based log pagination with in-memory caching
+- 7-day audit trail
 
 ---
 
-# 🏢 Recruiter Features
+## ✨ Features
 
-- Recruiter Dashboard
-- Company Management
-- Company Logo Upload
-- Applicant Tracking
-- Recruiter Workspace
-- Job Management
+### Job Seeker
+- Secure auth with session restoration
+- AI resume analysis & career guidance
+- Resume upload with async processing + polling
+- Skills management
+- Profile completion tracking
+- Premium subscription (Razorpay)
+- Job applications & history
+
+### Recruiter
+- Company management with logo upload
+- Job creation & management
+- Applicant tracking & workflow
+- Recruiter dashboard
+
+### Payment & Subscription
+- Razorpay checkout integration
+- Secure HMAC signature verification
+- Subscription lifecycle (activation → expiry tracking)
+- Payment failure recovery
+- Production-safe checkout UX
+
+### AI Features
+- Resume intelligence (skills extraction, experience analysis)
+- Resume improvement suggestions
+- Career guidance with personalized roadmaps
+- Technology recommendations
+- AI quota management (Redis-backed)
 
 ---
 
-# 🎨 Shared Features
+## 📊 Observability & Logging
 
-- Dark / Light Theme
-- Dynamic Loaders
-- Protected Routes
-- Responsive Design
-- Dynamic Modals
-- Polling-based Updates
-- Reusable Components
-- Smooth UI Animations
+### Winston Integration (All Services)
+- **Structured JSON logs** in production
+- **Daily rotation** with 7-day retention (20MB max per file)
+- **Separate error streams** for fast incident triage
+- **Request correlation** via `X-Request-Id` (crypto.randomUUID)
+- **Sensitive data redaction** (passwords, tokens, secrets)
+- **Color-coded console** output in development
 
----
-
-# 🌐 API Gateway
-
-The API Gateway acts as the centralized entry point for all requests.
-
----
-
-# 📌 Responsibilities
-
-| Responsibility | Description |
+### Log Admin Dashboard
+| Feature | Description |
 |---|---|
-| JWT Authentication | Centralized auth verification |
-| Reverse Proxy | Request forwarding |
-| Rate Limiting | Redis-based distributed limiting |
-| Logging | Structured request logging |
-| Circuit Breakers | Fault tolerance |
-| Middleware Handling | Shared middleware layer |
-| Request Routing | Service communication |
+| Dashboard | Cluster-wide stats, 7-day audit chart |
+| Service Logs | Per-service log viewer with filters |
+| Error Logs | Aggregated errors across all services |
+| Service Details | Per-service CPU, memory, latency, error rate |
+| Infrastructure | Live DB metrics, ER diagram, Kafka & Redis panels |
+| Architecture | Full system wire flow & request lifecycle docs |
 
 ---
 
-# 🧩 Backend Microservices
+## 🔄 Request Flows
 
-Every service follows Clean Architecture principles.
+### Login Flow
+```
+Frontend → Gateway (rate limit) → Auth Service → PostgreSQL (verify)
+→ Generate JWT + refresh token → Set cookies → Return user
+```
 
-```text
-api/
-domain/
-infra/
-shared/
-composition-root/
+### Resume Upload Flow
+```
+Frontend → Gateway → User Service → Kafka (upload-content)
+→ Utils Consumer → Cloud upload → Groq AI analysis
+→ DB update (status: success) → Frontend polling detects completion
+```
+
+### Payment Flow
+```
+Frontend → Payment Service → Razorpay (create order)
+→ Frontend opens checkout → User pays → Razorpay callback
+→ Payment Service (HMAC verify) → DB (activate subscription)
+```
+
+### AI Career Guidance
+```
+Frontend → Gateway (AI quota check via Redis)
+→ Utils Service → Groq AI (structured prompt)
+→ Parse response → Return roadmap + recommendations
 ```
 
 ---
 
-# 🔐 Auth Service
+## 🗄 Database Design
 
-Handles all authentication workflows.
-
-## Features
-
-- User Registration
-- User Login
-- Refresh Token Rotation
-- Forgot Password
-- Reset Password
-- Secure Logout
-- Device Tracking
-- Session Management
-- JWT Authentication
-- Redis Rate Limiting
+- **PostgreSQL** (Neon) — single shared database
+- **Raw SQL queries** — no ORM
+- **Migration-based** schema control
+- **7 tables**: users, refresh_tokens, skills, user_skills, companies, jobs, applications
 
 ---
 
-# 👤 User Service
+## 🛡 Authentication & Security
 
-Handles job seeker workflows.
-
-## Features
-
-- Profile Management
-- Resume Uploads
-- Resume Status Tracking
-- Skills Management
-- Profile Picture Upload
-- Apply For Jobs
-- Application History
-- Resume Polling
-- Subscription Management
+- JWT access tokens (15min) + refresh token rotation (7d)
+- Secure httpOnly cookies for refresh tokens
+- Device tracking per session
+- Redis rate limiting (200/min per IP)
+- AI quota limiting (daily per user)
+- Zod request validation
+- Sensitive data redaction in logs
+- Razorpay HMAC signature verification
+- Circuit breakers for fault tolerance
 
 ---
 
-# 💼 Job Service
-
-Handles recruiter workflows and job management.
-
-## Features
-
-- Company Management
-- Create Jobs
-- Update Jobs
-- Active Listings
-- Recruiter Dashboard
-- Applicant Tracking
-- Recruiter Workflows
-
----
-
-# 💳 Payment Service
-
-Dedicated backend service responsible for secure payment processing and subscription management.
-
-## Features
-
-- Razorpay Order Creation
-- Payment Verification
-- Signature Validation
-- Subscription Activation
-- Subscription Expiry Handling
-- Webhook Verification
-- Payment Audit Logs
-- Transaction Validation
-- Failure Handling & Retry Logic
-- Secure Checkout Processing
-
----
-
-# 🤖 Utils Service
-
-Dedicated service for asynchronous and AI-powered workflows.
-
-## Features
-
-- Kafka Consumers
-- Resume Analysis
-- Upload Processing
-- Email Workers
-- AI Workflows
-- Background Jobs
-
----
-
-# ⚡ Async Processing
-
-Kafka is used for asynchronous workflows.
-
-## Event Flow
-
-```text
-Producer
-   ↓
-Kafka Topic
-   ↓
-Consumer
-   ↓
-Background Processing
-```
-
----
-
-# 📌 Current Use Cases
-
-- Resume Processing
-- Email Processing
-- Upload Handling
-- AI Workflows
-- Background Jobs
-- Subscription Events
-
----
-
-# 🗄 Database Design
-
-## Database Strategy
-
-- PostgreSQL
-- Raw SQL Queries
-- Service-level Isolation
-- Migration-based Schema Control
-- No ORM Usage
-
----
-
-# 🛡 Authentication & Security
-
-# 📌 Authentication Security
-
-- JWT Access Tokens
-- Refresh Token Rotation
-- Secure Cookie Handling
-- Route Protection
-- Device Tracking
-
----
-
-# 📌 Infrastructure Security
-
-- Redis Rate Limiting
-- Request Validation using Zod
-- Structured Error Handling
-- Internal API Protection
-- Service Isolation
-- Razorpay Signature Validation
-- Payment Verification Layer
-- Webhook Security Validation
-
----
-
-# 💳 Payment Infrastructure
-
-Premium subscription system integrated using Razorpay.
-
-## Features
-
-- Subscription Activation
-- Secure Checkout
-- Razorpay Webhooks
-- Signature Verification
-- Payment Audit Handling
-- Payment Failure Handling
-- Subscription Expiry Tracking
-- Secure Backend Verification
-- Transaction Validation
-- Production-safe Checkout Architecture
-
----
-
-# 🚀 Installation
-
-## Clone Repository
+## 🚀 Installation
 
 ```bash
 git clone <repository-url>
@@ -589,196 +349,129 @@ cd job_portal_application
 
 ---
 
-# ▶️ Running The Project
-
-## Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## API Gateway
-
-```bash
-cd api-gateway
-npm install
-npm run dev
-```
-
-## Auth Service
-
-```bash
-cd services/auth
-npm install
-npm run dev
-```
-
-## User Service
-
-```bash
-cd services/user
-npm install
-npm run dev
-```
-
-## Job Service
-
-```bash
-cd services/job
-npm install
-npm run dev
-```
-
-## Payment Service
-
-```bash
-cd services/payment
-npm install
-npm run dev
-```
-
-## Utils Service
-
-```bash
-cd services/utils
-npm install
-npm run dev
-```
-
----
-
-# ⚙️ Environment Variables
+## ⚙️ Environment Variables
 
 ```env
+# Shared
 PORT=
-
 DATABASE_URL=
 REDIS_URL=
-
 JWT_SECRET=
 JWT_REFRESH_SECRET=
-
 KAFKA_BROKER=
+FRONTEND_URL=
 
+# AI (Utils service)
 GROQ_API_KEY=
 
+# Payment service
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
 
-FRONTEND_URL=
+# Log Admin
+ADMIN_PASSWORD=
 ```
 
 ---
 
-# 🔥 Advanced Concepts Used
+## ▶️ Running The Project
 
-- Microservices Architecture
-- API Gateway Pattern
-- Circuit Breaker Pattern
-- Distributed Rate Limiting
-- Event-driven Architecture
-- Kafka Consumers
-- Dependency Injection
-- Repository Pattern
-- Clean Architecture
-- Domain-driven Structure
-- Refresh Token Rotation
-- Async Workflow Isolation
-- Razorpay Integration
-- Payment Verification Pipelines
-- Background Workers
+```bash
+# Frontend
+cd frontend && npm install && npm run dev
+
+# API Gateway
+cd api-gateway && npm install && npm run dev
+
+# Services (each in separate terminal)
+cd services/auth && npm install && npm run dev
+cd services/user && npm install && npm run dev
+cd services/job && npm install && npm run dev
+cd services/payment && npm install && npm run dev
+cd services/utils && npm install && npm run dev
+
+# Log Admin Dashboard
+cd services/log-admin && npm install && npm run dev
+```
+
+**Ports:**
+| Service | Port |
+|---|---|
+| Frontend | 3000 |
+| API Gateway | 8080 |
+| Auth | 4000 |
+| Utils | 5002 |
+| User | 5003 |
+| Job | 5004 |
+| Payment | 5005 |
+| Log Admin | 9000 |
 
 ---
 
-# 📊 Current Status
+## 🧠 Engineering Patterns
+
+| Pattern | Implementation |
+|---|---|
+| Microservices | 6 independent services + gateway |
+| API Gateway | Fastify reverse proxy with centralized auth |
+| Clean Architecture | api → domain → infra → shared per service |
+| Repository Pattern | DB abstraction layer (raw SQL) |
+| Event-Driven | Kafka producers/consumers (fire-and-forget) |
+| Circuit Breaker | opossum per downstream service |
+| Rate Limiting | Redis INCR + EXPIRE (distributed) |
+| Refresh Token Rotation | Old token invalidated on each refresh |
+| Dependency Injection | Composition root wiring |
+| Structured Logging | Winston JSON + daily rotation + correlation IDs |
+| Polling Pattern | Frontend polls upload status until complete |
+| HMAC Verification | Razorpay signature validation |
+
+---
+
+## 📊 Current Status
 
 | Module | Status |
 |---|---|
-| Frontend Authentication | ✅ Stable |
-| Job Seeker Features | ✅ Stable |
-| Recruiter Features | ✅ Stable |
-| API Gateway | ✅ Stable |
+| Frontend (Next.js 15) | ✅ Stable |
+| API Gateway (Fastify) | ✅ Stable |
 | Auth Service | ✅ Stable |
 | User Service | ✅ Stable |
 | Job Service | ✅ Stable |
 | Payment Service | ✅ Stable |
-| AI Features | ✅ Working |
-| Kafka Consumers | ✅ Working |
+| Utils Service (AI + Kafka) | ✅ Stable |
+| Winston Logging | ✅ All services |
+| Log Admin Dashboard | ✅ Stable |
 | Razorpay Integration | ✅ Working |
-| AWS Deployment | 🚧 Planned |
+| AI Features (Groq) | ✅ Working |
+| Kafka Consumers | ✅ Working |
 
 ---
 
-# 🛣 Roadmap
+## 🛣 Roadmap
 
-## Backend
-
-- [ ] Distributed tracing
-- [ ] OpenTelemetry integration
-- [ ] Dead Letter Queue (DLQ)
-- [ ] Kafka retry pipelines
 - [ ] Docker Compose setup
 - [ ] Kubernetes deployment
+- [ ] Distributed tracing (OpenTelemetry)
+- [ ] Dead Letter Queue (DLQ) for Kafka
 - [ ] Service discovery
-- [ ] Redis caching layer
-
----
-
-## Frontend
-
-- [ ] Recruiter analytics dashboard
-- [ ] Real-time notifications
-- [ ] WebSocket integration
+- [ ] WebSocket notifications
 - [ ] Advanced search & filtering
-- [ ] Better mobile optimization
+- [ ] AI job matching & resume scoring
 
 ---
 
-## AI Features
+## 👨‍💻 Author
 
-- [ ] AI Job Matching
-- [ ] Resume Scoring
-- [ ] Interview Preparation Assistant
-- [ ] AI-generated Cover Letters
+**Nikhil Singh**
 
----
-
-# 🧠 Design Philosophy
-
-This platform is designed to reflect a real-world scalable engineering system rather than a simple CRUD application.
-
-The focus areas are:
-
-- Scalability
-- Maintainability
-- Service Isolation
-- AI Integration
-- Async Workflows
-- Production-oriented Backend Patterns
-- Modern Frontend Architecture
+Focused on distributed systems, scalable backend architecture, modern frontend engineering, AI-powered platform development, and production-grade system design.
 
 ---
 
-# 👨‍💻 Author
+<div align="center">
 
-## Nikhil Singh
+Built to demonstrate production-oriented software engineering — scalable architecture, async systems, AI integrations, payment infrastructure, structured observability, and modern frontend patterns.
 
-Focused on:
+⭐ Star this repo if you found it useful.
 
-- Distributed Systems
-- Scalable Backend Architecture
-- Modern Frontend Engineering
-- AI-powered Platform Development
-- Microservices Engineering
-- Production-grade System Design
-
----
-
-# ⭐ Final Note
-
-This project was built to demonstrate production-oriented software engineering concepts including scalable architecture, asynchronous systems, AI integrations, distributed workflows, payment infrastructure, and modern frontend engineering practices.
-
-If you found this project useful, consider giving it a ⭐ on GitHub.
+</div>
