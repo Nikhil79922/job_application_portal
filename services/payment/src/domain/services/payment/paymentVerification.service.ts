@@ -114,7 +114,7 @@ export class paymentVerificationSer {
         subscription: baseDate,
       });
 
-    if (subscribedUserData) {
+    if (!subscribedUserData) {
       throw new AppError(
         "Failed to activate subscription",
         500

@@ -12,6 +12,10 @@ import QueryProvider from "@/components/providers/query-provider"
 
 import AuthProvider from "@/components/providers/auth-provider"
 
+import PageTransition from "@/components/providers/page-transition"
+
+import UploadPollingProvider from "@/components/providers/upload-polling-provider"
+
 import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
@@ -42,21 +46,27 @@ export default function RootLayout({
 
             <AuthProvider>
 
-              <Navbar />
+              <UploadPollingProvider>
 
-              <main>
-                {children}
-              </main>
+                <Navbar />
 
-              <FuturisticFooter />
+                <main>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </main>
 
-              <Toaster
-                richColors
-                position="top-center"
-                closeButton
-                duration={3000}
-                theme="system"
-              />
+                <FuturisticFooter />
+
+                <Toaster
+                  richColors
+                  position="top-center"
+                  closeButton
+                  duration={3000}
+                  theme="system"
+                />
+
+              </UploadPollingProvider>
 
             </AuthProvider>
 

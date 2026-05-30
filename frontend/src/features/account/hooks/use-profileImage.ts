@@ -1,273 +1,141 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useEffect,useMemo,useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { useMutation } from "@tanstack/react-query"
 
 import profileImageService from "../services/profileImage.service"
-
 import { useAuthStore } from "@/stores/auth.store"
-import { usePolling } from "@/hooks/use-polling"
 
-export const useUpdateProfileImage=()=>{
+export const useUpdateProfileImage = () => {
 
-  const setAuth=useAuthStore(
-    (state)=>state.setAuth
-  )
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  const accessToken=useAuthStore(
-    (state)=>state.accessToken
-  )
+  const confirmedImage =
+    useAuthStore((s) => s.user?.profile_pic) ?? null
 
-  const [previewUrl,setPreviewUrl]=
-    useState<string|null>(null)
+  const uploadStatus =
+    useAuthStore((s) => s.user?.profile_pic_upload_status)
 
-  const [confirmedImage,setConfirmedImage]=
-    useState<string|null>(
-      useAuthStore.getState()
-        .user?.profile_pic||null
-    )
-
-  const [isProcessing,setIsProcessing]=
+  const [forceStopProcessing, setForceStopProcessing] =
     useState(false)
 
-  const imageSrc=useMemo(()=>{
+  const uploadedThisSession = useRef(false)
 
-    return(
-      previewUrl||
-      confirmedImage||
-      useAuthStore.getState()
-        .user?.profile_pic||
-      null
-    )
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  },[
-    previewUrl,
-    confirmedImage,
-  ])
+  const isProcessing =
+    uploadStatus === "pending" &&
+    !forceStopProcessing &&
+    uploadedThisSession.current
 
-  useEffect(()=>{
+  const imageSrc = useMemo(
+    () => previewUrl || confirmedImage || null,
+    [previewUrl, confirmedImage]
+  )
 
-    return()=>{
+  // Clear stale "pending" status on mount
+  useEffect(() => {
+    const { user, accessToken, setAuth } = useAuthStore.getState()
+    if (user?.profile_pic_upload_status === "pending") {
+      setAuth({ ...user, profile_pic_upload_status: undefined }, accessToken!)
+    }
+  }, [])
 
-      if(previewUrl){
+  // Cleanup object URLs and timers on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [previewUrl])
 
-        URL.revokeObjectURL(
-          previewUrl
-        )
+  // Safety timeout: stop spinner if stuck in pending > 30s
+  useEffect(() => {
+    if (uploadStatus !== "pending") {
+      setForceStopProcessing(false)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
       }
+      return
     }
 
-  },[
-    previewUrl,
-  ])
+    timeoutRef.current = setTimeout(() => {
+      console.warn("Profile image stuck in pending state. Stopping loader.")
+      setForceStopProcessing(true)
+    }, 30000)
 
-  const {
-    startPolling,
-    stopPolling,
-  }=usePolling({
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [uploadStatus])
 
-    interval:3000,
+  // Clear preview once the background job resolves
+  useEffect(() => {
+    if (!previewUrl) return
 
-    pollingFn:async()=>{
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      const status = state.user?.profile_pic_upload_status
 
-      try{
-
-        const response=
-          await profileImageService
-            .updateProfileImage({
-              checkUpload:true,
-            })
-
-        /* STILL PROCESSING */
-
-        if(
-          response.status===202
-        ){
-          return
-        }
-
-        /* SUCCESS */
-
-        if(
-          response.status===200 &&
-          response.data
-        ){
-
-          const latestUser=
-            useAuthStore.getState()
-              .user
-
-          setConfirmedImage(
-            response.data.profile_pic
-          )
-
-          setAuth(
-            {
-              ...latestUser!,
-              profile_pic:
-                response.data.profile_pic,
-              profile_pic_upload_status:
-                "success",
-            },
-            accessToken!
-          )
-
-          stopPolling()
-
-          requestAnimationFrame(()=>{
-
-            setPreviewUrl(null)
-
-          })
-
-          setIsProcessing(false)
-
-          toast.success(
-            "Profile image updated successfully"
-          )
-        }
-
-      }catch(error:any){
-
-        const latestUser=
-          useAuthStore.getState()
-            .user
-
-        stopPolling()
-
-        setPreviewUrl(null)
-
-        setConfirmedImage(
-          latestUser?.profile_pic||
-          null
-        )
-
-        setIsProcessing(false)
-
-        if(latestUser){
-
-          setAuth(
-            {
-              ...latestUser,
-              profile_pic_upload_status:
-                "fail",
-            },
-            accessToken!
-          )
-        }
-
-        toast.error(
-          error?.response?.data?.message||
-          error?.message||
-          "Image processing failed"
-        )
-      }
-    },
-  })
-
-  const mutation=useMutation({
-
-    retry:false,
-
-    mutationFn:async(
-      file:File
-    )=>{
-
-      return profileImageService
-        .updateProfileImage({
-          file,
-          checkUpload:false,
+      if (status === "success" || status === "fail") {
+        requestAnimationFrame(() => {
+          setPreviewUrl(null)
+          setForceStopProcessing(false)
+          uploadedThisSession.current = false
         })
-    },
-
-    onMutate:async(file)=>{
-
-      if(previewUrl){
-
-        URL.revokeObjectURL(
-          previewUrl
-        )
       }
+    })
 
-      const latestUser=
-        useAuthStore.getState()
-          .user
+    return unsubscribe
+  }, [previewUrl])
 
-      const localPreview=
-        URL.createObjectURL(file)
+  const mutation = useMutation({
+    retry: false,
 
-      setPreviewUrl(
-        localPreview
-      )
+    mutationFn: (file: File) =>
+      profileImageService.updateProfileImage({ file, checkUpload: false }),
 
-      setIsProcessing(true)
+    onMutate: async (file) => {
+      uploadedThisSession.current = true
+      setForceStopProcessing(false)
 
-      if(latestUser){
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(URL.createObjectURL(file))
 
-        setAuth(
-          {
-            ...latestUser,
-            profile_pic_upload_status:
-              "pending",
-          },
-          accessToken!
-        )
+      const { user, accessToken, setAuth } = useAuthStore.getState()
+      if (user) {
+        setAuth({ ...user, profile_pic_upload_status: "pending" }, accessToken!)
       }
     },
 
-    onSuccess:()=>{
-
-      toast.success(
-        "Image upload started"
-      )
-
-      startPolling()
+    onSuccess: () => {
+      toast.success("Image upload started — processing in background")
     },
 
-    onError:(error:any)=>{
-
-      const latestUser=
-        useAuthStore.getState()
-          .user
-
-      stopPolling()
-
+    onError: (error: any) => {
       setPreviewUrl(null)
+      uploadedThisSession.current = false
 
-      setConfirmedImage(
-        latestUser?.profile_pic||
-        null
-      )
-
-      setIsProcessing(false)
-
-      if(latestUser){
-
-        setAuth(
-          {
-            ...latestUser,
-            profile_pic_upload_status:
-              "fail",
-          },
-          accessToken!
-        )
+      const { user, accessToken, setAuth } = useAuthStore.getState()
+      if (user) {
+        setAuth({ ...user, profile_pic_upload_status: "fail" }, accessToken!)
       }
+
+      setForceStopProcessing(false)
 
       toast.error(
-        error?.response?.data?.message||
-        error?.message||
+        error?.response?.data?.message ||
+        error?.message ||
         "Upload failed"
       )
     },
   })
 
-  return{
-    updateImage:
-      mutation.mutate,
-    isUploading:
-      mutation.isPending,
+  return {
+    updateImage: mutation.mutate,
+    isUploading: mutation.isPending,
     isProcessing,
     previewUrl,
     imageSrc,

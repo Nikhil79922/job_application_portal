@@ -16,6 +16,9 @@ interface UsePollingOptions {
   enabled?: boolean
 
   maxAttempts?: number
+
+  /** Called when maxAttempts is reached without success */
+  onExhausted?: () => void
 }
 
 export const usePolling = ({
@@ -23,6 +26,7 @@ export const usePolling = ({
   interval = 3000,
   enabled = true,
   maxAttempts = Infinity,
+  onExhausted,
 }: UsePollingOptions) => {
 
   const intervalRef =
@@ -33,35 +37,30 @@ export const usePolling = ({
   const attemptsRef =
     useRef(0)
 
-  /* STABLE POLLING FN */
+  /* STABLE REFS */
 
   const pollingFnRef =
     useRef(pollingFn)
 
+  const onExhaustedRef =
+    useRef(onExhausted)
+
   useEffect(() => {
+    pollingFnRef.current = pollingFn
+  }, [pollingFn])
 
-    pollingFnRef.current =
-      pollingFn
-
-  }, [
-    pollingFn,
-  ])
+  useEffect(() => {
+    onExhaustedRef.current = onExhausted
+  }, [onExhausted])
 
   /* STOP */
 
   const stopPolling =
     useCallback(() => {
 
-      if (
-        intervalRef.current
-      ) {
-
-        clearInterval(
-          intervalRef.current
-        )
-
-        intervalRef.current =
-          null
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
 
       attemptsRef.current = 0
@@ -73,17 +72,10 @@ export const usePolling = ({
   const startPolling =
     useCallback(() => {
 
-      if (!enabled) {
-        return
-      }
+      if (!enabled) return
 
       /* PREVENT DUPLICATE */
-
-      if (
-        intervalRef.current
-      ) {
-        return
-      }
+      if (intervalRef.current) return
 
       intervalRef.current =
         setInterval(
@@ -93,9 +85,8 @@ export const usePolling = ({
               attemptsRef.current >=
               maxAttempts
             ) {
-
               stopPolling()
-
+              onExhaustedRef.current?.()
               return
             }
 
@@ -117,20 +108,13 @@ export const usePolling = ({
   /* CLEANUP */
 
   useEffect(() => {
-
     return () => {
-
       stopPolling()
     }
-
-  }, [
-    stopPolling,
-  ])
+  }, [stopPolling])
 
   return {
-
     startPolling,
-
     stopPolling,
   }
 }

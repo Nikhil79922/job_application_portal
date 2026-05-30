@@ -1,298 +1,50 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import {
-  useEffect,
-  useState,
-} from "react"
-
-import {
-  toast,
-} from "sonner"
-
-import {
-  useMutation,
-} from "@tanstack/react-query"
+import { useState } from "react"
+import { toast } from "sonner"
+import { useMutation } from "@tanstack/react-query"
 
 import resumeService from "../services/resume.service"
+import { useAuthStore } from "@/stores/auth.store"
 
-import {
-  useAuthStore,
-} from "@/stores/auth.store"
+export const useUpdateResume = () => {
 
-import {
-  usePolling,
-} from "@/hooks/use-polling"
+  const [isUploading, setIsUploading] = useState(false)
 
-export const useUpdateResume =
-  () => {
+  const mutation = useMutation({
 
-    const setAuth =
-      useAuthStore(
-        (state) =>
-          state.setAuth
+    retry: false,
+
+    mutationFn: (file: File) =>
+      resumeService.updateResume({ file, checkUpload: false }),
+
+    onMutate: () => {
+      setIsUploading(true)
+      const { user, accessToken, setAuth } = useAuthStore.getState()
+      if (user) setAuth({ ...user, resume_upload_status: "pending" }, accessToken!)
+    },
+
+    onSuccess: () => {
+      setIsUploading(false)
+      toast.success("Resume upload started — processing in background")
+      // UploadPollingProvider picks up the 'pending' status automatically
+    },
+
+    onError: (error: any) => {
+      setIsUploading(false)
+      const { user, accessToken, setAuth } = useAuthStore.getState()
+      if (user) setAuth({ ...user, resume_upload_status: "fail" }, accessToken!)
+      toast.error(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Resume upload failed"
       )
-
-    const accessToken =
-      useAuthStore(
-        (state) =>
-          state.accessToken
-      )
-
-    const [isProcessing,
-      setIsProcessing] =
-      useState(false)
-
-    /* POLLING */
-
-    const {
-      startPolling,
-      stopPolling,
-    } = usePolling({
-
-      interval: 3000,
-
-      maxAttempts: 20,
-
-      pollingFn: async () => {
-
-        try {
-
-          const response =
-            await resumeService
-              .updateResume({
-                checkUpload: true,
-              })
-
-          /* STILL PROCESSING */
-
-          if (
-            response.status === 202
-          ) {
-            return
-          }
-
-          /* SUCCESS */
-
-          if (
-            response.status === 200 &&
-            response.data
-          ) {
-
-            const latestUser =
-              useAuthStore
-                .getState()
-                .user
-
-            const latestResume =
-              response.data
-                .resume
-
-            setAuth(
-              {
-                ...latestUser!,
-
-                resume:
-                  latestResume,
-
-                resume_upload_status:
-                  "success",
-              },
-              accessToken!
-            )
-
-            stopPolling()
-
-            setIsProcessing(
-              false
-            )
-
-            toast.success(
-              "Resume updated successfully"
-            )
-
-            return
-          }
-
-        } catch (
-          error: any
-        ) {
-
-          const latestUser =
-            useAuthStore
-              .getState()
-              .user
-
-          stopPolling()
-
-          setIsProcessing(
-            false
-          )
-
-          if (
-            latestUser
-          ) {
-
-            setAuth(
-              {
-                ...latestUser,
-
-                resume_upload_status:
-                  "fail",
-              },
-              accessToken!
-            )
-          }
-
-          toast.error(
-            error?.response
-              ?.data
-              ?.message ||
-            error?.message ||
-            "Resume processing failed"
-          )
-        }
-      },
-    })
-
-    /* RESTORE POLLING ON REFRESH */
-
-    useEffect(() => {
-
-      const latestUser =
-        useAuthStore
-          .getState()
-          .user
-
-      const shouldStartPolling =
-        latestUser
-          ?.resume_upload_status ===
-          "pending"
-
-      if (
-        shouldStartPolling
-      ) {
-
-        setIsProcessing(
-          true
-        )
-
-        startPolling()
-      }
-
-      return () => {
-
-        stopPolling()
-      }
-
-    }, [
-      startPolling,
-      stopPolling,
-    ])
-
-    /* UPLOAD */
-
-    const mutation =
-      useMutation({
-
-        retry: false,
-
-        mutationFn: async (
-          file: File
-        ) => {
-
-          return resumeService
-            .updateResume({
-              file,
-              checkUpload: false,
-            })
-        },
-
-        onMutate: () => {
-
-          const latestUser =
-            useAuthStore
-              .getState()
-              .user
-
-          setIsProcessing(
-            true
-          )
-
-          if (
-            latestUser
-          ) {
-
-            setAuth(
-              {
-                ...latestUser,
-
-                resume_upload_status:
-                  "pending",
-              },
-              accessToken!
-            )
-          }
-        },
-
-        onSuccess: () => {
-
-          toast.success(
-            "Resume upload started"
-          )
-
-          startPolling()
-        },
-
-        onError: (
-          error: any
-        ) => {
-
-          const latestUser =
-            useAuthStore
-              .getState()
-              .user
-
-          stopPolling()
-
-          setIsProcessing(
-            false
-          )
-
-          if (
-            latestUser
-          ) {
-
-            setAuth(
-              {
-                ...latestUser,
-
-                resume_upload_status:
-                  "fail",
-              },
-              accessToken!
-            )
-          }
-
-          toast.error(
-            error?.response
-              ?.data
-              ?.message ||
-            error?.message ||
-            "Resume upload failed"
-          )
-        },
-      })
-
-    return {
-
-      updateResume:
-        mutation.mutate,
-
-      isUploading:
-        mutation.isPending,
-
-      isProcessing,
-    }
+    },
+  })
+
+  return {
+    updateResume: mutation.mutate,
+    isUploading,
   }
+}

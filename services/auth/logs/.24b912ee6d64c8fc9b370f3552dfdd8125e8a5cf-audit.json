@@ -9,6 +9,11 @@
             "date": 1780120387555,
             "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/auth/logs/2026-05-30-auth.log",
             "hash": "582091be083f41a7482e46990216d39d798f5ee0ccf6f93d6d61fddba10f84c5"
+        },
+        {
+            "date": 1780165800262,
+            "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/auth/logs/2026-05-31-auth.log",
+            "hash": "d2db5cd02e8a2ff89e3e17a274ec4a3b4030cab67d4acd5a8a2cab05c25cc384"
         }
     ],
     "hashType": "sha256"

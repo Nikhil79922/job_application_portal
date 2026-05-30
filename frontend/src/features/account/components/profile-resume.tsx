@@ -199,10 +199,10 @@ export default function ProfileResume({ user }: Props) {
     useAuthStore((state) => state.user?.resume_upload_status) ||
     user.resume_upload_status
 
-  const { updateResume, isUploading, isProcessing } = useUpdateResume()
+  const { updateResume, isUploading } = useUpdateResume()
 
   const isPending =
-    isUploading || isProcessing || latestResumeStatus === "pending"
+    isUploading || latestResumeStatus === "pending"
 
   const phaseLabel = usePhaseLabel(isPending)
 

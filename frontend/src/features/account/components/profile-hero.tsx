@@ -143,6 +143,7 @@ export default function ProfileHero({
                     <Loader2 className="h-8 w-8 animate-spin text-white" />
                   </div>
                 )}
+
               </div>
 
               {/* Camera Button */}
@@ -176,12 +177,14 @@ export default function ProfileHero({
                   <Crown className="h-4 w-4 text-yellow-500" />
                   {user.subscription || "Free Plan"}
                 </div>
+
                 {isProcessing && (
                   <div className="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700 dark:border-yellow-500/10 dark:bg-yellow-500/10 dark:text-yellow-300">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Updating Image
                   </div>
                 )}
+
               </div>
             </div>
           </div>

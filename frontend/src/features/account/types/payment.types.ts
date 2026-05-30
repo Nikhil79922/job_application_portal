@@ -20,6 +20,7 @@
     success: boolean
     message: string
     data: {
+      message: string
       data: RazorpayOrder
     }
   }

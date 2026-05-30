@@ -32,13 +32,50 @@ function loadRazorpayScript(): Promise<boolean> {
   })
 }
 
+// ─── Error classifier ─────────────────────────────────────────────────────────
+
+function classifyPaymentError(err: any): string {
+  const code        = err?.error?.code        as string | undefined
+  const reason      = err?.error?.reason      as string | undefined
+  const description = err?.error?.description as string | undefined
+  const step        = err?.error?.step        as string | undefined
+
+  // UPI-specific
+  if (reason === "payment_cancelled" || code === "BAD_REQUEST_ERROR") {
+    if (step === "payment_authentication") {
+      return "UPI payment was cancelled or timed out. Please try again."
+    }
+  }
+
+  // Card decline
+  if (
+    reason === "card_declined" ||
+    reason === "insufficient_funds" ||
+    code   === "GATEWAY_ERROR"
+  ) {
+    return description || "Your card was declined. Please try a different card."
+  }
+
+  // Network / timeout
+  if (
+    reason === "network_error" ||
+    code   === "NETWORK_ERROR"
+  ) {
+    return "Network error during payment. Please check your connection and try again."
+  }
+
+  // Generic Razorpay description
+  if (description) return description
+
+  return "Payment failed. Please try again or use a different payment method."
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export const usePayment = () => {
 
   const [isLoading, setIsLoading] = useState(false)
 
-  // Read token + user from the auth store — same pattern as meService
   const accessToken = useAuthStore((state) => state.accessToken)
   const user        = useAuthStore((state) => state.user)
   const setAuth     = useAuthStore((state) => state.setAuth)
@@ -59,8 +96,7 @@ export const usePayment = () => {
       }
 
       // 2. Validate Razorpay public key
-      const razorpayKey =
-        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
 
       if (!razorpayKey) {
         toast.error(
@@ -72,23 +108,18 @@ export const usePayment = () => {
 
       // 3. Validate session token
       if (!accessToken) {
-        toast.error(
-          "Session expired. Please log in again."
-        )
+        toast.error("Session expired. Please log in again.")
         setIsLoading(false)
         return
       }
 
       // 4. Create order on backend
-      const orderResponse =
-        await paymentService.createOrder(accessToken)
-
+      // Backend shape: { success, message, data: { message, data: RazorpayOrder } }
+      const orderResponse = await paymentService.createOrder(accessToken)
       const orderData = orderResponse?.data?.data
 
-      if (!orderData) {
-        throw new Error(
-          "Unable to create order. Please try again."
-        )
+      if (!orderData?.id) {
+        throw new Error("Unable to create order. Please try again.")
       }
 
       // 5. Open Razorpay checkout modal
@@ -101,27 +132,17 @@ export const usePayment = () => {
         order_id:    orderData.id,
 
         // ── Success: verify on backend then update store ──────────────────
-        handler: async (
-          razorpayResponse: RazorpayPaymentResponse
-        ) => {
+        handler: async (razorpayResponse: RazorpayPaymentResponse) => {
           try {
-            const verifyResponse =
-              await paymentService.verifyPayment(
-                {
-                  razorpay_order_id:
-                    razorpayResponse.razorpay_order_id,
-                  razorpay_payment_id:
-                    razorpayResponse.razorpay_payment_id,
-                  razorpay_signature:
-                    razorpayResponse.razorpay_signature,
-                },
-                accessToken
-              )
+            const verifyResponse = await paymentService.verifyPayment(
+              {
+                razorpay_order_id:   razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature:  razorpayResponse.razorpay_signature,
+              },
+              accessToken
+            )
 
-            // Update auth store directly — no page reload needed.
-            // setAuth(user, accessToken) keeps the token in memory
-            // and patches the user with the new subscription date.
-            // Mirrors exactly what the backend sets (30 days from now).
             if (user && accessToken) {
               const expiresAt = new Date()
               expiresAt.setDate(expiresAt.getDate() + 30)
@@ -141,11 +162,14 @@ export const usePayment = () => {
 
           } catch (err: any) {
             setIsLoading(false)
-            toast.error(
+
+            // Verification failure — payment went through but backend failed
+            const msg =
               err?.response?.data?.message ||
               err?.message ||
               "Payment verification failed. Contact support with your payment ID."
-            )
+
+            toast.error(msg)
           }
         },
 
@@ -163,29 +187,49 @@ export const usePayment = () => {
             setIsLoading(false)
             toast.info("Payment cancelled.")
           },
+          // Escape key / back button
+          escape: true,
+          backdropclose: false,
         },
       }
 
       const razor = new (window as any).Razorpay(options)
 
-      // Card decline / network failure inside the modal
+      // Card decline / network failure / UPI timeout inside the modal
       razor.on(
         "payment.failed",
         (failureResponse: RazorpayFailureResponse) => {
           setIsLoading(false)
-          toast.error(
-            failureResponse?.error?.description ??
-            "Payment failed. Please try again."
-          )
+          toast.error(classifyPaymentError(failureResponse))
         }
       )
 
-      // Open modal — do NOT setIsLoading(false) here;
-      // the modal is still open and loading resets inside its callbacks.
       razor.open()
 
     } catch (err: any) {
       setIsLoading(false)
+
+      // Network error reaching our backend
+      if (!navigator.onLine) {
+        toast.error("No internet connection. Please check your network.")
+        return
+      }
+
+      // Rate limit
+      if (err?.response?.status === 429) {
+        toast.error("Too many checkout attempts. Please wait a few minutes.")
+        return
+      }
+
+      // Already subscribed
+      if (err?.response?.status === 400) {
+        toast.error(
+          err?.response?.data?.message ||
+          "You already have an active subscription."
+        )
+        return
+      }
+
       toast.error(
         err?.response?.data?.message ||
         err?.message ||
