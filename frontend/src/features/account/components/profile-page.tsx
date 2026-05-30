@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"                          // kept for modal toast z-fix only
 
 import {
@@ -225,7 +225,15 @@ export default function ProfilePage() {
   const { data: initialData, isLoading } = useProfile()
 
   const storeUser = useAuthStore((state) => state.user)
-  const data = storeUser ?? initialData
+  const setAuth = useAuthStore((state) => state.setAuth)
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const data = initialData ?? storeUser
+
+  useEffect(() => {
+    if (initialData && accessToken) {
+      setAuth(initialData as any, accessToken)
+    }
+  }, [initialData, accessToken, setAuth])
 
   const { initiateCheckout, isLoading: checkoutLoading } = usePayment()
 

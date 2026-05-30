@@ -78,7 +78,7 @@ export default function ProfileHero({
   }
 
   // Display priority: croppedSrc (local crop) → imageSrc (from hook/server)
-  const displaySrc = croppedSrc ?? imageSrc
+  const displaySrc = croppedSrc ?? imageSrc ?? user.profile_pic ?? null
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)

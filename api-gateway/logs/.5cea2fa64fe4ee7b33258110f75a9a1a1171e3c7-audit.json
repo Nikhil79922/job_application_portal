@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "/Users/apple/Documents/Nikhil Singh /job_portal_application/api-gateway/logs/.5cea2fa64fe4ee7b33258110f75a9a1a1171e3c7-audit.json",
+    "files": [
+        {
+            "date": 1780137575359,
+            "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/api-gateway/logs/2026-05-30-error.log",
+            "hash": "4ff09e9aba29cadcc9771d8e51438dc83e93fd1ceee1a510ad6f7df949e4ddc9"
+        }
+    ],
+    "hashType": "sha256"
+}

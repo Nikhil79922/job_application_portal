@@ -52,13 +52,6 @@ export const useLogout =
         response: any
       ) => {
 
-        /* SUCCESS TOAST */
-
-        toast.success(
-          response?.message ||
-          "Logged out successfully"
-        )
-
         /* CLEAR AUTH */
 
         logout()
