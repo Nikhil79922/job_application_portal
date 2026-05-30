@@ -1,5 +1,6 @@
+import logger from "../config/logger.js";
 export async function initApp() {
-    console.log("🚀 Initializing user module...");
+    logger.info("🚀 Initializing user module...");
   
     await import("./helper/InfraConnect.container.js");
     await import("./helper/rateLimiting.container.js");
@@ -7,5 +8,5 @@ export async function initApp() {
     await import("./payment/checkoutSubscription.container.js");
 
   
-    console.log("✅ User module initialized");
+    logger.info("✅ User module initialized");
   }

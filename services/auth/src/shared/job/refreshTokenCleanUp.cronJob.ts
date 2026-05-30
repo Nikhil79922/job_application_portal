@@ -1,10 +1,11 @@
 import cron from "node-cron";
 import { pool } from "../../config/database.config.js";
+import logger from "../../config/logger.js";
 
 export const startRefreshTokenCleanup = () => {
   cron.schedule("0 */6 * * *", async () => {
     try {
-      console.time("[CRON] Cleanup");
+      const startTime = Date.now();
 
       const result = await pool.query(`
         DELETE FROM refresh_tokens
@@ -12,14 +13,14 @@ export const startRefreshTokenCleanup = () => {
         RETURNING token_id
       `);
 
-      console.timeEnd("[CRON] Cleanup");
+      const durationMs = Date.now() - startTime;
 
-      console.log(
-        `[CRON] Expired refresh tokens cleaned: ${result.rowCount}`
+      logger.info(
+        `[CRON] Expired refresh tokens cleaned: ${result.rowCount} (took ${durationMs}ms)`
       );
 
     } catch (error) {
-      console.error("[CRON] Refresh token cleanup failed:", error);
+      logger.error("[CRON] Refresh token cleanup failed:", { error });
     }
   });
 };

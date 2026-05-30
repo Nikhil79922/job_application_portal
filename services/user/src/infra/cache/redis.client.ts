@@ -1,12 +1,13 @@
 import { redisClient } from "../../config/redis.config.js";
 import AppError from "../../shared/errors/AppError.js";
 import { ICacheService } from "../../domain/interfaces/infraInterfaces/cache.interface.js";
+import logger from "../../config/logger.js";
 
 export class RedisCacheService implements ICacheService {
   async connect(): Promise<void> {
     try {
       await redisClient.connect();
-      console.log("✅ Redis connected");
+      logger.info("✅ Redis connected");
     } catch (err) {
       throw new AppError("Redis connection failed", 503);
     }

@@ -3,6 +3,7 @@ import { SkillsToUserDTO } from "../../../api/dtos/SkillsToUser.schema.js";
 import { SkillsRepository } from "../../interfaces/repoInterfaces/skills.repository.interface.js";
 import { User_SkillsRepository } from "../../interfaces/repoInterfaces/user_skills.repository.interface.js";
 import { executeInTransaction } from "../../../infra/database/transaction.js";
+import logger from "../../../config/logger.js";
 
 import { performance } from "node:perf_hooks";
 
@@ -27,12 +28,15 @@ export class addUserSKillDetails {
       );
 
       const skillEnd = performance.now();
-      console.log(
+      logger.debug(
         `[TIME] insertOrGetSkill: ${(skillEnd - skillStart).toFixed(2)} ms`
       );
 
       // 🔹 Add Skill To User
       const userSkillStart = performance.now();
+
+      const responseTime = Date.now();
+      logger.debug(`[addSkillsSer] Response ready: ${responseTime - txStart}ms`);
 
       const wasSkillAdded = await this.userSkillRepo.addSkillToUser(
         userDetails.user_id,
@@ -41,17 +45,17 @@ export class addUserSKillDetails {
       );
 
       const userSkillEnd = performance.now();
-      console.log(
+      logger.debug(
         `[TIME] addSkillToUser: ${(userSkillEnd - userSkillStart).toFixed(2)} ms`
       );
 
       const txEnd = performance.now();
-      console.log(
+      logger.debug(
         `[TIME] transaction block: ${(txEnd - txStart).toFixed(2)} ms`
       );
 
       if (!wasSkillAdded) {
-        console.log(
+        logger.debug(
           `[TIME] TOTAL: ${(performance.now() - totalStart).toFixed(2)} ms`
         );
         return { message: "User already possesses this skill" };

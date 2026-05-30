@@ -1,4 +1,5 @@
 import app from './app.js'
+import logger from './config/logger.js';
 import { UserModel } from './infra/database/models/user.model.js';
 import { SkillsModel } from './infra/database/models/skill.model.js';
 import { UserSkillsModel } from './infra/database/models/userSkills.model.js';
@@ -29,19 +30,19 @@ async function initDB() {
 
        await migrations.createTable();
        
-        console.log("✅ DataBase initialization successfully done",);
+        logger.info("✅ DataBase initialization successfully done");
         await Promise.all(
             Array.from({ length: 1 }, () => pool.query("SELECT 1"))
         );
-        console.log("✅ DB warmed up");
+        logger.info("✅ DB warmed up");
     } catch (e) {
-        console.log("❌ Error in DataBase initialization", e);
+        logger.error("❌ Error in DataBase initialization", { error: e });
         process.exit(1);
     }
 }
 initDB().then(() => {
     app.listen(port, () => {
-        console.log(`User Server is Listening at Port ${port}`)
+        logger.info(`User Server is Listening at Port ${port}`)
         runMigrations()
     })
 })

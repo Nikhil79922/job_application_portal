@@ -1,6 +1,7 @@
 import { Users } from "../../../shared/types/user.type.js";
 import AppError from "../../../shared/errors/AppError.js";
 import { razorpayInstance } from "../../../config/razorpay.config.js";
+import logger from "../../../config/logger.js";
 
 export class checkoutSer {
   constructor() {}
@@ -51,7 +52,7 @@ export class checkoutSer {
         data: order,
       };
     } catch (error: any) {
-      console.error("RAZORPAY_CHECKOUT_ERROR:", error);
+      logger.error("RAZORPAY_CHECKOUT_ERROR:", { error });
 
       throw new AppError(
         error?.error?.description ||

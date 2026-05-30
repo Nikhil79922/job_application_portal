@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 import { kafka } from '../../../config/kafka.config.js';
+import logger from '../../../config/logger.js';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ export const sendMailConsumer = async () => {
       fromBeginning: false
     });
 
-    console.log("✅ Mail consumer started");
+    logger.info("✅ Mail consumer started");
 
     await consumer.run({
       eachMessage: async ({ message }) => {
@@ -35,12 +36,12 @@ export const sendMailConsumer = async () => {
           try {
             payload = JSON.parse(message.value?.toString() || "{}");
           } catch {
-            console.log("❌ Invalid JSON message");
+            logger.error("❌ Invalid JSON message");
             return;
           }
 
           if (!payload.to || !payload.subject) {
-            console.log("⚠️ Invalid message skipped");
+            logger.warn("⚠️ Invalid message skipped");
             return;
           }
 
@@ -51,15 +52,15 @@ export const sendMailConsumer = async () => {
             html: payload.html
           });
 
-          console.log(`✅ Mail sent to: ${payload.to}`);
+          logger.info(`✅ Mail sent to: ${payload.to}`);
 
         } catch (error: any) {
-          console.error("❌ Mail processing failed:", error.message);
+          logger.error("❌ Mail processing failed:", { error: error.message });
         }
       },
     });
 
   } catch (error) {
-    console.error("❌ Kafka Consumer failed", error);
+    logger.error("❌ Kafka Consumer failed", { error });
   }
 };

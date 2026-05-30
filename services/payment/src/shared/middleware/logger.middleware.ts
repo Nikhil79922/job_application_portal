@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
+import appLogger from "../../config/logger.js";
 
 const sanitizeQuery = (query: Record<string, any>) => {
   const blockedKeys = ["password", "token", "otp", "secret"];
@@ -57,10 +58,10 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
     };
 
     if (process.env.NODE_ENV === "production") {
-      console.log(JSON.stringify(log));
+      appLogger.http(JSON.stringify(log));
       return;
     }
-    console.log(
+    appLogger.http(
       "Request Details",
       {
         body: req.body,

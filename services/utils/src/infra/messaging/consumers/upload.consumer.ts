@@ -2,6 +2,7 @@
 
 import { kafka } from "../../../config/kafka.config.js"
 import { uploadToCloudinary } from "../../../services/upload.service.js"
+import logger from "../../../config/logger.js"
 
 import { PostgresCompaniesRepository } from "../../database/repository/companies.repository.js"
 import { PostgresUserRepository } from "../../database/repository/user.repository.js"
@@ -23,7 +24,7 @@ export const startUploadConsumer=async()=>{
     fromBeginning:false,
   })
 
-  console.log(
+  logger.info(
     "📥 Upload consumer started"
   )
 
@@ -47,7 +48,7 @@ export const startUploadConsumer=async()=>{
 
         }catch{
 
-          console.log(
+          logger.error(
             "❌ Invalid JSON"
           )
 
@@ -71,7 +72,7 @@ export const startUploadConsumer=async()=>{
           !uploadType
         ){
 
-          console.log(
+          logger.warn(
             "⚠️ Invalid payload",
             payload
           )
@@ -79,7 +80,7 @@ export const startUploadConsumer=async()=>{
           return
         }
 
-        console.log(
+        logger.info(
           `📦 [P${partition}] ${entityType}:${uploadType} | ID ${entityId}`
         )
 
@@ -92,7 +93,7 @@ export const startUploadConsumer=async()=>{
             public_id
           )
 
-        console.log(
+        logger.info(
           `☁️ Uploaded → ${result.url}`
         )
 
@@ -162,7 +163,7 @@ export const startUploadConsumer=async()=>{
 
         if(!handlers[key]){
 
-          console.log(
+          logger.warn(
             "⚠️ No handler found for:",
             key
           )
@@ -221,13 +222,13 @@ export const startUploadConsumer=async()=>{
 
         await handlers[key]()
 
-        console.log(
+        logger.info(
           `✅ Upload + DB updated (${key})`
         )
 
       }catch(err:any){
 
-        console.error(
+        logger.error(
           "❌ Upload failed:",
           err.message
         )
@@ -283,13 +284,13 @@ export const startUploadConsumer=async()=>{
             }
           }
 
-          console.log(
+          logger.info(
             "⚠️ Failure status updated in DB"
           )
 
         }catch(dbErr){
 
-          console.error(
+          logger.error(
             "❌ DB update failed",
             dbErr
           )

@@ -1,5 +1,6 @@
 import { Admin } from "kafkajs";
 import { kafka } from "../../../config/kafka.config.js";
+import logger from "../../../config/logger.js";
 
 export class KafkaAdmin {
   private admin: Admin | null = null;
@@ -14,7 +15,7 @@ export class KafkaAdmin {
       try {
         const admin = kafka.admin();
        await admin.connect();
-        console.log("✅ Kafka Admin connected");
+        logger.info("✅ Kafka Admin connected");
 
         await admin.createTopics({
           topics: [
@@ -32,10 +33,9 @@ export class KafkaAdmin {
           waitForLeaders: true,
         });
 
-        console.log("📌 Topics ensured:", [
-          this.SEND_MAIL_TOPIC,
-          this.UPLOAD_CONTENT_TOPIC,
-        ]);
+        logger.info("📌 Topics ensured", {
+          topics: [this.SEND_MAIL_TOPIC, this.UPLOAD_CONTENT_TOPIC],
+        });
 
         this.admin = admin;
       } catch (error) {

@@ -3,6 +3,7 @@ import AppError from "../../../../shared/errors/AppError.js";
 import { Users } from "../../../../shared/types/user.type.js";
 import { ICompaniesRepository } from "../../../interfaces/repoInterfaces/companies.repository.interface.js";
 import { IMessageBroker } from "../../../interfaces/infraInterfaces/message-broker.interface.js";
+import logger from "../../../../config/logger.js";
 
 export class createCompanySer {
   constructor(
@@ -67,7 +68,7 @@ export class createCompanySer {
           String(registeredCompany.company_id)
         )
         .catch((err) => {
-          console.error("Kafka publish failed", err);
+          logger.error("Kafka publish failed", { err });
         });
 
       // 🔥 mark pending

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { pool } from "../../config/database.config.js";
 import { executeInTransaction } from "./transaction.js";
+import logger from "../../config/logger.js";
 
 const migrationsDir = path.join(process.cwd(), "src/infra/database/migrations");
 
@@ -20,7 +21,7 @@ export const runMigrations = async () => {
         );
   
         if (rows.length === 0) {
-          console.log(`Running migration: ${file}`);
+          logger.info(`Running migration: ${file}`);
   
           const sql = fs.readFileSync(
             path.join(migrationsDir, file),
@@ -39,7 +40,7 @@ export const runMigrations = async () => {
       }
   
     } catch (err) {
-      console.error("Migration failed:", err);
+      logger.error("Migration failed:", { error: err });
     } finally {
 
       await client.query("SELECT pg_advisory_unlock(123456)");

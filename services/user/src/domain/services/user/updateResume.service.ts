@@ -4,6 +4,7 @@ import { Users } from "../../../shared/types/user.type.js";
 import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 import { IMessageBroker } from "../../interfaces/infraInterfaces/message-broker.interface.js";
 import sendResponse from "../../../shared/constants/successRes.js";
+import logger from "../../../config/logger.js";
 
 export class updateResumeFile {
   constructor(

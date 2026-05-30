@@ -6,9 +6,7 @@ export class getCompanyDetailSer {
     ) { }
 
     async getCompanyDetail(company_id :number) {
-        console.log(company_id)
         let companyDetails: any = await this.companyRepo.companyDetails(company_id);
-        console.log(companyDetails)
         if (!companyDetails) {
             return { message: "Company not found" };
         }else{

@@ -1,6 +1,7 @@
-// composition-root/index.ts
+import logger from "../config/logger.js";
+
 export async function initApp() {
-    console.log("🚀 Initializing composition root...");
+    logger.info("🚀 Initializing composition root...");
   
     await import("./helper/InfraConnect.container.js");
     await import("./helper/rateLimiting.container.js");
@@ -17,5 +18,5 @@ export async function initApp() {
     await import("./job/getAllApplicationForJob.container.js");
     await import("./job/updateApplication.container.js");
   
-    console.log("✅ All containers initialized");
+    logger.info("✅ All containers initialized");
   }

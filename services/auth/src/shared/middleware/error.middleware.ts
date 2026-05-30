@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-
+import logger from "../../config/logger.js";
 
 const errorMiddleware = (
   err: any,
@@ -10,14 +10,14 @@ const errorMiddleware = (
 
     //  ZOD VALIDATION ERRORS
     if (err?.name === "ZodError") {
-      console.log(err.message)
+      logger.error("Zod Validation Error", { message: err.message });
       return res.status(400).json({
         success: false,
         message: err.issues.map((e: { message: any; }) => e.message).join(", "),
       });
     }
   const statusCode = err.statusCode || err.status || 500;
-console.log(err.message)
+  logger.error(err.message || "Internal Server Error", { error: err });
   res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error",

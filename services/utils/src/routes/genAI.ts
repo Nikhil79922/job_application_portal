@@ -11,6 +11,7 @@ import { resumeAnalyserPrompt } from "../shared/resumeAnalyserPrompt.js";
 
 import { handleAIError } from "../services/helperHandler.js";
 import groq from "../config/groq.js";
+import logger from "../config/logger.js";
 
 dotenv.config();
 
@@ -91,10 +92,7 @@ router.post("/career", async (req, res) => {
       
       } catch (err) {
       
-        console.log(
-          "RAW AI RESPONSE:",
-          rawText
-        );
+        logger.error("Failed to parse AI response", { rawText, error: err });
       
         throw new Error(
           "Failed to parse AI response."
@@ -121,7 +119,7 @@ router.post("/career", async (req, res) => {
             .join(", "),
       });
     }
-console.log(error)
+    logger.error("Career endpoint error", { error });
     return handleAIError(
       error,
       res

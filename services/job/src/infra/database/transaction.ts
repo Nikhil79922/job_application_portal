@@ -1,5 +1,6 @@
 import { pool } from "../../config/database.config.js";
-import { PoolClient } from "../../../node_modules/@types/pg/index.js";
+import { PoolClient } from "pg";
+import logger from "../../config/logger.js";
 
 export const executeInTransaction = async <T>(
   callback: (client: PoolClient) => Promise<T>
@@ -17,7 +18,7 @@ export const executeInTransaction = async <T>(
     try {
       await client.query("ROLLBACK");
     } catch (rollbackErr) {
-      console.error("Rollback failed:", rollbackErr);
+      logger.error("Rollback failed:", { error: rollbackErr });
     }
     throw err;
   }finally {

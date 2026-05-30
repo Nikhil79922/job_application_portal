@@ -1,9 +1,11 @@
+import logger from "../config/logger.js";
+
 export const handleAIError = (
     error: any,
     res: any
   ) => {
   
-    console.log(error)
+    logger.error("AI Service Error:", { error })
   
     // GEMINI RATE LIMIT
     if (

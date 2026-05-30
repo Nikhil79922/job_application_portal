@@ -2,6 +2,7 @@ import { Producer, Partitioners } from "kafkajs";
 import { kafka } from "../../config/kafka.config.js";
 import AppError from "../../shared/errors/AppError.js";
 import { IMessageBroker } from "../../domain/interfaces/message-broker.interface.js";
+import logger from "../../config/logger.js";
 
 export class KafkaProducer implements IMessageBroker {
   private producer: Producer | null = null;
@@ -12,7 +13,7 @@ export class KafkaProducer implements IMessageBroker {
     if (this.producer) return;
 
     if (!this.connecting) {
-      console.log("Kafka Producer connecting...");
+      logger.info("Kafka Producer connecting...");
 
       this.connecting = (async () => {
         try {
@@ -22,11 +23,11 @@ export class KafkaProducer implements IMessageBroker {
 
           await producer.connect();
 
-          console.log("✅ Kafka Producer connected");
+          logger.info("✅ Kafka Producer connected");
 
           this.producer = producer;
         } catch (error) {
-          console.error("❌ Kafka connect error:", error);
+          logger.error("❌ Kafka connect error:", { error });
 
           this.producer = null;
 
@@ -67,9 +68,9 @@ export class KafkaProducer implements IMessageBroker {
         ],
       });
   
-      console.log(`📤 Message sent to topic: ${topic}`);
+      logger.info(`📤 Message sent to topic: ${topic}`);
     } catch (error) {
-      console.error("❌ Kafka publish error:", error);
+      logger.error("❌ Kafka publish error:", { error });
   
       throw new AppError(
         `Failed to publish message to topic: ${topic}`,
@@ -83,11 +84,11 @@ export class KafkaProducer implements IMessageBroker {
 
     try {
       await this.producer.disconnect();
-      console.log("🔌 Kafka Producer disconnected");
+      logger.info("🔌 Kafka Producer disconnected");
 
       this.producer = null;
     } catch (error) {
-      console.error("❌ Kafka disconnect error:", error);
+      logger.error("❌ Kafka disconnect error:", { error });
 
       throw new AppError(
         "Kafka Producer disconnection failed.",

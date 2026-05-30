@@ -1,4 +1,5 @@
 import app from './app.js'
+import logger from './config/logger.js';
 import { UserModel } from './infra/database/models/user.model.js';
 import { env } from './config/env.js';
 import { runMigrations } from './infra/database/migrationRunner.js';
@@ -17,19 +18,19 @@ async function initDB() {
 
        await users.createTable(); 
        
-        console.log("✅ DataBase initialization successfully done",);
+        logger.info("✅ DataBase initialization successfully done");
         await Promise.all(
             Array.from({ length: 1 }, () => pool.query("SELECT 1"))
         );
-        console.log("✅ DB warmed up");
+        logger.info("✅ DB warmed up");
     } catch (e) {
-        console.log("❌ Error in DataBase initialization", e);
+        logger.error("❌ Error in DataBase initialization", { error: e });
         process.exit(1);
     }
 }
 initDB().then(() => {
     app.listen(port, () => {
-        console.log(`Payment Server is Listening at Port ${port}`)
+        logger.info(`Payment Server is Listening at Port ${port}`)
         runMigrations()
     })
 })

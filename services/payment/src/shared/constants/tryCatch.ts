@@ -1,12 +1,13 @@
 import { Handler, NextFunction , Response } from "express";
 import { AuthenticatedRequest } from "../types/user.type.js";
+import logger from "../../config/logger.js";
 
 const TryCatch = (handle: Handler) => {
     return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
         try {
             await handle(req,res,next);
         } catch (error:any) {
-            console.log(`Catched Error` , error)
+            logger.error(`Catched Error`, { error });
             next(error);
         }
     }

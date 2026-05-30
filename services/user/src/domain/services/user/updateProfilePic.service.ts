@@ -3,6 +3,7 @@ import AppError from "../../../shared/errors/AppError.js";
 import { Users } from "../../../shared/types/user.type.js";
 import { IUserRepository } from "../../interfaces/repoInterfaces/user.repository.interface.js";
 import { IMessageBroker } from "../../interfaces/infraInterfaces/message-broker.interface.js";
+import logger from "../../../config/logger.js";
 
 export class updateProfilePic {
   constructor(
@@ -17,7 +18,6 @@ export class updateProfilePic {
   {
 
     if (data.checkUpload === true ) {
-      console.log("check worked")
       const userData = await this.userRepo.findById(userDetails.user_id);
 
       if (userData.profile_pic_upload_status === "success" && userData.profile_pic) {
@@ -83,10 +83,7 @@ export class updateProfilePic {
         }
       )
   
-      console.error(
-        "Kafka publish failed",
-        err
-      )
+      logger.error("Kafka publish failed", err);
   
       throw new AppError(
         "Unable to process image upload",

@@ -34,9 +34,9 @@ export const createJobController = TryCatch(async (req: AuthenticatedRequest, re
 
   const dto = createJobSchema.parse(req.body)
 
-  const resData = await createJobService.createJob(dto ,userData)
+  const resData = await createJobService.createJob(dto, userData)
 
-    sendResponse(res, 200, "Job created successfully", resData);
+  sendResponse(res, 200, "Job created successfully", resData);
 });
 
 export const udpateJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
@@ -52,9 +52,9 @@ export const udpateJobController = TryCatch(async (req: AuthenticatedRequest, re
 
   const dto = updateJobSchema.parse(req.body)
 
-  const resData = await updateJobService.updateJob(dto ,userData)
+  const resData = await updateJobService.updateJob(dto, userData)
 
-    sendResponse(res, 200, "Job updated successfully", resData);
+  sendResponse(res, 200, "Job updated successfully", resData);
 });
 
 export const getAllActiveJobController = TryCatch(async (req: Request, res: Response) => {
@@ -75,49 +75,12 @@ export const getAllActiveJobController = TryCatch(async (req: Request, res: Resp
   }
   const resData = await getAllActiveJobService.getAllActiveJobs(filters);
 
-    sendResponse(res, 200, resData?.message, resData?.data);
+  sendResponse(res, 200, resData?.message, resData?.data);
 });
 
 export const getJobController = TryCatch(async (req: Request, res: Response) => {
   const { id } = req.params;
-  
-    if (!id || typeof id !== "string") {
-      throw new AppError("Job ID is required", 400);
-    }
 
-    if (!/^\d+$/.test(id)) {
-      throw new AppError("Job ID must be a valid number", 400);
-    }
-
-    const jobId = Number(id);
-
-    if (!Number.isInteger(jobId) || jobId <= 0) {
-      throw new AppError("Job ID must be a positive integer", 400);
-    }
-
-    if (jobId > 1_000_000_000) {
-      throw new AppError("job ID too large", 400);
-    }
-
-  const resData = await getJobDetailsService.getJobsDetails(jobId);
-
-    sendResponse(res, 200, resData?.message, resData?.data);
-});
-
-export const getAllApplicationForJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
-
-  const userData = req.user;
-
-  if (!userData) {
-    throw new AppError("Unauthorized", 401);
-  }
-
-  if (userData.role !== 'recruiter') {
-    throw new AppError("Only recruiter can access this Route", 403);
-  }
-
-  const { id } = req.params;
-  
   if (!id || typeof id !== "string") {
     throw new AppError("Job ID is required", 400);
   }
@@ -136,12 +99,49 @@ export const getAllApplicationForJobController = TryCatch(async (req: Authentica
     throw new AppError("job ID too large", 400);
   }
 
-  const resData = await getAllApplicationForJobService.getAllApplication(jobId,userData);
+  const resData = await getJobDetailsService.getJobsDetails(jobId);
 
-    sendResponse(res, 200, resData?.message, resData?.data);
+  sendResponse(res, 200, resData?.message, resData?.data);
 });
 
-export const updateApplicationController = TryCatch(async (req:AuthenticatedRequest , res:Response)=>{
+export const getAllApplicationForJobController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
+
+  const userData = req.user;
+
+  if (!userData) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  if (userData.role !== 'recruiter') {
+    throw new AppError("Only recruiter can access this Route", 403);
+  }
+
+  const { id } = req.params;
+
+  if (!id || typeof id !== "string") {
+    throw new AppError("Job ID is required", 400);
+  }
+
+  if (!/^\d+$/.test(id)) {
+    throw new AppError("Job ID must be a valid number", 400);
+  }
+
+  const jobId = Number(id);
+
+  if (!Number.isInteger(jobId) || jobId <= 0) {
+    throw new AppError("Job ID must be a positive integer", 400);
+  }
+
+  if (jobId > 1_000_000_000) {
+    throw new AppError("job ID too large", 400);
+  }
+
+  const resData = await getAllApplicationForJobService.getAllApplication(jobId, userData);
+
+  sendResponse(res, 200, resData?.message, resData?.data);
+});
+
+export const updateApplicationController = TryCatch(async (req: AuthenticatedRequest, res: Response) => {
 
   const userData = req.user;
 
@@ -158,7 +158,6 @@ export const updateApplicationController = TryCatch(async (req:AuthenticatedRequ
     ...req.body,
   });
 
-  console.log(dto)
-  const resData = await updateApplicationService.updateApplications(dto,userData);
+  const resData = await updateApplicationService.updateApplications(dto, userData);
   sendResponse(res, 200, resData?.message, resData?.data);
 })

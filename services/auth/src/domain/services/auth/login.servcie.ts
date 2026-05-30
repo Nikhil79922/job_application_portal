@@ -6,6 +6,7 @@ import { IRefreshTokenRepository } from "../../interfaces/refreshToken.repositor
 import { ITokenService } from "../../interfaces/token.service.interface.js";
 import { IUserRepository } from "../../interfaces/user.repository.interface.js";
 import { DeviceInfoType } from "../helpers/device.service.js";
+import logger from "../../../config/logger.js";
 
 export class authLogin {
   constructor(
@@ -39,10 +40,13 @@ export class authLogin {
     }
 
     try {
-      if(AuthEntity.validateSessionLimit(user.sessions)){
-        console.log("Id missing")
-        await this.refreshRepo.deleteOldest(user.user_id)
-      };
+        let user_id = user.user_id;
+        if (!user_id) {
+          logger.warn("Id missing");
+        }
+        if(AuthEntity.validateSessionLimit(user.sessions)){
+          await this.refreshRepo.deleteOldest(user.user_id)
+        };
     } catch (err: any) {
       throw new AppError(err.message, 401);
     }

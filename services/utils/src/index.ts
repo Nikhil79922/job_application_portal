@@ -8,6 +8,7 @@ import "./config/database.config.js";
 import { env } from './config/env.js';
 import { startUploadConsumer } from './infra/messaging/consumers/upload.consumer.js';
 import logger from './shared/middleware/logger.middleware.js';
+import appLogger from './config/logger.js';
 
 // Configuration
 cloudinary.config({
@@ -42,6 +43,5 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }))
 app.use("/api/utils/ai", genAIRoutes)
 
 app.listen(port, () => {
-    console.log(`Utils Server is Listening at Port ${port}`)
+    appLogger.info(`Utils Server is Listening at Port ${port}`)
 })
-
