@@ -1,63 +1,30 @@
-// src/features/jobs/hooks/use-update-job.ts
-
 "use client"
 
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query"
-
-import {
-  toast,
-} from "sonner"
-
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import jobService from "../services/update-job.services"
+import type { ApiErrorResponse } from "@/types/api/response.types"
 
-import type {
-  ApiErrorResponse,
-} from "@/types/api/response.types"
+export const useUpdateJob = (companyId?: number) => {
+  const queryClient = useQueryClient()
 
-export const useUpdateJob =
-  () => {
+  return useMutation({
+    mutationFn: jobService.update,
 
-    const queryClient =
-      useQueryClient()
+    onSuccess: (response) => {
+      toast.success(response.message || "Job updated successfully")
 
-    return useMutation({
+      queryClient.invalidateQueries({ queryKey: ["jobs"] })
+      queryClient.invalidateQueries({ queryKey: ["job-details", response.data.job_id] })
 
-      mutationFn:
-        jobService.update,
+      // ✅ this is what refreshes the job list on the page
+      if (companyId) {
+        queryClient.invalidateQueries({ queryKey: ["company-detail", companyId] })
+      }
+    },
 
-      onSuccess: (
-        response
-      ) => {
-
-        toast.success(
-          response.message ||
-          "Job updated successfully"
-        )
-
-        queryClient.invalidateQueries({
-          queryKey: ["jobs"],
-        })
-
-        queryClient.invalidateQueries({
-          queryKey: [
-            "job-details",
-            response.data.job_id,
-          ],
-        })
-      },
-
-      onError: (
-        error:
-          ApiErrorResponse
-      ) => {
-
-        toast.error(
-          error.message ||
-          "Failed to update job"
-        )
-      },
-    })
-  }
+    onError: (error: ApiErrorResponse) => {
+      toast.error(error.message || "Failed to update job")
+    },
+  })
+}

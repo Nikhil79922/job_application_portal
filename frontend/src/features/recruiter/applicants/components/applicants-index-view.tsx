@@ -84,51 +84,51 @@ const FILTER_TABS: {
   activeBg: string
   activeBorder: string
 }[] = [
-  {
-    value: "All",
-    label: "All",
-    activeColor: "text-slate-900 dark:text-white",
-    activeBg: "bg-white dark:bg-white/10",
-    activeBorder: "border-slate-200 dark:border-white/15",
-  },
-  {
-    value: "Submitted",
-    label: "Submitted",
-    dot: "#f59e0b",
-    activeColor: "text-amber-700 dark:text-amber-300",
-    activeBg: "bg-amber-50 dark:bg-amber-500/10",
-    activeBorder: "border-amber-200 dark:border-amber-500/25",
-  },
-  {
-    value: "Hired",
-    label: "Hired",
-    dot: "#10b981",
-    activeColor: "text-emerald-700 dark:text-emerald-300",
-    activeBg: "bg-emerald-50 dark:bg-emerald-500/10",
-    activeBorder: "border-emerald-200 dark:border-emerald-500/25",
-  },
-  {
-    value: "Rejected",
-    label: "Rejected",
-    dot: "#ef4444",
-    activeColor: "text-red-600 dark:text-red-300",
-    activeBg: "bg-red-50 dark:bg-red-500/10",
-    activeBorder: "border-red-200 dark:border-red-500/25",
-  },
-]
+    {
+      value: "All",
+      label: "All",
+      activeColor: "text-slate-900 dark:text-white",
+      activeBg: "bg-white dark:bg-white/10",
+      activeBorder: "border-slate-200 dark:border-white/15",
+    },
+    {
+      value: "Submitted",
+      label: "Submitted",
+      dot: "#f59e0b",
+      activeColor: "text-amber-700 dark:text-amber-300",
+      activeBg: "bg-amber-50 dark:bg-amber-500/10",
+      activeBorder: "border-amber-200 dark:border-amber-500/25",
+    },
+    {
+      value: "Hired",
+      label: "Hired",
+      dot: "#10b981",
+      activeColor: "text-emerald-700 dark:text-emerald-300",
+      activeBg: "bg-emerald-50 dark:bg-emerald-500/10",
+      activeBorder: "border-emerald-200 dark:border-emerald-500/25",
+    },
+    {
+      value: "Rejected",
+      label: "Rejected",
+      dot: "#ef4444",
+      activeColor: "text-red-600 dark:text-red-300",
+      activeBg: "bg-red-50 dark:bg-red-500/10",
+      activeBorder: "border-red-200 dark:border-red-500/25",
+    },
+  ]
 
 // ─── component ────────────────────────────────────────────────────────────────
 
 export default function ApplicantsIndexView({ jobId }: Props) {
   const { data, isLoading, isError } = useApplicants(jobId)
-  const { mutate, isPending } = useUpdateApplicantStatus()
+  const { mutate, isPending } = useUpdateApplicantStatus(jobId)  // ✅ pass jobId
 
   const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null)
   const [activeFilter, setActiveFilter] = useState<FilterStatus>("All")
 
-  const totalCount    = data?.length ?? 0
-  const hiredCount    = data?.filter((a) => a.status === "Hired").length ?? 0
-  const pendingCount  = data?.filter((a) => a.status === "Submitted").length ?? 0
+  const totalCount = data?.length ?? 0
+  const hiredCount = data?.filter((a) => a.status === "Hired").length ?? 0
+  const pendingCount = data?.filter((a) => a.status === "Submitted").length ?? 0
   const rejectedCount = data?.filter((a) => a.status === "Rejected").length ?? 0
 
   const filteredData =
@@ -189,10 +189,10 @@ export default function ApplicantsIndexView({ jobId }: Props) {
           {!isLoading && !isError && data && (
             <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
               {[
-                { label: "Total",    value: totalCount,    sub: "candidates", color: "text-slate-700 dark:text-white" },
-                { label: "Hired",    value: hiredCount,    sub: "accepted",   color: "text-emerald-500" },
-                { label: "Pending",  value: pendingCount,  sub: "to review",  color: "text-yellow-500" },
-                { label: "Rejected", value: rejectedCount, sub: "declined",   color: "text-red-400" },
+                { label: "Total", value: totalCount, sub: "candidates", color: "text-slate-700 dark:text-white" },
+                { label: "Hired", value: hiredCount, sub: "accepted", color: "text-emerald-500" },
+                { label: "Pending", value: pendingCount, sub: "to review", color: "text-yellow-500" },
+                { label: "Rejected", value: rejectedCount, sub: "declined", color: "text-red-400" },
               ].map((item) => (
                 <div
                   key={item.label}

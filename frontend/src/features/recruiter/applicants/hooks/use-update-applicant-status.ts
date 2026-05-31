@@ -1,15 +1,12 @@
-import {
-    useMutation,
-    useQueryClient,
-  } from "@tanstack/react-query"
-  
-  import {
-    updateApplicantStatus,
-    type UpdateApplicantStatusDTO,
-  } from "../services/update-applicant-status"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { updateApplicantStatus, type UpdateApplicantStatusDTO } from "../services/update-applicant-status"
 import { toast } from "sonner"
-  
-// ─── toast helpers ─────────────────────────────────────────────────────────────
+
+// ─── types ────────────────────────────────────────────────────────────────────
+
+type ApplicationStatus = "Submitted" | "Hired" | "Rejected"
+
+// ─── toast helpers ────────────────────────────────────────────────────────────
 
 const STATUS_TOAST: Record<
   ApplicationStatus,
@@ -41,25 +38,29 @@ const STATUS_TOAST: Record<
   },
 }
 
-type ApplicationStatus = "Submitted" | "Hired" | "Rejected"
-  export const useUpdateApplicantStatus =
-    () => {
-  
-      return useMutation({
-        mutationFn: (
-          payload: UpdateApplicantStatusDTO
-        ) =>
-          updateApplicantStatus(payload),
-  
-            onSuccess: (_data, variables) => {
-              const { label, style } = STATUS_TOAST[variables.status as ApplicationStatus] ?? {
-                label: variables.status,
-                style: {},
-              }
-              toast.success(`Applicant marked as ${label}`, style)
-            },
-            onError: () => {
-              toast.error("Failed to update status. Please try again.")
-            },
-      })
-    }
+// ─── hook ─────────────────────────────────────────────────────────────────────
+
+export const useUpdateApplicantStatus = (jobId: number) => {  // ✅ added jobId
+  const queryClient = useQueryClient()                        // ✅ added
+
+  return useMutation({
+    mutationFn: (payload: UpdateApplicantStatusDTO) =>
+      updateApplicantStatus(payload),
+
+    onSuccess: (_data, variables) => {
+      const { label, style } = STATUS_TOAST[variables.status as ApplicationStatus] ?? {
+        label: variables.status,
+        style: {},
+      }
+
+      toast.success(`Applicant marked as ${label}`, style)
+
+      // ✅ refreshes the list so status badges update without a page reload
+      queryClient.invalidateQueries({ queryKey: ["job-applicants", jobId] })
+    },
+
+    onError: () => {
+      toast.error("Failed to update status. Please try again.")
+    },
+  })
+}

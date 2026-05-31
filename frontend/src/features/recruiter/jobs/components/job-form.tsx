@@ -46,6 +46,7 @@ import {
 
 interface Props {
   companyId: number
+  onSuccess?: () => void  // ✅ added — called after job is created
 }
 
 /* ─────────────────────────────────────────────────────────── */
@@ -217,12 +218,13 @@ function SectionLabel({
 
 export default function JobForm({
   companyId,
+  onSuccess,  // ✅ destructured
 }: Props) {
 
   const {
     mutate,
     isPending,
-  } = useCreateJob()
+  } = useCreateJob(companyId)
 
   const form =
     useForm<CreateJobFormValues>({
@@ -255,31 +257,33 @@ export default function JobForm({
 
   const onSubmit:
     SubmitHandler<CreateJobFormValues> =
-      (values) => {
+    (values) => {
 
-        const parsed:
-          CreateJobDTO =
-            createJobSchema.parse(
-              values
-            )
+      const parsed:
+        CreateJobDTO =
+        createJobSchema.parse(
+          values
+        )
 
-        mutate(parsed, {
-          onSuccess: () => {
+      mutate(parsed, {
+        onSuccess: () => {
 
-            reset({
-              title: "",
-              description: "",
-              salary: 0,
-              location: "",
-              job_type: "Full-time",
-              work_location: "Hybrid",
-              openings: 1,
-              role: "",
-              company_id: companyId,
-            })
-          },
-        })
-      }
+          reset({
+            title: "",
+            description: "",
+            salary: 0,
+            location: "",
+            job_type: "Full-time",
+            work_location: "Hybrid",
+            openings: 1,
+            role: "",
+            company_id: companyId,
+          })
+
+          onSuccess?.()  // ✅ closes the modal
+        },
+      })
+    }
 
   return (
 

@@ -1,56 +1,29 @@
 "use client"
 
-// src/features/jobs/hooks/use-create-job.ts
-
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query"
-
-import {
-  toast,
-} from "sonner"
-
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import jobService from "../services/create-job.service"
+import type { ApiErrorResponse } from "@/types/api/response.types"
 
-import type {
-  ApiErrorResponse,
-} from "@/types/api/response.types"
+export const useCreateJob = (companyId?: number) => {
+  const queryClient = useQueryClient()
 
-export const useCreateJob =
-  () => {
+  return useMutation({
+    mutationFn: jobService.create,
 
-    const queryClient =
-      useQueryClient()
+    onSuccess: (response) => {
+      toast.success(response.message || "Job created successfully")
 
-    return useMutation({
+      queryClient.invalidateQueries({ queryKey: ["jobs"] })
 
-      mutationFn:
-        jobService.create,
+      // ✅ this is what refreshes the job list on the page
+      if (companyId) {
+        queryClient.invalidateQueries({ queryKey: ["company-detail", companyId] })
+      }
+    },
 
-      onSuccess: (
-        response
-      ) => {
-
-        toast.success(
-          response.message ||
-          "Job created successfully"
-        )
-
-        queryClient.invalidateQueries({
-          queryKey: ["jobs"],
-        })
-      },
-
-      onError: (
-        error:
-          ApiErrorResponse
-      ) => {
-
-        toast.error(
-          error.message ||
-          "Failed to create job"
-        )
-      },
-    })
-  }
+    onError: (error: ApiErrorResponse) => {
+      toast.error(error.message || "Failed to create job")
+    },
+  })
+}

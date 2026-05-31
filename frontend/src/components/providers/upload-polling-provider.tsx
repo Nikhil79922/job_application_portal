@@ -33,43 +33,99 @@ export default function UploadPollingProvider({
   }
 
   const startResumePolling = () => {
-    if (resumeTimer.current) return   // already running
+    const { user } = useAuthStore.getState()
+
+    // NEVER poll resumes for recruiters
+    if (user?.role !== "jobseeker") {
+      stopResumePolling()
+      return
+    }
+
+    if (resumeTimer.current) return
 
     resumeTimer.current = setInterval(async () => {
-
       if (resumeAttempts.current >= MAX_ATTEMPTS) {
         stopResumePolling()
-        const { user, accessToken, setAuth } = useAuthStore.getState()
-        if (user) setAuth({ ...user, resume_upload_status: "fail" }, accessToken!)
-        toast.error("Resume processing timed out. Please try uploading again.")
+
+        const {
+          user,
+          accessToken,
+          setAuth,
+        } = useAuthStore.getState()
+
+        if (user) {
+          setAuth(
+            {
+              ...user,
+              resume_upload_status: "fail",
+            },
+            accessToken!
+          )
+        }
+
+        toast.error(
+          "Resume processing timed out. Please try uploading again."
+        )
+
         return
       }
 
       resumeAttempts.current += 1
 
       try {
-        const res = await resumeService.updateResume({ checkUpload: true })
+        const res = await resumeService.updateResume({
+          checkUpload: true,
+        })
 
-        if (res.status === 202) return   // still processing
+        if (res.status === 202) return
 
         if (res.status === 200 && res.data) {
           stopResumePolling()
-          const { user, accessToken, setAuth } = useAuthStore.getState()
+
+          const {
+            user,
+            accessToken,
+            setAuth,
+          } = useAuthStore.getState()
+
           setAuth(
-            { ...user!, resume: res.data.resume, resume_upload_status: "success" },
+            {
+              ...user!,
+              resume: res.data.resume,
+              resume_upload_status: "success",
+            },
             accessToken!
           )
+
           toast.success("Resume updated successfully")
         }
       } catch (err: any) {
         stopResumePolling()
-        const { user, accessToken, setAuth } = useAuthStore.getState()
-        if (user) setAuth({ ...user, resume_upload_status: "fail" }, accessToken!)
-        toast.error(err?.response?.data?.message || err?.message || "Resume processing failed")
+
+        const {
+          user,
+          accessToken,
+          setAuth,
+        } = useAuthStore.getState()
+
+        if (user) {
+          setAuth(
+            {
+              ...user,
+              resume_upload_status: "fail",
+            },
+            accessToken!
+          )
+        }
+
+        toast.error(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Resume processing failed"
+        )
       }
     }, INTERVAL)
   }
-
   /* ── image polling ── */
 
   const stopImagePolling = () => {
@@ -121,33 +177,60 @@ export default function UploadPollingProvider({
   /* ── subscribe to store changes to start/stop polling ── */
 
   useEffect(() => {
-    // Resume: restore on page refresh if still pending
     const { user } = useAuthStore.getState()
-    if (user?.resume_upload_status === "pending") startResumePolling()
 
-    // Image: never auto-start on mount — only starts when user actively uploads
-    let prevImgStatus = user?.profile_pic_upload_status
+    // Resume polling ONLY for jobseekers
+    if (
+      user?.role === "jobseeker" &&
+      user?.resume_upload_status === "pending"
+    ) {
+      startResumePolling()
+    }
 
-    const unsub = useAuthStore.subscribe((state) => {
-      const status = state.user?.resume_upload_status
-      const imgStatus = state.user?.profile_pic_upload_status
+    let prevImgStatus =
+      user?.profile_pic_upload_status
 
-      if (status === "pending") startResumePolling()
-      else stopResumePolling()
+    const unsub = useAuthStore.subscribe(
+      (state) => {
+        const user = state.user
 
-      // Only start image polling on the transition TO pending (active upload)
-      if (imgStatus === "pending" && prevImgStatus !== "pending") startImagePolling()
-      else if (imgStatus !== "pending") stopImagePolling()
+        const resumeStatus =
+          user?.resume_upload_status
 
-      prevImgStatus = imgStatus
-    })
+        const imageStatus =
+          user?.profile_pic_upload_status
+
+        // Resume polling ONLY for jobseekers
+        if (
+          user?.role === "jobseeker" &&
+          resumeStatus === "pending"
+        ) {
+          startResumePolling()
+        } else {
+          stopResumePolling()
+        }
+
+        // Image polling unchanged
+        if (
+          imageStatus === "pending" &&
+          prevImgStatus !== "pending"
+        ) {
+          startImagePolling()
+        } else if (
+          imageStatus !== "pending"
+        ) {
+          stopImagePolling()
+        }
+
+        prevImgStatus = imageStatus
+      }
+    )
 
     return () => {
       unsub()
       stopResumePolling()
       stopImagePolling()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return <>{children}</>

@@ -125,7 +125,7 @@ const Hero = () => {
               <Link
                 href={
                   isRecruiter
-                    ? "/companies"
+                    ? "/recruiter/companies"
                     : "/jobs"
                 }
               >
@@ -203,7 +203,7 @@ const Hero = () => {
                 </Button>
               </Link>
 
-    
+
             </div>
 
             {/* MINI INFO */}

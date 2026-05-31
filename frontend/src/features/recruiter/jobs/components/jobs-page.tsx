@@ -26,15 +26,15 @@ import AppBackground from "@/components/shared/app-background"
 /* ═══════════════════════════════════════════════════════════ */
 
 export default function JobsPageView() {
-  const params    = useParams()
-  const router    = useRouter()
+  const params = useParams()
+  const router = useRouter()
 
   // Route: /recruiter/jobs/[companyId]
   const companyId = Number(params?.companyId) || null
 
   const { company, isLoading, isError } = useCompanyDetail({ companyId })
 
-  const [createOpen,  setCreateOpen]  = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<CompanyJob | null>(null)
 
   const jobs: CompanyJob[] = company?.jobs || []
@@ -278,7 +278,11 @@ export default function JobsPageView() {
           title="Post New Position"
           subtitle="Publish a professional listing that attracts the right candidates."
         >
-          <JobForm companyId={company.company_id} />
+          {/* ✅ onSuccess closes the modal after job is created */}
+          <JobForm
+            companyId={company.company_id}
+            onSuccess={() => setCreateOpen(false)}
+          />
         </ModalShell>
 
         {/* ════════════════════════
