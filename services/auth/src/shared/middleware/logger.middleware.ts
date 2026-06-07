@@ -9,6 +9,8 @@ const sanitizeQuery = (query: Record<string, any>) => {
   for (const key in query) {
     if (!blockedKeys.includes(key.toLowerCase())) {
       safeQuery[key] = query[key];
+    }else{
+      safeQuery[key] = '***MASKED***';
     }
   }
 
