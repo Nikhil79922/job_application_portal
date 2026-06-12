@@ -1,6 +1,5 @@
 import express from "express";
 import { verifyToken } from "../../../shared/middleware/verifyToken.middleware.js";
-import uploadFile from "../../../config/multer.config.js";
 import { createJobController, getAllActiveJobController, getAllApplicationForJobController, getJobController, udpateJobController, updateApplicationController } from "../../controllers/jobController.js";
 
 const router = express.Router();

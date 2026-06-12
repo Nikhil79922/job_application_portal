@@ -50,4 +50,4 @@ app.use("/api/auth", authRouter);
 // Global error handler
 app.use(errorMiddleware);
 
-export default app;
+export { app};

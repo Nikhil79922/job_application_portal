@@ -6,14 +6,9 @@
     "auditLog": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/job/logs/.4dd7a2cf641871fbaf2a4fe9e5f702062196c3b3-audit.json",
     "files": [
         {
-            "date": 1780120462830,
-            "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/job/logs/2026-05-30-error.log",
-            "hash": "9e55da7432b8c8b1c136ee9d18e9f056baf6a6fad8c0882256d587723f49350f"
-        },
-        {
-            "date": 1780167497255,
-            "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/job/logs/2026-05-31-error.log",
-            "hash": "93e93826bfa8631d7108c1bdf58b7bb35151cf38b82c2c67d97d7ca196b7bd2e"
+            "date": 1781227900340,
+            "name": "/Users/apple/Documents/Nikhil Singh /job_portal_application/services/job/logs/2026-06-12-error.log",
+            "hash": "de7772a9272116dc90f28280632283f828bff8b823334263c74e4182bdc8b179"
         }
     ],
     "hashType": "sha256"

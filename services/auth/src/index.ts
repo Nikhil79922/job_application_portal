@@ -1,4 +1,4 @@
-import app from './app.js'
+import {app} from './app.js'
 import logger from './config/logger.js';
 import { UserModel } from './infra/database/models/user.model.js';
 import { SkillsModel } from './infra/database/models/skill.model.js';
